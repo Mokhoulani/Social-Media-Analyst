@@ -3,37 +3,27 @@ using Domain.Exceptions;
 using Domain.Events;
 using Domain.ValueObjects;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using TimeZone = Domain.ValueObjects.TimeZone;
 
 namespace Domain.Entities;
 
-public class User : BaseEntity, IAggregateRoot
+public class User : IdentityUser<int>, IAggregateRoot
 {
-    public Email Email { get; private set; }
-    public string Name { get; private set; }
-    public ValueObjects.TimeZone TimeZone { get; private set; }
-    public DateTime RegistrationDate { get; private set; }
-    public bool IsActive { get; private set; } = true;
-
-    private readonly List<AppUsage> _appUsages = new();
-    public IReadOnlyCollection<AppUsage> AppUsages => _appUsages.AsReadOnly();
-
-    public User(Email email, string name, ValueObjects.TimeZone timeZone)
+    public Email Email { get; set; }
+    public string Name { get; set; }
+   
+    public DateTime RegistrationDate { get; set; }
+    public bool IsActive { get; set; } = true;
+    
+    public User(Email email, string name )
     {
         Email = email;
         Name = name;
-        TimeZone = timeZone;
         RegistrationDate = DateTime.UtcNow;
-        IsActive = true;
-        AddDomainEvent(new UserCreatedEvent(Id, email.Value, name));
     }
-
-    public void UpdateProfile(string name, ValueObjects.TimeZone timeZone)
+    public User() : base()
     {
-        if (string.IsNullOrEmpty(name))
-            throw new DomainException("Name cannot be empty");
-
-        Name = name;
-        TimeZone = timeZone;
-        AddDomainEvent(new UserProfileUpdatedEvent(Id, name, timeZone.Value));
+       
     }
 }

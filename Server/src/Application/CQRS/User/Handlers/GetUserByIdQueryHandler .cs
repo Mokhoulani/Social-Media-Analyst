@@ -26,7 +26,6 @@ namespace Application.CQRS.User.Handlers
                 Id = user.Id,
                 Email = user.Email.Value,
                 Name = user.Name,
-                TimeZone = user.TimeZone.Value,
                 RegistrationDate = user.RegistrationDate,
                 IsActive = user.IsActive
             };

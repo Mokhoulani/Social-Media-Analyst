@@ -7,6 +7,8 @@ public class TimeZone : BaseValueObject
 {
     public string Value { get; }
 
+    private TimeZone() { }
+    
     public TimeZone(string value)
     {
         if (string.IsNullOrWhiteSpace(value))

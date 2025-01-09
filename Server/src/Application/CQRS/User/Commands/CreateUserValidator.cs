@@ -14,7 +14,7 @@ public class CreateUserValidator : AbstractValidator<CreateUserCommand>
             .NotEmpty().WithMessage("Name is required.")
             .MaximumLength(50).WithMessage("Name cannot exceed 50 characters.");
 
-        RuleFor(x => x.TimeZone)
-            .NotEmpty().WithMessage("Time Zone is required.");
+        // RuleFor(x => x.TimeZone)
+        //     .NotEmpty().WithMessage("Time Zone is required.");
     }
 }

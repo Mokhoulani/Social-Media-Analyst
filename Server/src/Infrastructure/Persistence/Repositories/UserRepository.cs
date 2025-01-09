@@ -1,5 +1,6 @@
-using Domain.Interfaces;
 using Domain.Entities;
+using Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories;
 
@@ -21,6 +22,11 @@ public class UserRepository : IRepository<Domain.Entities.User>
     public async Task<User> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         return await _context.Users.FindAsync(id, cancellationToken);
+    }
+
+    public async Task<IList<User>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        return await _context.Users.ToListAsync(cancellationToken);
     }
 
 }

@@ -19,10 +19,10 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, int>
     {
         // Validate input (optional: you might throw a custom exception or use validation libraries)
         var email = new Email(command.Email);
-        var timeZone = new Domain.ValueObjects.TimeZone(command.TimeZone);
+        // var timeZone = new Domain.ValueObjects.TimeZone(command.TimeZone);
 
         // Create the User Aggregate
-        var user = new Domain.Entities.User(email, command.Name, timeZone);
+        var user = new Domain.Entities.User(email, command.Name);
 
         // Persist the User Aggregate
         await _repository.AddAsync(user, cancellationToken);
