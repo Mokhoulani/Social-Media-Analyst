@@ -13,13 +13,14 @@ public class UserRepository : IRepository<Domain.Entities.User>
         _context = context;
     }
 
-    public async Task AddAsync(User user, CancellationToken cancellationToken)
+    public async Task<User> AddAsync(User user, CancellationToken cancellationToken)
     {
-        await _context.Users.AddAsync(user, cancellationToken);
+        var userCreated = await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
+        return userCreated?.Entity ?? throw new InvalidOperationException("Failed to add the user.");
     }
-
-    public async Task<User> GetByIdAsync(int id, CancellationToken cancellationToken)
+    
+    public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
         return await _context.Users.FindAsync(id, cancellationToken);
     }

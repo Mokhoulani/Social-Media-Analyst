@@ -2,19 +2,16 @@ using FluentValidation;
 
 namespace Application.CQRS.User.Commands;
 
-public class CreateUserValidator : AbstractValidator<CreateUserCommand>
+public class SignUpValidator : AbstractValidator<SignUpCommand>
 {
-    public CreateUserValidator()
+    public SignUpValidator()
     {
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required.")
             .EmailAddress().WithMessage("Invalid email format.");
 
-        RuleFor(x => x.Name)
+        RuleFor(x => x.Username)
             .NotEmpty().WithMessage("Name is required.")
             .MaximumLength(50).WithMessage("Name cannot exceed 50 characters.");
-
-        // RuleFor(x => x.TimeZone)
-        //     .NotEmpty().WithMessage("Time Zone is required.");
     }
 }

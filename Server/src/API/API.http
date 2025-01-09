@@ -7,10 +7,10 @@ Accept: application/json
  GET http://localhost:5014/api/user/1
  
 ###
-POST http://localhost:5014/api/User
+POST http://localhost:5014/api/User/signup
 Content-Type: application/json
 
 {
-  "Email": "test@example.com",
-  "Name": "Test User"
+  "UserName": "Test User",
+  "Email": "test@test.com"
 }

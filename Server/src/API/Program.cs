@@ -1,7 +1,6 @@
+using Application.Common.Extensions;
 using Infrastructure.Persistence;
-using Application.Extensions;
 using Domain.Entities;
-using Domain.ValueObjects;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -66,6 +65,5 @@ static async Task ApplyMigrationsAndSeedAsync(WebApplication app)
 
     // Apply migrations
     await context.Database.EnsureCreatedAsync();
-    await context.Users.AddAsync(new User(new Email("test@example.com"), "Test User"));
-  
+ 
 }
