@@ -7,7 +7,7 @@ namespace Application.Services;
 
 public class UserService(IRepository<User> userRepository) : IUserService
 {
-    public async Task<User> AddUserAsync(User user, CancellationToken cancellationToken)
+    public async Task<User?> AddUserAsync(User user, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(user);
 

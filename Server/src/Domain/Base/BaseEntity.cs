@@ -5,17 +5,11 @@ namespace Domain.Base;
 
 public abstract class BaseEntity
 {
-    public int Id { get; protected set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    public bool IsDeleted { get; set; }
-
     private readonly List<IDomainEvent> _domainEvents = new();
-    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    protected void AddDomainEvent(IDomainEvent domainEvent)
+    public IReadOnlyList<IDomainEvent> GetDomainEvents()
     {
-        _domainEvents.Add(domainEvent);
+        return _domainEvents.ToList();
     }
 
     public void ClearDomainEvents()
@@ -23,12 +17,8 @@ public abstract class BaseEntity
         _domainEvents.Clear();
     }
 
-    public void SoftDelete()
+    protected void RaiseDomainEvent(IDomainEvent domainEvent)
     {
-        if (!IsDeleted)
-        {
-            IsDeleted = true;
-            AddDomainEvent(new EntityDeletedEvent(Id, GetType().Name));
-        }
+        _domainEvents.Add(domainEvent);
     }
 }

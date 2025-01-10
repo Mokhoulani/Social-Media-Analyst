@@ -6,6 +6,7 @@ using Application.CQRS.User.Commands;
 using Application.CQRS.User.Handlers;
 using Application.Interfaces;
 using Application.Services;
+using Domain.Events;
 using FluentValidation;
 using Mapster;
 using MapsterMapper;
@@ -20,8 +21,10 @@ public static class DependencyInjection
     public static IServiceCollection AddApplicationLayer(this IServiceCollection services)
     {
         // Register MediatR
+        services.AddMediatR(typeof(DependencyInjection).Assembly);
         services.AddMediatR(typeof(SignUpHandler).Assembly);
         services.AddMediatR(typeof(GetUserByIdQueryHandler).Assembly);
+        services.AddMediatR(typeof(UserSignedUpEventHandler).Assembly);
 
         // Register FluentValidation
         services.AddValidatorsFromAssembly(typeof(SignUpValidator).Assembly);
@@ -31,6 +34,9 @@ public static class DependencyInjection
         
         //Register Services
         services.AddScoped<IUserService, UserService>();
+        
+        //Register Domain Events
+        services.AddTransient<INotificationHandler<UserSignedUpDomainEvent>, UserSignedUpEventHandler>();
         
         // Register Mapper
         services.AddSingleton(GetConfiguredMappingConfig());

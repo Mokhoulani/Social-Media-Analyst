@@ -4,35 +4,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories;
 
-public class UserRepository : IRepository<Domain.Entities.User>
+public class UserRepository(AppDbContext context) : IRepository<Domain.Entities.User>
 {
-    private readonly AppDbContext _context;
-
-    public UserRepository(AppDbContext context)
+    public async Task<User?> AddAsync(User user, CancellationToken cancellationToken)
     {
-        _context = context;
-    }
-
-    public async Task<User> AddAsync(User user, CancellationToken cancellationToken)
-    {
-        var userCreated = await _context.Users.AddAsync(user, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        var userCreated = await context.Users.AddAsync(user, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
         return userCreated?.Entity;
     }
     
     public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken)
     {
-        return await _context.Users.FindAsync(id, cancellationToken);
+        return await context.Users.FindAsync(id, cancellationToken);
     }
 
     public async Task<IList<User>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await _context.Users.ToListAsync(cancellationToken);
+        return await context.Users.ToListAsync(cancellationToken);
     }
     
     public async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken)
     {
-        return await _context.Users
+        return await context.Users
             .AnyAsync(u => u.Email == email, cancellationToken);
     }
 }
