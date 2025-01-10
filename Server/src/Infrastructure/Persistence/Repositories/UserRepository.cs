@@ -17,7 +17,7 @@ public class UserRepository : IRepository<Domain.Entities.User>
     {
         var userCreated = await _context.Users.AddAsync(user, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
-        return userCreated?.Entity ?? throw new InvalidOperationException("Failed to add the user.");
+        return userCreated?.Entity;
     }
     
     public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken)

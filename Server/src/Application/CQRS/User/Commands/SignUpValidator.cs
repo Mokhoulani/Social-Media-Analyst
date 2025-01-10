@@ -1,15 +1,15 @@
-using Domain.Interfaces;
+using Application.Interfaces;
 using FluentValidation;
 
 namespace Application.CQRS.User.Commands;
 
 public class SignUpValidator : AbstractValidator<SignUpCommand>
 {
-    private readonly IRepository<Domain.Entities.User> _repository;
+    private readonly IUserService _userService;
 
-    public SignUpValidator(IRepository<Domain.Entities.User> repository)
+    public SignUpValidator(IUserService userService)
     {
-        _repository = repository;
+        _userService = userService;
         
         RuleFor(x => x.Email)
             .NotEmpty().WithMessage("Email is required.")
@@ -29,6 +29,6 @@ public class SignUpValidator : AbstractValidator<SignUpCommand>
         string email,
         CancellationToken cancellationToken)
     {
-        return !await _repository.EmailExistsAsync(email, cancellationToken);
+        return !await _userService.EmailExistsAsync(email, cancellationToken);
     }
 }

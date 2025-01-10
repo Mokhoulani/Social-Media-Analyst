@@ -4,10 +4,13 @@ using Application.Common.Mappings;
 using Microsoft.Extensions.DependencyInjection;
 using Application.CQRS.User.Commands;
 using Application.CQRS.User.Handlers;
+using Application.Interfaces;
+using Application.Services;
 using FluentValidation;
 using Mapster;
 using MapsterMapper;
 using MediatR;
+
 
 
 namespace Application.Common.Extensions;
@@ -25,6 +28,9 @@ public static class DependencyInjection
         
         // Register ValidationBehavior
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+        
+        //Register Services
+        services.AddScoped<IUserService, UserService>();
         
         // Register Mapper
         services.AddSingleton(GetConfiguredMappingConfig());
