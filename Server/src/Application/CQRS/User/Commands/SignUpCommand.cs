@@ -13,10 +13,12 @@ public sealed class SignUpCommand : IRequest<AppUserViewModel>
     /// </summary>
     /// <param name="username"></param>
     /// <param name="email"></param>
-    public SignUpCommand(string username, string email)
+    /// <param name="password"></param>
+    public SignUpCommand(string username, string email, string password)
     {
         Username = username;
         Email = email;
+        Password = password;
     }
 
     /// <summary>
@@ -28,6 +30,11 @@ public sealed class SignUpCommand : IRequest<AppUserViewModel>
     ///     The email of the AppUser.
     /// </summary>
     public string Email { get; set; }
+    
+    /// <summary>
+    ///     The Password of the AppUser.
+    /// </summary>
+    public string Password { get; set; }
 }
 
 // public sealed record SignInResponse(AppUserViewModel User, IEnumerable<Permissions> Claims, string Token);

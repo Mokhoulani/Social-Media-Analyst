@@ -1,10 +1,7 @@
-using Application.Common.Exception;
 using Application.Common.Modoles.ViewModels;
 using Domain.Interfaces;
-
 using MediatR;
 using Application.CQRS.User.Commands;
-using Domain.Exceptions;
 using FluentValidation;
 using MapsterMapper;
 
@@ -21,7 +18,6 @@ public class SignUpHandler(
         SignUpCommand command, 
         CancellationToken cancellationToken)
     {
-        await ValidateCommand(command, cancellationToken);
         
         var user = new Domain.Entities.User
         {
@@ -33,14 +29,6 @@ public class SignUpHandler(
         
         return mapper.Map<AppUserViewModel>(user);
     }
-    private async Task ValidateCommand(SignUpCommand command, CancellationToken cancellationToken)
-    {
-        var validationResult = await validator.ValidateAsync(command, cancellationToken);
-        
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationException(validationResult.Errors);
-        }
-    }
+  
 }
 

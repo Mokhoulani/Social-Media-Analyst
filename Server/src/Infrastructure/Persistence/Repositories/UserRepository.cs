@@ -29,5 +29,10 @@ public class UserRepository : IRepository<Domain.Entities.User>
     {
         return await _context.Users.ToListAsync(cancellationToken);
     }
-
+    
+    public async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken)
+    {
+        return await _context.Users
+            .AnyAsync(u => u.Email == email, cancellationToken);
+    }
 }

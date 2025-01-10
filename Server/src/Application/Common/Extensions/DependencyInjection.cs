@@ -1,4 +1,5 @@
 using System.Reflection;
+using Application.Common.Behaviours;
 using Application.Common.Mappings;
 using Microsoft.Extensions.DependencyInjection;
 using Application.CQRS.User.Commands;
@@ -21,6 +22,9 @@ public static class DependencyInjection
 
         // Register FluentValidation
         services.AddValidatorsFromAssembly(typeof(SignUpValidator).Assembly);
+        
+        // Register ValidationBehavior
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         
         // Register Mapper
         services.AddSingleton(GetConfiguredMappingConfig());

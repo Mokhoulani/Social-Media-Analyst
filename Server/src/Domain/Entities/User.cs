@@ -10,7 +10,5 @@ namespace Domain.Entities;
 
 public class User : IdentityUser<int>, IAggregateRoot
 {
-    public DateTime RegistrationDate { get; set; }
-    public bool IsActive { get; set; } = true;
     
 }
