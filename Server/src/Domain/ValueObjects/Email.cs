@@ -1,23 +1,35 @@
-using Domain.Base;
-using Domain.Exceptions;
+﻿using Domain.Errors;
+using Domain.Primitives;
+using Domain.Shared;
 
 namespace Domain.ValueObjects;
 
-public class Email : BaseValueObject
+public sealed class Email : ValueObject
 {
-    public string Value { get; }
-
-    public Email(string value)
+    private Email(string value)
     {
-        if (string.IsNullOrWhiteSpace(value) || !value.Contains("@"))
-            throw new DomainException("Invalid email format.");
         Value = value;
     }
 
-    protected override IEnumerable<object> GetEqualityComponents()
+    public string Value { get; }
+
+    public static Result<Email> Create(string firstName)
+    {
+        if (string.IsNullOrWhiteSpace(firstName))
+        {
+            return Result.Failure<Email>(DomainErrors.Email.Empty);
+        }
+
+        if (firstName.Split('@').Length != 2)
+        {
+            return Result.Failure<Email>(DomainErrors.Email.InvalidFormat);
+        }
+
+        return new Email(firstName);
+    }
+
+    public override IEnumerable<object> GetAtomicValues()
     {
         yield return Value;
     }
-
-    public override string ToString() => Value;
 }

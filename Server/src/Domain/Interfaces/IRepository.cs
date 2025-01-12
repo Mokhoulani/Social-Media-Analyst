@@ -1,4 +1,3 @@
-using Domain.Base;
 using Domain.Entities;
 
 namespace Domain.Interfaces;

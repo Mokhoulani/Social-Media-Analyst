@@ -4,9 +4,9 @@ namespace Application.CQRS.User.Queries;
 
 public class GetUserByIdQuery : IRequest<AppUserViewModel>
 {
-    public int Id { get; set; }
+    public string Id { get; set; }
 
-    public GetUserByIdQuery(int id)
+    public GetUserByIdQuery(string id)
     {
         Id = id;
     }

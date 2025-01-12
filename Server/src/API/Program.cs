@@ -1,53 +1,73 @@
 using Application.Common.Extensions;
 using Infrastructure.Persistence;
-using Domain.Entities;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.Sqlite;
+using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
-
-
+using Infrastructure.BackgroundJobs;
+using Infrastructure.Interceptors;
+using Infrastructure.Persistence.Repositories;
+using Quartz;
 var builder = WebApplication.CreateBuilder(args);
 
-// Create a single SQLite connection
-var connection = new SqliteConnection("Data Source=:memory:");
-connection.Open(); // Keep the connection open for the application's lifetime
+builder
+    .Services
+    .Scan(
+        selector => selector
+            .FromAssemblies(
+                Infrastructure.AssemblyReference.Assembly)
+            .AddClasses(false)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
 
-// Add DbContext with the shared connection
-builder.Services.AddDbContext<AppDbContext>(options =>
+string connectionString = builder.Configuration.GetConnectionString("Database");
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddApplicationLayer();
+
+builder.Services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
+
+builder.Services.AddDbContext<ApplicationDbContext>(
+    (sp, optionsBuilder) =>
+    {
+        var inteceptor = sp.GetService<ConvertDomainEventsToOutboxMessagesInterceptor>();
+
+        optionsBuilder.UseSqlite(connectionString,b=>b.MigrationsAssembly("API"))
+            .AddInterceptors(inteceptor);
+    });
+
+builder.Services.AddQuartz(configure =>
 {
-    options.UseSqlite(connection);
+    var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
+
+    configure
+        .AddJob<ProcessOutboxMessagesJob>(jobKey)
+        .AddTrigger(
+            trigger =>
+                trigger.ForJob(jobKey)
+                    .WithSimpleSchedule(
+                        schedule =>
+                            schedule.WithIntervalInSeconds(10)
+                                .RepeatForever()));
+
+    configure.UseMicrosoftDependencyInjectionJobFactory();
 });
 
-// Add Identity services
-builder.Services.AddIdentity<User, IdentityRole<int>>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services.AddQuartzHostedService();
 
-// Add services to the container.
+
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
-
-// Add application and infrastructure layer services
-builder.Services.AddApplicationLayer();
-builder.Services.AddInfrastructureServices();
-
-// Add OpenAPI/Swagger
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Apply migrations and seed data
-await ApplyMigrationsAndSeedAsync(app);
 
-// Enable authentication and authorization middleware
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -57,13 +77,3 @@ app.MapControllers();
 app.Run();
 
 
-// Helper to apply migrations and seed data
-static async Task ApplyMigrationsAndSeedAsync(WebApplication app)
-{
-    using var scope = app.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-    // Apply migrations
-    await context.Database.EnsureCreatedAsync();
- 
-}

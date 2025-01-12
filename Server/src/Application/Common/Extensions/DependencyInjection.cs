@@ -11,6 +11,8 @@ using FluentValidation;
 using Mapster;
 using MapsterMapper;
 using MediatR;
+using Domain.Interfaces;
+
 
 
 
@@ -22,25 +24,20 @@ public static class DependencyInjection
     {
         // Register MediatR
         services.AddMediatR(typeof(DependencyInjection).Assembly);
-        services.AddMediatR(typeof(SignUpHandler).Assembly);
-        services.AddMediatR(typeof(GetUserByIdQueryHandler).Assembly);
-        services.AddMediatR(typeof(UserSignedUpEventHandler).Assembly);
+
+
+        services.AddScoped<IUserService, UserService>();
 
         // Register FluentValidation
         services.AddValidatorsFromAssembly(typeof(SignUpValidator).Assembly);
-        
+
         // Register ValidationBehavior
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-        
-        //Register Services
-        services.AddScoped<IUserService, UserService>();
-        
-        //Register Domain Events
-        services.AddTransient<INotificationHandler<UserSignedUpDomainEvent>, UserSignedUpEventHandler>();
-        
+
+
         // Register Mapper
         services.AddSingleton(GetConfiguredMappingConfig());
-        
+
         var codeGenerationConfig = new CodeGenerationConfig();
         var modelCodeGenRegister = new ModelCodeGenRegister();
         modelCodeGenRegister.Register(codeGenerationConfig);
@@ -50,8 +47,8 @@ public static class DependencyInjection
 
         return services;
     }
-    
-      
+
+
     /// <summary>
     /// Mapster(Mapper) global configuration settings
     /// To learn more about Mapster,
@@ -61,11 +58,11 @@ public static class DependencyInjection
     private static TypeAdapterConfig GetConfiguredMappingConfig()
     {
         var config = TypeAdapterConfig.GlobalSettings;
-    
+
         var registers = config.Scan(Assembly.GetExecutingAssembly());
-    
+
         config.Apply(registers);
-    
+
         return config;
     }
 }

@@ -69,7 +69,7 @@ public class UserController : ControllerBase
     /// <param name="id">The ID of the user</param>
     /// <returns>The user data</returns>
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetUserById(int id)
+    public async Task<IActionResult> GetUserById(string id)
     {
         try
         {

@@ -1,31 +1,47 @@
+using Domain.DomainEvents;
 using Domain.Events;
 using Domain.Interfaces;
-using Microsoft.AspNetCore.Identity;
+using Domain.Primitives;
+using Domain.ValueObjects;
+
+
 
 
 namespace Domain.Entities;
-
-public class User : IdentityUser<int>, IAggregateRoot
+public sealed class User : AggregateRoot, IAggregateRoot
 {
-    private readonly List<IDomainEvent> _domainEvents = new();
-    
-    public IReadOnlyList<IDomainEvent> GetDomainEvents()
+    private User(Guid id, Email email, FirstName firstName, LastName lastName)
+        : base(id)
     {
-        return _domainEvents.ToList();
+        Email = email;
+        FirstName = firstName;
+        LastName = lastName;
     }
 
-    public User()
+    private User()
     {
-        RaiseDomainEvent(new UserSignedUpDomainEvent(this));
     }
 
-    public void ClearDomainEvents()
-    {
-        _domainEvents.Clear();
-    }
+    public Email Email { get; set; }
 
-    protected void RaiseDomainEvent(IDomainEvent domainEvent)
+    public FirstName FirstName { get; set; }
+
+    public LastName LastName { get; set; }
+
+    public static User Create(
+        Guid id,
+        Email email,
+        FirstName firstName,
+        LastName lastName)
     {
-        _domainEvents.Add(domainEvent);
+        var user = new User(
+            id,
+            email,
+            firstName,
+            lastName);
+
+        user.RaiseDomainEvent(new UserSignedUpDomainEvent(user.Id));
+
+        return user;
     }
 }

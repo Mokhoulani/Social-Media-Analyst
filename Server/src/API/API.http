@@ -1,6 +1,6 @@
 @API_HostAddress = http://localhost:5014
 
-GET {{API_HostAddress}}/api/user/1
+GET {{API_HostAddress}}/api/user/70ebadd4-e923-4584-b82f-52175d8c30db
 Accept: application/json
 
 ###
@@ -8,7 +8,8 @@ POST http://localhost:5014/api/User/signup
 Content-Type: application/json
 
 {
-  "UserName": "Test User",
-  "Email": "test2@test.com",
+  "FirstName": "Test User",
+  "LastName": "Ko",
+  "Email": "test9@test.com",
   "Password": "123456"
 }

@@ -9,13 +9,13 @@ using MapsterMapper;
 namespace Application.CQRS.User.Handlers
 {
     public class GetUserByIdQueryHandler(
-        IRepository<Domain.Entities.User> repository,
+        IUserService userService,
         IMapper mapper)
         : IRequestHandler<GetUserByIdQuery, AppUserViewModel>
     {
         public async Task<AppUserViewModel> Handle(GetUserByIdQuery query, CancellationToken cancellationToken)
         {
-            var user = await repository.GetByIdAsync(query.Id, cancellationToken);
+            var user = await userService.GetUserByIdAsync(query.Id, cancellationToken);
 
             if (user == null)
                 throw new Exception("User not found");

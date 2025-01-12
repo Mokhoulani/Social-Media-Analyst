@@ -1,4 +1,7 @@
 using Application.Interfaces;
+using Domain.Errors;
+using Domain.Shared;
+using Domain.ValueObjects;
 using FluentValidation;
 
 namespace Application.CQRS.User.Commands;
@@ -16,7 +19,7 @@ public class SignUpValidator : AbstractValidator<SignUpCommand>
             .EmailAddress().WithMessage("Invalid email format.")
             .MustAsync(BeUniqueEmailAsync).WithMessage("The email is already in use.");
 
-        RuleFor(x => x.Username)
+        RuleFor(x => x.FirstName)
             .NotEmpty().WithMessage("Name is required.")
             .MaximumLength(50).WithMessage("Name cannot exceed 50 characters.");
         
@@ -29,6 +32,16 @@ public class SignUpValidator : AbstractValidator<SignUpCommand>
         string email,
         CancellationToken cancellationToken)
     {
-        return !await _userService.EmailExistsAsync(email, cancellationToken);
+        Result<Email> emailResult = Email.Create(email);
+
+        if (!await _userService.IsEmailExistsAsync(emailResult.Value, cancellationToken))
+        {
+            Result.Failure<Guid>(DomainErrors.User.EmailAlreadyInUse);
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 }

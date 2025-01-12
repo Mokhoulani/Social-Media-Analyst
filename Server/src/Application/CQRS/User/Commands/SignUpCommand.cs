@@ -14,17 +14,20 @@ public sealed class SignUpCommand : IRequest<AppUserViewModel>
     /// <param name="username"></param>
     /// <param name="email"></param>
     /// <param name="password"></param>
-    public SignUpCommand(string username, string email, string password)
+    public SignUpCommand(string firstName, string email,string lastName, string password)
     {
-        Username = username;
+        FirstName = firstName;
         Email = email;
+        LastName = lastName;
         Password = password;
     }
 
     /// <summary>
     ///     The username of the AppUser.
     /// </summary>
-    public string Username { get; set; }
+    public string FirstName { get; set; }
+    
+    public string LastName { get; set; }
 
     /// <summary>
     ///     The email of the AppUser.

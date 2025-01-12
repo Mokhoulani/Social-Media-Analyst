@@ -1,27 +1,30 @@
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
+using Domain.ValueObjects;
 
 
 namespace Application.Services;
 
-public class UserService(IRepository<User> userRepository) : IUserService
+public class UserService(IUserRepository userRepository,IUnitOfWork unitOfWork ) : IUserService
 {
-    public async Task<User?> AddUserAsync(User user, CancellationToken cancellationToken)
+  
+    public async Task<bool> IsEmailExistsAsync(Email email, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(user);
-
-        return await userRepository.AddAsync(user, cancellationToken);
-    }
-
-    public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken)
-    {
-         return await userRepository.GetByIdAsync(id, cancellationToken);
+       return await userRepository.IsEmailUniqueAsync(email, cancellationToken);
     }
     
-    public async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken)
+    public async Task<User> AddUserAsync(User user, CancellationToken cancellationToken)
     {
-        return await userRepository.EmailExistsAsync(email, cancellationToken);
+        userRepository.Insert(user); // Add the user to the repository
+        await unitOfWork.SaveChangesAsync(cancellationToken); // Save changes via Unit of Work
+        return user; // Return the user with updated properties
+    }
+ 
+
+    public Task<User?> GetUserByIdAsync(string userId, CancellationToken cancellationToken)
+    {
+        return userRepository.GetByIdAsync(Guid.Parse(userId), cancellationToken);
     }
 }
 

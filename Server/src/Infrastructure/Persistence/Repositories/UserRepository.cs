@@ -1,31 +1,26 @@
 using Domain.Entities;
 using Domain.Interfaces;
+using Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence.Repositories;
 
-public class UserRepository(AppDbContext context) : IRepository<Domain.Entities.User>
+public class UserRepository(ApplicationDbContext context) : IUserRepository
 {
-    public async Task<User?> AddAsync(User user, CancellationToken cancellationToken)
+    public void Insert(User user) => context.Set<User>().Add(user);
+    public Task<User?> GetByIdAsync(Guid userId)
     {
-        var userCreated = await context.Users.AddAsync(user, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
-        return userCreated?.Entity;
-    }
-    
-    public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken)
-    {
-        return await context.Users.FindAsync(id, cancellationToken);
+        return context.Set<User>().FirstOrDefaultAsync(x => x.Id == userId);
     }
 
-    public async Task<IList<User>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<User?> GetByIdAsync(Guid userId, CancellationToken cancellationToken = default)
+
     {
-        return await context.Users.ToListAsync(cancellationToken);
+        return await context.Set<User>().FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
     }
-    
-    public async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken)
+
+    public async Task<bool> IsEmailUniqueAsync(Email email, CancellationToken cancellationToken = default)
     {
-        return await context.Users
-            .AnyAsync(u => u.Email == email, cancellationToken);
+        return !await context.Set<User>().AnyAsync(u => u.Email == email, cancellationToken);
     }
 }
