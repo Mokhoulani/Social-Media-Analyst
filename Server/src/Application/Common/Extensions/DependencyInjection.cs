@@ -34,7 +34,8 @@ public static class DependencyInjection
         // Register ValidationBehavior
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
-
+        services.AddTransient<EmailService>();
+        
         // Register Mapper
         services.AddSingleton(GetConfiguredMappingConfig());
 
