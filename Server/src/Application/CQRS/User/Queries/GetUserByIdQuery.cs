@@ -1,8 +1,9 @@
+using Application.Abstractions.Messaging;
 using Application.Common.Modoles.ViewModels;
-using MediatR;
+
 namespace Application.CQRS.User.Queries;
 
-public class GetUserByIdQuery : IRequest<AppUserViewModel>
+public class GetUserByIdQuery :ICommand<AppUserViewModel>
 {
     public string Id { get; set; }
 

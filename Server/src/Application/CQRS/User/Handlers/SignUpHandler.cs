@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Domain.ValueObjects;
 using Domain.Interfaces;
 using Domain.Errors;
+using Application.Abstractions.Messaging;
 
 
 namespace Application.CQRS.User.Handlers;
@@ -16,15 +17,15 @@ public class SignUpHandler(
     IUserService userService,
     IMapper mapper,
     ILogger<SignUpHandler> logger)
-    : IRequestHandler<SignUpCommand, AppUserViewModel>
+    : ICommandHandler<SignUpCommand, AppUserViewModel>
 {
-    public async Task<AppUserViewModel> Handle(
-        SignUpCommand command,
-        CancellationToken cancellationToken)
+    public async Task<Result<AppUserViewModel>> Handle(
+        SignUpCommand request,
+         CancellationToken cancellationToken)
     {
-        Result<Email> emailResult = Email.Create(command.Email);
-        Result<FirstName> firstNameResult = FirstName.Create(command.FirstName);
-        Result<LastName> lastNameResult = LastName.Create(command.LastName);
+        Result<Email> emailResult = Email.Create(request.Email);
+        Result<FirstName> firstNameResult = FirstName.Create(request.FirstName);
+        Result<LastName> lastNameResult = LastName.Create(request.LastName);
 
         var user = Domain.Entities.User.Create(
             Guid.NewGuid(),
@@ -38,5 +39,6 @@ public class SignUpHandler(
             user.Id);
         return mapper.Map<AppUserViewModel>(user);
     }
+   
 }
 

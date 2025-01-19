@@ -10,6 +10,14 @@ Content-Type: application/json
 {
   "FirstName": "Test User",
   "LastName": "Ko",
-  "Email": "test10@test.com",
-  "Password": "123456"
+  "Email": "test12@test.com",
+  "Password": "1233456"
+}
+
+###
+POST http://localhost:5014/api/User/login
+Content-Type: application/json
+
+{
+  "Email": "test11@test.com"
 }

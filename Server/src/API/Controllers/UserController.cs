@@ -1,20 +1,22 @@
+using Api.Abstractions;
 using Application.Common.Modoles.ViewModels;
-using Microsoft.AspNetCore.Mvc;
 using Application.CQRS.User.Commands;
 using Application.CQRS.User.Queries;
 using Domain.Exceptions;
+using Domain.Shared;
 using FluentValidation;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
-[ApiController]
+namespace Api.Controllers;
+
+
 [Route("api/[controller]")]
-public class UserController : ControllerBase
+public class UserController : ApiController
 {
-    private readonly IMediator _mediator;
-
-    public UserController(IMediator mediator)
+    public UserController(ISender sender)
+        : base(sender)
     {
-        _mediator = mediator;
     }
 
     /// <summary>
@@ -26,60 +28,59 @@ public class UserController : ControllerBase
     [ProducesResponseType(typeof(AppUserViewModel), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateUser([FromBody] SignUpCommand command)
+    public async Task<IActionResult> CreateUser(
+        [FromBody] SignUpCommand command,
+        CancellationToken cancellationToken)
     {
-        try
+        var result = await Sender.Send(command, cancellationToken);
+
+        if (result.IsFailure)
         {
-            var user = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+            return HandleFailure(result);
         }
-        catch (ValidationException ex)
+
+        return CreatedAtAction(nameof(GetUserById), new { id = result.Value.Id }, result.Value);
+    }
+
+    /// <summary>
+    /// Get a user by their ID
+    /// </summary>
+    /// <param name="id">The user ID</param>
+    /// <returns>The user details</returns>
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(AppUserViewModel), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetUserById(string id, CancellationToken cancellationToken)
+    {
+        var query = new GetUserByIdQuery(id);
+        var result = await Sender.Send(query, cancellationToken);
+
+        if (result.IsFailure)
         {
-            return BadRequest(new ValidationProblemDetails(
-                ex.Errors.GroupBy(x => x.PropertyName)
-                    .ToDictionary(g =>
-                        g.Key, g => 
-                        g.Select(x => x.ErrorMessage).ToArray())
-            ));
+            return HandleFailure(result);
         }
-        catch (DomainException ex)
-        {
-            return BadRequest(new ProblemDetails
-            {
-                Title = "Domain Validation Error",
-                Detail = ex.Message,
-                Status = StatusCodes.Status400BadRequest
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, 
-                new ProblemDetails
-                {
-                    Title = "An unexpected error occurred",
-                    Status = StatusCodes.Status500InternalServerError
-                });
-        }
+
+        return Ok(result.Value);
     }
 
 
-    /// <summary>
-    /// Get user by ID
-    /// </summary>
-    /// <param name="id">The ID of the user</param>
-    /// <returns>The user data</returns>
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetUserById(string id)
+    [HttpPost("login")]
+    public async Task<IActionResult> LoginUser(
+        [FromBody] LoginRequest request,
+        CancellationToken cancellationToken)
     {
-        try
+        var command = new LoginCommand(request.Email);
+
+        Result<string> tokenResult = await Sender.Send(
+            command,
+            cancellationToken);
+
+        if (tokenResult.IsFailure)
         {
-            var query = new GetUserByIdQuery(id);
-            var user = await _mediator.Send(query); // Use _mediator.Send to handle the query
-            return Ok(user);
+            return HandleFailure(tokenResult);
         }
-        catch (Exception ex)
-        {
-            return NotFound(new { message = ex.Message });
-        }
+
+        return Ok(tokenResult.Value);
     }
 }

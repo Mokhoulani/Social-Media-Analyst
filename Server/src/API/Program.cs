@@ -1,3 +1,4 @@
+using Api.OptionsSetup;
 using Application.Common.Extensions;
 using Infrastructure.Persistence;
 using Domain.Interfaces;
@@ -5,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Infrastructure.BackgroundJobs;
 using Infrastructure.Interceptors;
 using Infrastructure.Persistence.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Quartz;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +59,12 @@ builder.Services.AddQuartzHostedService();
 builder.Services.AddControllers();
 
 builder.Services.AddSwaggerGen();
+
+builder.Services.ConfigureOptions<JwtOptionsSetup>();
+builder.Services.ConfigureOptions<JwtBearerOptionsSetup>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer();
 
 var app = builder.Build();
 

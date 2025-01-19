@@ -23,4 +23,9 @@ public class UserRepository(ApplicationDbContext context) : IUserRepository
     {
         return !await context.Set<User>().AnyAsync(u => u.Email == email, cancellationToken);
     }
+    
+    public async Task<User?> GetByEmailAsync(Email email, CancellationToken cancellationToken = default) =>
+        await context
+            .Set<User>()
+            .FirstOrDefaultAsync(member => member.Email == email, cancellationToken);
 }
