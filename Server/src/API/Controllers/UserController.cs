@@ -2,9 +2,6 @@ using Api.Abstractions;
 using Application.Common.Modoles.ViewModels;
 using Application.CQRS.User.Commands;
 using Application.CQRS.User.Queries;
-using Domain.Exceptions;
-using Domain.Shared;
-using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,17 +9,13 @@ namespace Api.Controllers;
 
 
 [Route("api/[controller]")]
-public class UserController : ApiController
+public class UserController(ISender sender, ILogger<UserController> logger) : ApiController(sender, logger)
 {
-    public UserController(ISender sender)
-        : base(sender)
-    {
-    }
-
     /// <summary>
     /// Create a new user
     /// </summary>
     /// <param name="command">The CreateUserCommand</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>The ID of the newly created user</returns>
     [HttpPost("signup")]
     [ProducesResponseType(typeof(AppUserViewModel), StatusCodes.Status201Created)]
@@ -32,20 +25,16 @@ public class UserController : ApiController
         [FromBody] SignUpCommand command,
         CancellationToken cancellationToken)
     {
-        var result = await Sender.Send(command, cancellationToken);
-
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return CreatedAtAction(nameof(GetUserById), new { id = result.Value.Id }, result.Value);
+            var user = await Sender.Send(command, cancellationToken);
+            return CreatedAtAction(nameof(GetUserById),
+                new { id = user.Id }, user);
     }
 
     /// <summary>
     /// Get a user by their ID
     /// </summary>
     /// <param name="id">The user ID</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>The user details</returns>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(AppUserViewModel), StatusCodes.Status200OK)]
@@ -54,14 +43,9 @@ public class UserController : ApiController
     public async Task<IActionResult> GetUserById(string id, CancellationToken cancellationToken)
     {
         var query = new GetUserByIdQuery(id);
-        var result = await Sender.Send(query, cancellationToken);
-
-        if (result.IsFailure)
-        {
-            return HandleFailure(result);
-        }
-
-        return Ok(result.Value);
+        var user = await Sender.Send(query, cancellationToken);
+        
+        return Ok(user);
     }
 
 
@@ -72,15 +56,10 @@ public class UserController : ApiController
     {
         var command = new LoginCommand(request.Email);
 
-        Result<string> tokenResult = await Sender.Send(
+        var token = await Sender.Send(
             command,
             cancellationToken);
-
-        if (tokenResult.IsFailure)
-        {
-            return HandleFailure(tokenResult);
-        }
-
-        return Ok(tokenResult.Value);
+        
+        return Ok(token);
     }
 }

@@ -1,10 +1,10 @@
 using System.Reflection;
 using Application.Common.Behaviours;
+using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Microsoft.Extensions.DependencyInjection;
 using Application.CQRS.User.Commands;
 using Application.CQRS.User.Handlers;
-using Application.Interfaces;
 using Application.Services;
 using Domain.Events;
 using FluentValidation;
@@ -30,6 +30,7 @@ public static class DependencyInjection
 
         // Register FluentValidation
         services.AddValidatorsFromAssembly(typeof(SignUpValidator).Assembly);
+        services.AddValidatorsFromAssembly(typeof(LoginValidator).Assembly);
 
         // Register ValidationBehavior
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));

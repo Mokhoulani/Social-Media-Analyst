@@ -1,11 +1,9 @@
 using Application.Common.Modoles.ViewModels;
-using Domain.Interfaces;
-using MediatR;
 using Application.CQRS.User.Queries;
-using Application.Interfaces;
 using MapsterMapper;
 using Application.Abstractions.Messaging;
-using Domain.Shared;
+using Application.Common.Interfaces;
+
 
 
 namespace Application.CQRS.User.Handlers;
@@ -17,7 +15,7 @@ public class GetUserByIdQueryHandler(
 {
 
 
-    public async Task<Result<AppUserViewModel>> Handle(
+    public async Task<AppUserViewModel> Handle(
         GetUserByIdQuery request,
          CancellationToken cancellationToken)
     {

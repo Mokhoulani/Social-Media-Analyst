@@ -1,7 +1,7 @@
 using Domain.Entities;
 using Domain.ValueObjects;
 
-namespace Application.Interfaces;
+namespace Application.Common.Interfaces;
 
 public interface IUserService
 {

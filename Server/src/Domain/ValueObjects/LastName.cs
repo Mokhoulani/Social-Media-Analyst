@@ -1,6 +1,5 @@
-﻿using Domain.Errors;
-using Domain.Primitives;
-using Domain.Shared;
+﻿using Domain.Primitives;
+
 
 namespace Domain.ValueObjects;
 
@@ -15,18 +14,8 @@ public sealed class LastName : ValueObject
 
     public string Value { get; }
 
-    public static Result<LastName> Create(string lastName)
+    public static LastName Create(string lastName)
     {
-        if (string.IsNullOrWhiteSpace(lastName))
-        {
-            return Result.Failure<LastName>(DomainErrors.LastName.Empty);
-        }
-
-        if (lastName.Length > MaxLength)
-        {
-            return Result.Failure<LastName>(DomainErrors.LastName.TooLong);
-        }
-
         return new LastName(lastName);
     }
 

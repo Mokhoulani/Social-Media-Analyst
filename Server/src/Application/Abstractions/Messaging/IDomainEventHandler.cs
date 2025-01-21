@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Application.Abstractions.Messaging;
 
-public interface IDomainEventHandler<TEvent> : INotificationHandler<TEvent>
+public interface IDomainEventHandler<in TEvent> : INotificationHandler<TEvent>
     where TEvent : IDomainEvent
 {
 }

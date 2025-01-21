@@ -1,14 +1,10 @@
 using Application.Common.Modoles.ViewModels;
-using MediatR;
 using Application.CQRS.User.Commands;
-using Application.Interfaces;
-using Domain.Shared;
 using MapsterMapper;
 using Microsoft.Extensions.Logging;
 using Domain.ValueObjects;
-using Domain.Interfaces;
-using Domain.Errors;
 using Application.Abstractions.Messaging;
+using Application.Common.Interfaces;
 
 
 namespace Application.CQRS.User.Handlers;
@@ -19,19 +15,19 @@ public class SignUpHandler(
     ILogger<SignUpHandler> logger)
     : ICommandHandler<SignUpCommand, AppUserViewModel>
 {
-    public async Task<Result<AppUserViewModel>> Handle(
+    public async Task<AppUserViewModel> Handle(
         SignUpCommand request,
          CancellationToken cancellationToken)
     {
-        Result<Email> emailResult = Email.Create(request.Email);
-        Result<FirstName> firstNameResult = FirstName.Create(request.FirstName);
-        Result<LastName> lastNameResult = LastName.Create(request.LastName);
+        Email emailResult = Email.Create(request.Email);
+        FirstName firstNameResult = FirstName.Create(request.FirstName);
+        LastName lastNameResult = LastName.Create(request.LastName);
 
         var user = Domain.Entities.User.Create(
             Guid.NewGuid(),
-            emailResult.Value,
-            firstNameResult.Value,
-            lastNameResult.Value);
+            emailResult,
+            firstNameResult,
+            lastNameResult);
 
         await userService.AddUserAsync(user, cancellationToken);
 

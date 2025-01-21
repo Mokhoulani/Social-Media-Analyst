@@ -1,33 +1,23 @@
-﻿using Domain.Errors;
-using Domain.Primitives;
-using Domain.Shared;
+﻿using Domain.Primitives;
+
 
 namespace Domain.ValueObjects;
 
 public sealed class Email : ValueObject
 {
+    public string Value { get; }
+
     private Email(string value)
     {
         Value = value;
     }
 
-    public string Value { get; }
-
-    public static Result<Email> Create(string firstName)
+   
+    public static Email Create(string email)
     {
-        if (string.IsNullOrWhiteSpace(firstName))
-        {
-            return Result.Failure<Email>(DomainErrors.Email.Empty);
-        }
-
-        if (firstName.Split('@').Length != 2)
-        {
-            return Result.Failure<Email>(DomainErrors.Email.InvalidFormat);
-        }
-
-        return new Email(firstName);
+        return new Email(email);
     }
-
+    
     public override IEnumerable<object> GetAtomicValues()
     {
         yield return Value;

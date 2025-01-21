@@ -1,8 +1,7 @@
-﻿using Domain.Shared;
-using MediatR;
+﻿using MediatR;
 
-namespace Gatherly.Application.Abstractions.Messaging;
+namespace Application.Abstractions.Messaging;
 
-public interface IQuery<TResponse> : IRequest<Result<TResponse>>
+public interface IQuery<out TResponse> : IRequest<TResponse>
 {
 }

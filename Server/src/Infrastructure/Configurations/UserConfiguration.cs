@@ -4,7 +4,7 @@ using Infrastructure.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Infrastructure.Persistence.Configurations;
+namespace Infrastructure.Configurations;
 
 internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 {
@@ -16,16 +16,16 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder
             .Property(x => x.Email)
-            .HasConversion(x => x.Value, v => Email.Create(v).Value);
+            .HasConversion(x => x.Value, v => Email.Create(v));
 
         builder
             .Property(x => x.FirstName)
-            .HasConversion(x => x.Value, v => FirstName.Create(v).Value)
+            .HasConversion(x => x.Value, v => FirstName.Create(v))
             .HasMaxLength(FirstName.MaxLength);
 
         builder
             .Property(x => x.LastName)
-            .HasConversion(x => x.Value, v => LastName.Create(v).Value)
+            .HasConversion(x => x.Value, v => LastName.Create(v))
             .HasMaxLength(LastName.MaxLength);
 
         builder.HasIndex(x => x.Email).IsUnique();

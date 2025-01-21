@@ -8,10 +8,10 @@ POST http://localhost:5014/api/User/signup
 Content-Type: application/json
 
 {
-  "FirstName": "Test User",
+  "FirstName": "",
   "LastName": "Ko",
-  "Email": "test12@test.com",
-  "Password": "1233456"
+  "Email": "test16@test.com",
+  "Password": "123456"
 }
 
 ###
@@ -19,5 +19,5 @@ POST http://localhost:5014/api/User/login
 Content-Type: application/json
 
 {
-  "Email": "test11@test.com"
+  "Email": "test17@test.com"
 }

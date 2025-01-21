@@ -1,12 +1,11 @@
-﻿using Domain.Shared;
-using MediatR;
+﻿using MediatR;
 
 namespace Application.Abstractions.Messaging;
 
-public interface ICommand : IRequest<Result>
+public interface ICommand : IRequest<Unit>
 {
 }
 
-public interface ICommand<TResponse> : IRequest<Result<TResponse>>
+public interface ICommand<out TResponse> : IRequest<TResponse>
 {
 }

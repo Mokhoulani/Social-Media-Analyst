@@ -1,6 +1,4 @@
-using Application.Interfaces;
-using Domain.Errors;
-using Domain.Shared;
+using Application.Common.Interfaces;
 using Domain.ValueObjects;
 using FluentValidation;
 
@@ -20,7 +18,11 @@ public class SignUpValidator : AbstractValidator<SignUpCommand>
             .MustAsync(BeUniqueEmailAsync).WithMessage("The email is already in use.");
 
         RuleFor(x => x.FirstName)
-            .NotEmpty().WithMessage("Name is required.")
+            .NotEmpty().WithMessage("First Name is required.")
+            .MaximumLength(50).WithMessage("Name cannot exceed 50 characters.");
+        
+        RuleFor(x => x.LastName)
+            .NotEmpty().WithMessage("Last Name is required.")
             .MaximumLength(50).WithMessage("Name cannot exceed 50 characters.");
         
            RuleFor(x => x.Password)
@@ -32,16 +34,9 @@ public class SignUpValidator : AbstractValidator<SignUpCommand>
         string email,
         CancellationToken cancellationToken)
     {
-        Result<Email> emailResult = Email.Create(email);
-
-        if (!await _userService.IsEmailExistsAsync(emailResult.Value, cancellationToken))
-        {
-            Result.Failure<Guid>(DomainErrors.User.EmailAlreadyInUse);
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        Email emailResult = Email.Create(email);
+    
+    
+        return await _userService.IsEmailExistsAsync(emailResult, cancellationToken);
     }
 }

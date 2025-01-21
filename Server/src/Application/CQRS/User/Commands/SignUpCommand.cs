@@ -12,7 +12,11 @@ public sealed class SignUpCommand : ICommand<AppUserViewModel>
     /// <param name="username"></param>
     /// <param name="email"></param>
     /// <param name="password"></param>
-    public SignUpCommand(string firstName, string email,string lastName, string password)
+    public SignUpCommand(
+        string firstName,
+        string email,
+        string lastName,
+        string password)
     {
         FirstName = firstName;
         Email = email;
@@ -38,4 +42,3 @@ public sealed class SignUpCommand : ICommand<AppUserViewModel>
     public string Password { get; set; }
 }
 
-// public sealed record SignInResponse(AppUserViewModel User, IEnumerable<Permissions> Claims, string Token);
