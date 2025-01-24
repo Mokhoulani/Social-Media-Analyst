@@ -1,24 +1,33 @@
 using Domain.Primitives;
 
-
 namespace Domain.ValueObjects;
 
 public sealed class Password : ValueObject
 {
-    private Password(string value)
+    public string Hash { get; } 
+
+
+    private Password() { }
+
+    private Password(string hash)
     {
-        Value = value;
+        Hash = hash;
     }
-
-    public string Value { get; }
-
-    public static Password Create(string password)
+    
+    public static Password Create(string plainTextPassword)
     {
-        return new Password(password);
-    }
+        string hash = BCrypt.Net.BCrypt.HashPassword(plainTextPassword, workFactor: 12); 
 
+        return new Password(hash);
+    }
+    
+    public bool Verify(string plainTextPassword)
+    {
+        return BCrypt.Net.BCrypt.Verify(plainTextPassword, Hash);
+    }
+    
     public override IEnumerable<object> GetAtomicValues()
     {
-        yield return Value;
+        yield return Hash;
     }
 }

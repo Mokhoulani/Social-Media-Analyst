@@ -28,6 +28,13 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasConversion(x => x.Value, v => LastName.Create(v))
             .HasMaxLength(LastName.MaxLength);
 
+        builder.OwnsOne(u => u.Password, passwordBuilder =>
+        {
+            passwordBuilder.Property(p => p.Hash)
+                .HasColumnName("PasswordHash")
+                .IsRequired();
+        });
+        
         builder.HasIndex(x => x.Email).IsUnique();
     }
 }

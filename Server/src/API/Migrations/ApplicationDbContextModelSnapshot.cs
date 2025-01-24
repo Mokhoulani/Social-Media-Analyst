@@ -72,6 +72,30 @@ namespace API.Migrations
 
                     b.ToTable("OutboxMessage", (string)null);
                 });
+
+            modelBuilder.Entity("Domain.Entities.User", b =>
+                {
+                    b.OwnsOne("Domain.ValueObjects.Password", "Password", b1 =>
+                        {
+                            b1.Property<Guid>("UserId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Hash")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("PasswordHash");
+
+                            b1.HasKey("UserId");
+
+                            b1.ToTable("User");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.Navigation("Password")
+                        .IsRequired();
+                });
 #pragma warning restore 612, 618
         }
     }

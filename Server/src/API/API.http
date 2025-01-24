@@ -8,9 +8,9 @@ POST http://localhost:5014/api/User/signup
 Content-Type: application/json
 
 {
-  "FirstName": "",
+  "FirstName": "MOh",
   "LastName": "Ko",
-  "Email": "test16@test.com",
+  "Email": "test18@test.com",
   "Password": "123456"
 }
 

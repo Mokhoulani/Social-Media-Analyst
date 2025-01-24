@@ -22,12 +22,15 @@ public class SignUpHandler(
         Email emailResult = Email.Create(request.Email);
         FirstName firstNameResult = FirstName.Create(request.FirstName);
         LastName lastNameResult = LastName.Create(request.LastName);
+        Password passwordResult = Password.Create(request.Password);
 
         var user = Domain.Entities.User.Create(
             Guid.NewGuid(),
             emailResult,
             firstNameResult,
-            lastNameResult);
+            lastNameResult,
+            passwordResult.Hash
+        );
 
         await userService.AddUserAsync(user, cancellationToken);
 

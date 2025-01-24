@@ -26,6 +26,7 @@ public class ValidationBehavior<TRequest, TResponse>(
             var failures = validationResults
                 .SelectMany(r => r.Errors)
                 .Where(f => f != null)
+                .Distinct()
                 .ToList();
 
             if (failures.Count != 0)

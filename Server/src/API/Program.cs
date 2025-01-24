@@ -2,6 +2,7 @@ using Api.OptionsSetup;
 using Application.Common.Extensions;
 using Infrastructure.Persistence;
 using Domain.Interfaces;
+using Hellang.Middleware.ProblemDetails;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.BackgroundJobs;
 using Infrastructure.Interceptors;
@@ -22,8 +23,10 @@ builder
 
 string connectionString = builder.Configuration.GetConnectionString("Database");
 
+builder.Services.AddControllers();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddApplicationLayer();
+builder.Services.AddApplicationLayer(builder.Environment);
 
 builder.Services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
 
@@ -55,9 +58,6 @@ builder.Services.AddQuartz(configure =>
 
 builder.Services.AddQuartzHostedService();
 
-
-builder.Services.AddControllers();
-
 builder.Services.AddSwaggerGen();
 
 builder.Services.ConfigureOptions<JwtOptionsSetup>();
@@ -75,8 +75,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-
+app.UseProblemDetails();
+app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
