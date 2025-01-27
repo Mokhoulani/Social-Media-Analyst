@@ -1,6 +1,7 @@
 ﻿using Domain.Entities;
 using Domain.ValueObjects;
 
+
 namespace Domain.Interfaces;
 
 public interface IUserRepository
@@ -9,4 +10,5 @@ public interface IUserRepository
     Task<User?> GetByIdAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<bool> IsEmailUniqueAsync(Email email, CancellationToken cancellationToken = default);
     Task<User?> GetByEmailAsync(Email email, CancellationToken cancellationToken = default);
+   
 }

@@ -25,9 +25,9 @@ public class SignUpValidator : AbstractValidator<SignUpCommand>
             .NotEmpty().WithMessage("Last Name is required.")
             .MaximumLength(50).WithMessage("Name cannot exceed 50 characters.");
         
-           RuleFor(x => x.Password)
-               .NotEmpty().WithMessage("Password is required.")
-               .MinimumLength(6).WithMessage("Password cannot exceed 6 characters.");
+        RuleFor(x => x.Password)
+            .NotEmpty().WithMessage("Password is required.")
+            .MinimumLength(6).WithMessage("Password cannot exceed 6 characters.");
     }
     
     private async Task<bool> BeUniqueEmailAsync(

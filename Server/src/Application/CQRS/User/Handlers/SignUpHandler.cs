@@ -29,7 +29,7 @@ public class SignUpHandler(
             emailResult,
             firstNameResult,
             lastNameResult,
-            passwordResult.Hash
+            passwordResult
         );
 
         await userService.AddUserAsync(user, cancellationToken);

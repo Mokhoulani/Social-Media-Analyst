@@ -27,7 +27,7 @@ public sealed class User : AggregateRoot, IAggregateRoot
     public FirstName FirstName { get; set; }
 
     public LastName LastName { get; set; }
-    
+
     public Password Password { get; set; }
 
     public static User Create(
@@ -35,10 +35,10 @@ public sealed class User : AggregateRoot, IAggregateRoot
         Email email,
         FirstName firstName,
         LastName lastName,
-        string plainTextPassword)
+        Password password)
     {
-        var password = Password.Create(plainTextPassword);
-        
+
+
         var user = new User(
             id,
             email,
@@ -50,7 +50,7 @@ public sealed class User : AggregateRoot, IAggregateRoot
 
         return user;
     }
-    
+
     public bool VerifyPassword(string plainTextPassword)
     {
         return Password.Verify(plainTextPassword);

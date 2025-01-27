@@ -54,7 +54,7 @@ public class UserController(ISender sender, ILogger<UserController> logger) : Ap
         [FromBody] LoginRequest request,
         CancellationToken cancellationToken)
     {
-        var command = new LoginCommand(request.Email);
+        var command = new LoginCommand(request.Email,request.Password);
 
         var token = await Sender.Send(
             command,

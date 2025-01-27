@@ -10,7 +10,7 @@ Content-Type: application/json
 {
   "FirstName": "MOh",
   "LastName": "Ko",
-  "Email": "test18@test.com",
+  "Email": "test20@test.com",
   "Password": "123456"
 }
 
@@ -19,5 +19,6 @@ POST http://localhost:5014/api/User/login
 Content-Type: application/json
 
 {
-  "Email": "test17@test.com"
+  "Email": "test20@test.com",
+  "Password": "123466"
 }

@@ -1,5 +1,6 @@
 ﻿using Application.Abstractions;
 using Application.Abstractions.Messaging;
+using Application.Common.Interfaces;
 using Application.CQRS.User.Commands;
 using Domain.Interfaces;
 using Domain.ValueObjects;
@@ -7,7 +8,7 @@ using Domain.ValueObjects;
 namespace Application.CQRS.User.Handlers;
 
 internal sealed class LoginCommandHandler(
-    IUserRepository userRepository,
+    IUserService userService,
     IJwtProvider jwtProvider)
     : ICommandHandler<LoginCommand, string>
 {
@@ -15,13 +16,9 @@ internal sealed class LoginCommandHandler(
         LoginCommand request,
         CancellationToken cancellationToken)
     {
-        Email email = Email.Create(request.Email);
+        var user = await userService.LoginAsync(request, cancellationToken);
 
-      Domain.Entities.User? user = await userRepository.GetByEmailAsync(
-            email,
-            cancellationToken);
-      
-        string token = jwtProvider.Generate(user);
+        string token = jwtProvider.Generate(user!);
 
         return token;
     }
