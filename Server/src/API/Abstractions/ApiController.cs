@@ -6,6 +6,5 @@ namespace Api.Abstractions;
 [ApiController]
 public abstract class ApiController(ISender sender, ILogger<ApiController> logger) : ControllerBase
 {
-    protected readonly ISender Sender = sender;
-    
+    protected readonly ISender Sender = sender; 
 }

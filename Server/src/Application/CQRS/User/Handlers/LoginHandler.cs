@@ -1,6 +1,8 @@
 ﻿using Application.Abstractions;
 using Application.Abstractions.Messaging;
 using Application.Common.Interfaces;
+using Application.Common.Mod;
+using Application.Common.Mod.ViewModels;
 using Application.CQRS.User.Commands;
 using Domain.Interfaces;
 using Domain.ValueObjects;
@@ -9,17 +11,15 @@ namespace Application.CQRS.User.Handlers;
 
 internal sealed class LoginCommandHandler(
     IUserService userService,
-    IJwtProvider jwtProvider)
-    : ICommandHandler<LoginCommand, string>
+    IJwtProvider jwtProvider,
+    IAuthService authService)
+    : ICommandHandler<LoginCommand, TokenResponse>
 {
-    public async Task<string> Handle(
+    public async Task<TokenResponse> Handle(
         LoginCommand request,
         CancellationToken cancellationToken)
     {
-        var user = await userService.LoginAsync(request, cancellationToken);
-
-        string token = jwtProvider.Generate(user!);
-
-        return token;
+        var command = new LoginCommand(request.Email, request.Password);
+         return await authService.LoginAsync(command, cancellationToken);
     }
 }

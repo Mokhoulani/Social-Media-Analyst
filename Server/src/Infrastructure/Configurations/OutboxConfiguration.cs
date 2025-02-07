@@ -1,5 +1,5 @@
 ﻿using Infrastructure.Constants;
-using Infrastructure.Persistence.Outbox;
+using Infrastructure.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

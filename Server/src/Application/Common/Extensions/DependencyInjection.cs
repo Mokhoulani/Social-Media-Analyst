@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 
 
-
 namespace Application.Common.Extensions;
 
 public static class DependencyInjection
@@ -25,7 +24,6 @@ public static class DependencyInjection
         IWebHostEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(services);
-        ArgumentNullException.ThrowIfNull(environment);
         
         // Register MediatR
         services.AddMediatR(typeof(AssemblyReference).Assembly);
@@ -35,6 +33,8 @@ public static class DependencyInjection
         ConfigureMapping(services);
         
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAuthService, AuthService>();
+
         services.AddTransient<EmailService>();
         return services;
     }

@@ -1,5 +1,5 @@
 ﻿using Domain.Primitives;
-using Infrastructure.Persistence.Outbox;
+using Infrastructure.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Newtonsoft.Json;

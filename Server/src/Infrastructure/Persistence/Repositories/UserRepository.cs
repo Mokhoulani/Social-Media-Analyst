@@ -13,8 +13,7 @@ public class UserRepository(ApplicationDbContext context) : IUserRepository
         return context.Set<User>().FirstOrDefaultAsync(x => x.Id == userId);
     }
 
-    public async Task<User?> GetByIdAsync(Guid userId, CancellationToken cancellationToken = default)
-
+    public async Task<User?> GetByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         return await context.Set<User>().FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
     }

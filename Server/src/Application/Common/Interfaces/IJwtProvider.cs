@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 
-namespace Application.Abstractions;
+namespace Application.Common.Interfaces;
 
 public interface IJwtProvider
 {

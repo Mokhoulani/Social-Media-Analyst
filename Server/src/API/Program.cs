@@ -3,8 +3,10 @@ using Application.Common.Extensions;
 using Infrastructure.Persistence;
 using Domain.Interfaces;
 using Hellang.Middleware.ProblemDetails;
+using Infrastructure.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.BackgroundJobs;
+using Infrastructure.Extensions;
 using Infrastructure.Interceptors;
 using Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -21,11 +23,11 @@ builder
             .AsImplementedInterfaces()
             .WithScopedLifetime());
 
-string connectionString = builder.Configuration.GetConnectionString("Database");
+string connectionString = builder.Configuration.GetConnectionString("Database")!;
 
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddInfrastructureLayer();
 builder.Services.AddApplicationLayer(builder.Environment);
 
 builder.Services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
@@ -61,6 +63,7 @@ builder.Services.AddQuartzHostedService();
 builder.Services.AddSwaggerGen();
 
 builder.Services.ConfigureOptions<JwtOptionsSetup>();
+builder.Services.ConfigureOptions<RefreshTokenOptionsSetup>();
 builder.Services.ConfigureOptions<JwtBearerOptionsSetup>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

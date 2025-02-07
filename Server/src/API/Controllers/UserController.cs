@@ -1,5 +1,5 @@
 using Api.Abstractions;
-using Application.Common.Modoles.ViewModels;
+using Application.Common.Mod.ViewModels;
 using Application.CQRS.User.Commands;
 using Application.CQRS.User.Queries;
 using MediatR;

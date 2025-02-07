@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using Application.Abstractions;
+using Application.Common.Interfaces;
 using Domain.Entities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -30,7 +31,7 @@ internal sealed class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
             _options.Audience,
             claims,
             null,
-            DateTime.UtcNow.AddHours(1),
+            DateTime.UtcNow.AddMinutes(_options.ExpiryMinutes),
             signingCredentials);
 
         string tokenValue = new JwtSecurityTokenHandler()

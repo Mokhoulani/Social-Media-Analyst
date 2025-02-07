@@ -1,5 +1,5 @@
-using Application.Common.Modoles.ViewModels;
 using Application.Abstractions.Messaging;
+using Application.Common.Mod.ViewModels;
 
 namespace Application.CQRS.User.Commands;
 

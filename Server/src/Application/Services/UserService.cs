@@ -17,9 +17,9 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork)
 
     public async Task<User> AddUserAsync(User user, CancellationToken cancellationToken)
     {
-        userRepository.Insert(user); // Add the user to the repository
-        await unitOfWork.SaveChangesAsync(cancellationToken); // Save changes via Unit of Work
-        return user; // Return the user with updated properties
+        userRepository.Insert(user); 
+        await unitOfWork.SaveChangesAsync(cancellationToken); 
+        return user;
     }
 
 

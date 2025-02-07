@@ -1,6 +1,4 @@
-using Domain.ValueObjects;
-
-namespace Application.Common.Modoles.ViewModels;
+namespace Application.Common.Mod.ViewModels;
 
 public class AppUserViewModel
 {

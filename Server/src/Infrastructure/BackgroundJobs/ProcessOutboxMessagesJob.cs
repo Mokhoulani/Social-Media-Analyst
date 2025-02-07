@@ -1,6 +1,6 @@
 ﻿using Domain.Primitives;
+using Infrastructure.Outbox;
 using Infrastructure.Persistence;
-using Infrastructure.Persistence.Outbox;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;

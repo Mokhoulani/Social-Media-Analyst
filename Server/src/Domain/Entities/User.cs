@@ -22,13 +22,16 @@ public sealed class User : AggregateRoot, IAggregateRoot
     {
     }
 
-    public Email Email { get; set; }
+    public Email Email { get; init; }
 
-    public FirstName FirstName { get; set; }
+    public FirstName FirstName { get; init; }
 
-    public LastName LastName { get; set; }
+    public LastName LastName { get; init; }
+    
+    public Password Password { get; init; }
+    
+    public IEnumerable<RefreshToken>? RefreshTokens { get;private set; }
 
-    public Password Password { get; set; }
 
     public static User Create(
         Guid id,

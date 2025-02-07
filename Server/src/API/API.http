@@ -20,5 +20,14 @@ Content-Type: application/json
 
 {
   "Email": "test20@test.com",
-  "Password": "123466"
+  "Password": "123456"
+}
+
+
+###
+POST http://localhost:5014/api/Auth/refresh-token
+Content-Type: application/json
+
+{
+  "RefreshToken": "1LWDrXjUnhs2GM85c7qG4OAhflm8WqeiyHlTd6EU2nWFSzW3DPmDX8a7nVLegdEH2O68CDNH2D6XC10c0bDW2A=="
 }

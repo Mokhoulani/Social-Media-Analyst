@@ -1,5 +1,5 @@
 using Domain.Interfaces;
 
-namespace Domain.Events;
+namespace Domain.DomainEvents;
 
 public record UserDeactivatedEvent(Guid UserId) : IDomainEvent;
