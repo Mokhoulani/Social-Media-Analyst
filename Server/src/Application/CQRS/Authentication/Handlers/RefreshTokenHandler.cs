@@ -1,24 +1,30 @@
 using Application.Abstractions.Messaging;
 using Application.Common.Interfaces;
 using Application.Common.Mod;
-using Application.Common.Mod.ViewModels;
 using Application.CQRS.Authentication.Commands;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Application.CQRS.Authentication.Handlers;
 
 
-public class RefreshTokenHandler(IAuthService authService, ILogger<RefreshTokenHandler> logger)
+public class RefreshTokenHandler(IAuthService authService,
+    HybridCache cache)
     : ICommandHandler<RefreshTokenCommand, TokenResponse>
 {
-    public async Task<TokenResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+    public async Task<TokenResponse> Handle(
+        RefreshTokenCommand command, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Processing refresh token request...");
+        string cacheKey = $"refresh-token-{command.RefreshToken}"; 
+        
+        var cachedToken = await cache.GetOrCreateAsync<TokenResponse>(
+            cacheKey, async token =>
+        {
+            var storedToken = await authService.RefreshAsync(
+                command.RefreshToken,cancellationToken);
+            
+            return storedToken;
+        }, cancellationToken: cancellationToken);
 
-        var (accessToken, refreshToken) = await authService.RefreshAsync(request.RefreshToken, cancellationToken);
-
-        logger.LogInformation("New refresh token generated successfully.");
-
-        return new TokenResponse(accessToken, refreshToken);
+        return cachedToken; 
     }
 }

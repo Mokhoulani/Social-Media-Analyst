@@ -1,18 +1,16 @@
 using Domain.Primitives;
 
 namespace Domain.Entities;
-
-public class RefreshToken :Entity
+public class RefreshToken : Entity
 {
-    public string Token { get; private init; }
-    public DateTime ExpiresAt { get; init; }
+    public string Token { get; private set; }
+    public DateTime ExpiresAt { get; private set; }
     private DateTime? RevokedAt { get; set; }
     
     public bool IsActive => RevokedAt == null && DateTime.UtcNow < ExpiresAt;
     
-    public Guid UserId { get;private init; }
+    public Guid UserId { get; private init; }
     public User User { get; private init; }
-    
 
     private RefreshToken()
     {
@@ -25,13 +23,23 @@ public class RefreshToken :Entity
         ExpiresAt = expiresAt;
     }
 
-    public static RefreshToken Create(Guid userId, string token, TimeSpan validityPeriod)
+    public static RefreshToken Create(Guid userId, string token, DateTime expiresAt)
     {
-        return new RefreshToken(userId, token, DateTime.Now.Add(validityPeriod));
+        return new RefreshToken(userId, token, expiresAt);
     }
     
     public void Revoke()
     {
         RevokedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Replaces the current token with a new one and updates the expiration time.
+    /// </summary>
+    public void Replace(string newToken, DateTime newExpiry)
+    {
+        Token = newToken;
+        ExpiresAt = newExpiry;
+        RevokedAt = null; // Ensure token remains active
     }
 }

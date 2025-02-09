@@ -1,17 +1,41 @@
 using Api.OptionsSetup;
 using Application.Common.Extensions;
 using Infrastructure.Persistence;
-using Domain.Interfaces;
 using Hellang.Middleware.ProblemDetails;
-using Infrastructure.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.BackgroundJobs;
 using Infrastructure.Extensions;
 using Infrastructure.Interceptors;
-using Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Caching.Hybrid;
 using Quartz;
+
+
+
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost:6379";
+});
+
+builder.Services.AddHybridCache(options =>
+{
+    // Maximum size of cached items
+    options.MaximumPayloadBytes = 1024 * 1024 * 10; // 10MB
+    options.MaximumKeyLength = 512;
+
+    // Default timeouts
+    options.DefaultEntryOptions = new HybridCacheEntryOptions
+    {
+        Expiration = TimeSpan.FromMinutes(30),
+        LocalCacheExpiration = TimeSpan.FromMinutes(30)
+    };
+});
+
 
 builder
     .Services

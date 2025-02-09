@@ -27,10 +27,17 @@ public class AuthService(
         var user = await userService.LoginAsync(command, cancellationToken);
         
         string accessToken = jwtProvider.Generate(user);
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("User not found.");
+        }
+        
         string refreshToken = tokenService.GenerateRefreshToken();
-
-        // Store refresh token in the database
-        var refreshTokenEntity = RefreshToken.Create(user.Id, refreshToken, TimeSpan.FromDays(7));
+        DateTime expiryDate = tokenService.GetRefreshTokenExpiryDate();
+        
+        var refreshTokenEntity = RefreshToken.Create(
+            user.Id, refreshToken, expiryDate);
+        
         await refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
 
         return new TokenResponse(accessToken, refreshToken);
@@ -39,35 +46,32 @@ public class AuthService(
     /// <summary>
     /// Refreshes the access token using a valid refresh token.
     /// </summary>
-    public async Task<TokenResponse> RefreshAsync(
-        string refreshToken,
-        CancellationToken cancellationToken)
+    public async Task<TokenResponse> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
     {
         var storedToken = await refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken);
-
         if (storedToken == null || !storedToken.IsActive)
         {
-            throw new UnauthorizedAccessException("Invalid refresh token.");
+            throw new UnauthorizedAccessException("Invalid or expired refresh token.");
         }
-
+        
         var user = await userRepository.GetByIdAsync(storedToken.UserId, cancellationToken);
-
         if (user == null)
         {
             throw new UnauthorizedAccessException("User not found.");
         }
-
-        // Generate new access and refresh tokens
+        
         string newAccessToken = jwtProvider.Generate(user);
         string newRefreshToken = tokenService.GenerateRefreshToken();
+        
+        DateTime expiryDate = tokenService.GetRefreshTokenExpiryDate();
+        DateTime? slidingExpiry = tokenService.GetSlidingExpirationDate();
+        
+        storedToken.Replace(newRefreshToken, expiryDate);
+        await refreshTokenRepository.UpdateAsync(storedToken, cancellationToken);
 
-        // Revoke old token and store the new one
-        await refreshTokenRepository.RevokeTokenAsync(storedToken, cancellationToken);
-        var newTokenEntity = RefreshToken.Create(user.Id, newRefreshToken, TimeSpan.FromDays(7));
-        await refreshTokenRepository.AddAsync(newTokenEntity, cancellationToken);
-
-        return new TokenResponse(newAccessToken,newRefreshToken);
+        return new TokenResponse(newAccessToken, newRefreshToken);
     }
+ 
 }
 
 

@@ -29,6 +29,7 @@ public static class DependencyInjection
         services.AddMediatR(typeof(AssemblyReference).Assembly);
       
         ConfigureValidation(services);
+        ConfigureCache(services);
         ConfigureProblemDetails(services, environment);
         ConfigureMapping(services);
         
@@ -61,6 +62,11 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(typeof(SignUpValidator).Assembly);
         services.AddValidatorsFromAssembly(typeof(LoginValidator).Assembly);
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+    }
+    
+    private static void ConfigureCache(IServiceCollection services)
+    {
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
     }
     
     private static void ConfigureMapping(IServiceCollection services)

@@ -24,4 +24,10 @@ public class RefreshTokenRepository(ApplicationDbContext context) : IRefreshToke
         context.Set<RefreshToken>().Update(token);
         await context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task UpdateAsync(RefreshToken token, CancellationToken cancellationToken)
+    {
+        context.Set<RefreshToken>().Update(token);
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }
