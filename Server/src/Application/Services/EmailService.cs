@@ -29,4 +29,15 @@ public class EmailService(IConfiguration configuration)
             await client.SendMailAsync(mailMessage);
         }
     }
+    public async Task SendPasswordResetEmailAsync(
+        string userEmail,
+        string resetLink,
+        CancellationToken cancellationToken)
+    {
+        
+        string subject = "Password Reset Request";
+        string body = $"Click the following link to reset your password: <a href='{resetLink}'>Reset Password</a>";
+
+        await SendEmailAsync(userEmail, subject, body);
+    }
 }

@@ -10,11 +10,10 @@ using Domain.ValueObjects;
 namespace Application.Services;
 
 public class AuthService(
-    IUserRepository userRepository,
     IJwtProvider jwtProvider,
     ITokenService tokenService,
     IUserService userService,
-    IRefreshTokenRepository refreshTokenRepository)
+    IRepository<RefreshToken> refreshTokenRepository)
     : IAuthService
 {
     /// <summary>
@@ -48,13 +47,16 @@ public class AuthService(
     /// </summary>
     public async Task<TokenResponse> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        var storedToken = await refreshTokenRepository.GetByTokenAsync(refreshToken, cancellationToken);
+        var storedToken = await refreshTokenRepository
+            .GetByIndexAsync<string,RefreshToken>(
+                rt => rt.Token, refreshToken, cancellationToken);
+
         if (storedToken == null || !storedToken.IsActive)
         {
             throw new UnauthorizedAccessException("Invalid or expired refresh token.");
         }
         
-        var user = await userRepository.GetByIdAsync(storedToken.UserId, cancellationToken);
+        var user = await userService.GetUserByIdAsync(storedToken.UserId, cancellationToken);
         if (user == null)
         {
             throw new UnauthorizedAccessException("User not found.");
@@ -67,6 +69,7 @@ public class AuthService(
         DateTime? slidingExpiry = tokenService.GetSlidingExpirationDate();
         
         storedToken.Replace(newRefreshToken, expiryDate);
+        storedToken.Revoke();
         await refreshTokenRepository.UpdateAsync(storedToken, cancellationToken);
 
         return new TokenResponse(newAccessToken, newRefreshToken);

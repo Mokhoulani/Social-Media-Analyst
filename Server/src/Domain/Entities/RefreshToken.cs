@@ -1,7 +1,8 @@
+using Domain.Interfaces;
 using Domain.Primitives;
 
 namespace Domain.Entities;
-public class RefreshToken : Entity
+public class RefreshToken : AggregateRoot ,IAggregateRoot
 {
     public string Token { get; private set; }
     public DateTime ExpiresAt { get; private set; }

@@ -2,6 +2,7 @@ using Api.Abstractions;
 using Application.Common.Mod.ViewModels;
 using Application.CQRS.User.Commands;
 using Application.CQRS.User.Queries;
+using Application.CQRS.User.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

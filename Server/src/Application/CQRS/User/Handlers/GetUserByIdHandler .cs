@@ -12,13 +12,11 @@ public class GetUserByIdQueryHandler(
     IMapper mapper)
     : ICommandHandler<GetUserByIdQuery, AppUserViewModel>
 {
-
-
     public async Task<AppUserViewModel> Handle(
         GetUserByIdQuery request,
          CancellationToken cancellationToken)
     {
-        var user = await userService.GetUserByIdAsync(request.Id, cancellationToken);
+        var user = await userService.GetUserByIdAsync(Guid.Parse(request.Id), cancellationToken);
 
         if (user == null)
             throw new Exception("User not found");

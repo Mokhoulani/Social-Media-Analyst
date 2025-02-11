@@ -3,9 +3,11 @@ using Domain.DomainEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Application.CQRS.User.Handlers;
+namespace Application.CQRS.User.Events;
 
-public class UserSignedUpEventHandler(ILogger<UserSignedUpEventHandler> logger, EmailService emailService)
+public class UserSignedUpEventHandler(
+    ILogger<UserSignedUpEventHandler> logger,
+    EmailService emailService)
     : INotificationHandler<UserSignedUpDomainEvent>
 {
     public async Task Handle(

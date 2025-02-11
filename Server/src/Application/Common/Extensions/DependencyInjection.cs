@@ -2,7 +2,7 @@ using Application.Common.Behaviours;
 using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Microsoft.Extensions.DependencyInjection;
-using Application.CQRS.User.Commands;
+using Application.CQRS.User.Validators;
 using Application.Services;
 using FluentValidation;
 using Mapster;

@@ -1,8 +1,9 @@
 using Application.Common.Interfaces;
-using FluentValidation;
+using Application.CQRS.User.Commands;
 using Domain.ValueObjects;
+using FluentValidation;
 
-namespace Application.CQRS.User.Commands;
+namespace Application.CQRS.User.Validators;
 
 public class LoginValidator : AbstractValidator<LoginCommand>
 {

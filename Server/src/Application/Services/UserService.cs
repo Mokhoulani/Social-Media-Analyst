@@ -23,9 +23,9 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork)
     }
 
 
-    public Task<User?> GetUserByIdAsync(string userId, CancellationToken cancellationToken)
+    public Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
-        return userRepository.GetByIdAsync(Guid.Parse(userId), cancellationToken);
+        return userRepository.GetByIdAsync(userId, cancellationToken);
     }
 
 
