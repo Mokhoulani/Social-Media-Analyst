@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Application.Common.Interfaces;
 using Domain.Interfaces;
 using Infrastructure.Authentication;
@@ -15,6 +17,7 @@ public static class DependencyInjection
         this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<Dictionary<Type, object>>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddSingleton<ITokenService, TokenService>();

@@ -1,7 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Domain.Interfaces;
 using Domain.Primitives;
+using Domain.Specification;
 
 namespace Infrastructure.Persistence.Repositories;
 
@@ -9,49 +15,35 @@ public class Repository<T> : IRepository<T> where T : Entity, IAggregateRoot
 {
     private readonly ApplicationDbContext _applicationDbContext;
     private readonly DbSet<T> _dbSet;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public Repository(ApplicationDbContext applicationDbContext, IUnitOfWork unitOfWork)
+    public Repository(ApplicationDbContext applicationDbContext)
     {
       _applicationDbContext = applicationDbContext;
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _dbSet = _applicationDbContext.Set<T>();
     }
 
     public async Task<T> AddAsync(T entity, CancellationToken cancellationToken)
     {
         await _dbSet.AddAsync(entity, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return entity;
     }
 
-    public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<T?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
     }
-
-    public async Task<TResult?> GetByIndexAsync<TIndex, TResult>(
-        Expression<Func<T, TIndex>> indexSelector, 
-        TIndex index, 
-        CancellationToken cancellationToken)
+    
+    public async Task<T?> GetAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken)
     {
-        var lambda = Expression.Lambda<Func<T, bool>>(
-            Expression.Equal(indexSelector.Body, Expression.Constant(index)), 
-            indexSelector.Parameters
-        );
-
-        return await _dbSet
-            .Where(lambda)
-            .OfType<TResult>()
-            .FirstOrDefaultAsync(cancellationToken);
+        return await _dbSet.FirstOrDefaultAsync(predicate, cancellationToken);
     }
-
-    public async Task<IList<T>> GetAllAsync(CancellationToken cancellationToken)
+    
+    public async Task<IList<T>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await _dbSet.ToListAsync(cancellationToken);
     }
 
-    public async Task UpdateAsync(T entity, CancellationToken cancellationToken)
+    public async Task SoftUpdateAsync(T entity, CancellationToken cancellationToken = default)
     {
         var existingEntity = await _dbSet.FindAsync(new object[] { entity.Id }, cancellationToken);
         
@@ -59,9 +51,16 @@ public class Repository<T> : IRepository<T> where T : Entity, IAggregateRoot
             throw new KeyNotFoundException($"Entity {typeof(T).Name} with ID {entity.Id} not found.");
 
         _applicationDbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
+    
+    public async Task FullUpdateAsync(T entity, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
 
+        _applicationDbContext.Entry(entity).State = EntityState.Modified;
+        await Task.CompletedTask;
+    }
+    
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
         var entity = await _dbSet.FindAsync(new object[] { id }, cancellationToken);
@@ -69,6 +68,43 @@ public class Repository<T> : IRepository<T> where T : Entity, IAggregateRoot
             throw new KeyNotFoundException($"Entity {typeof(T).Name} with ID {id} not found.");
 
         _dbSet.Remove(entity);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<T?> FindOneAsync(Specification<T> specification,
+        CancellationToken cancellationToken = default)
+    {
+        var queryWithSpec = SpecificationEvaluator.GetQuery(
+            _dbSet.AsQueryable(),
+            specification);
+        return await queryWithSpec.FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<T>> FindManyAsync(
+        Specification<T> specification,
+        CancellationToken cancellationToken = default)
+    {
+        var queryWithSpec = SpecificationEvaluator.GetQuery(
+            _dbSet.AsQueryable(),
+            specification);
+        return await queryWithSpec.ToListAsync(cancellationToken);
+    }
+
+    public async Task<bool> ExistsAsync(
+        Specification<T> specification,
+        CancellationToken cancellationToken = default)
+    {
+        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet.AsQueryable(), specification);
+        return await queryWithSpec.AnyAsync(cancellationToken);
+    }
+
+    public async Task<int> CountAsync(
+        Specification<T> specification,
+        CancellationToken cancellationToken = default)
+    {
+        var queryWithSpec = SpecificationEvaluator.GetQuery(
+            _dbSet.AsQueryable(),
+            specification);
+        return await queryWithSpec.CountAsync(cancellationToken);
+    }
+
 }

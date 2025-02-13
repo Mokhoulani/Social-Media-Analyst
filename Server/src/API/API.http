@@ -29,5 +29,5 @@ POST http://localhost:5014/api/Auth/refresh-token
 Content-Type: application/json
 
 {
-  "RefreshToken":  "TYv+t0O8VbTgyFzz3XQ+C1Q1eTgdCgINAuuVFZuFH1Z/ldLpDUduQuNvyRL5qBiYlvZq5/5OjziOjbI3+esikg=="
+  "RefreshToken": "2nONgUkDSb8IjymUBplEKfvO14TLofPkYUKA7JA2j3VbFEm0mZSEXyWyDPbt+xT9LczCT7izUBlnS20Xn/YkeQ=="
 }

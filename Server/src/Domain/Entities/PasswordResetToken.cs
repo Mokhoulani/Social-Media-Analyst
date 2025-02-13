@@ -1,15 +1,16 @@
 using Domain.DomainEvents;
+using Domain.Interfaces;
 using Domain.Primitives;
 
 namespace Domain.Entities;
 
-public class PasswordResetToken : AggregateRoot
+public class PasswordResetToken : AggregateRoot ,IAggregateRoot
 {
     public Guid UserId { get; private init; } 
     public string Token { get; private init; }
-    private DateTime ExpiresAt { get; init; } 
+    public DateTime ExpiresAt { get; init; }
+    public bool Used { get; set; } = false;
     
-    private bool Used { get; set; } = false;
 
     private PasswordResetToken() { }
 
@@ -37,4 +38,5 @@ public class PasswordResetToken : AggregateRoot
         if (Used) throw new InvalidOperationException("Token has already been used.");
         Used = true;
     }
+    
 }

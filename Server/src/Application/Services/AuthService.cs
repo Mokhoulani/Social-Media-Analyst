@@ -1,11 +1,10 @@
-using Application.Abstractions;
 using Application.Common.Interfaces;
 using Application.Common.Mod;
-using Application.Common.Mod.ViewModels;
 using Application.CQRS.User.Commands;
 using Domain.Entities;
 using Domain.Interfaces;
-using Domain.ValueObjects;
+using Domain.Specification;
+
 
 namespace Application.Services;
 
@@ -13,7 +12,7 @@ public class AuthService(
     IJwtProvider jwtProvider,
     ITokenService tokenService,
     IUserService userService,
-    IRepository<RefreshToken> refreshTokenRepository)
+    IUnitOfWork unitOfWork)
     : IAuthService
 {
     /// <summary>
@@ -37,7 +36,8 @@ public class AuthService(
         var refreshTokenEntity = RefreshToken.Create(
             user.Id, refreshToken, expiryDate);
         
-        await refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
+        await unitOfWork.Repository<RefreshToken>().AddAsync(refreshTokenEntity, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new TokenResponse(accessToken, refreshToken);
     }
@@ -47,16 +47,18 @@ public class AuthService(
     /// </summary>
     public async Task<TokenResponse> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        var storedToken = await refreshTokenRepository
-            .GetByIndexAsync<string,RefreshToken>(
-                rt => rt.Token, refreshToken, cancellationToken);
+        var spec = new ValidRefreshTokenSpecification(refreshToken);
 
-        if (storedToken == null || !storedToken.IsActive)
+        var storedToken = await unitOfWork.Repository<RefreshToken>()
+            .FindOneAsync(spec, cancellationToken);
+
+        if (storedToken == null)
         {
             throw new UnauthorizedAccessException("Invalid or expired refresh token.");
         }
-        
+
         var user = await userService.GetUserByIdAsync(storedToken.UserId, cancellationToken);
+        
         if (user == null)
         {
             throw new UnauthorizedAccessException("User not found.");
@@ -70,11 +72,13 @@ public class AuthService(
         
         storedToken.Replace(newRefreshToken, expiryDate);
         storedToken.Revoke();
-        await refreshTokenRepository.UpdateAsync(storedToken, cancellationToken);
-
+        await unitOfWork.Repository<RefreshToken>().SoftUpdateAsync(storedToken, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        
         return new TokenResponse(newAccessToken, newRefreshToken);
     }
  
 }
+
 
 

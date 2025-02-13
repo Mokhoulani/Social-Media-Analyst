@@ -28,11 +28,10 @@ public sealed class User : AggregateRoot, IAggregateRoot
 
     public LastName LastName { get; init; }
     
-    public Password Password { get; init; }
+    public Password Password { get;private set; }
     
     public IEnumerable<RefreshToken>? RefreshTokens { get;private set; }
-
-
+    
     public static User Create(
         Guid id,
         Email email,
@@ -57,5 +56,10 @@ public sealed class User : AggregateRoot, IAggregateRoot
     public bool VerifyPassword(string plainTextPassword)
     {
         return Password.Verify(plainTextPassword);
+    }
+
+    public void SetPassword(Password newPassword)
+    {
+        Password = newPassword;
     }
 }
