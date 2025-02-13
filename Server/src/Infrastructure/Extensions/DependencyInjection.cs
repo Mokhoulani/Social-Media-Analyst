@@ -16,7 +16,6 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureLayer(
         this IServiceCollection services)
     {
-        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<Dictionary<Type, object>>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));

@@ -11,4 +11,5 @@ public interface IUserService
     Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken);
     Task<User?> LoginAsync(LoginCommand command, CancellationToken cancellationToken = default);
     Task<bool> IsPasswordValidAsync(string email, string password, CancellationToken cancellationToken= default);
+    Task<User?> GetByEmailAsync(Email user, CancellationToken cancellationToken = default);
 }

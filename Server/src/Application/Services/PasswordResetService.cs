@@ -1,4 +1,5 @@
 using Application.Common.Interfaces;
+using Domain.Common.Exceptions;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Specification;
@@ -9,14 +10,16 @@ namespace Application.Services;
 public class PasswordResetService(
     IUnitOfWork unitOfWork,
     ITokenService tokenService,
-    IUserRepository userRepository)
+    IUserService userService)
     : IPasswordResetService
 {
     public async Task RequestPasswordResetAsync(string email, CancellationToken cancellationToken)
     {
         var emailResult = Email.Create(email);
-        var user = await userRepository.GetByEmailAsync(emailResult, cancellationToken);
-        if (user == null) return;
+        var user = await userService.GetByEmailAsync(emailResult, cancellationToken);
+        
+        if (user == null)
+            throw new NotFoundException("User not found");
 
         var token =  tokenService.GenerateRefreshToken();
         var expiresAt = DateTime.UtcNow.AddHours(1);
@@ -37,10 +40,12 @@ public class PasswordResetService(
         if (resetToken == null)
             throw new InvalidOperationException("Invalid or expired token.");
 
-        var user = await userRepository.GetByIdAsync(resetToken.UserId, cancellationToken);
-        if (user == null) throw new InvalidOperationException("User not found.");
+        var user = await userService.GetUserByIdAsync(resetToken.UserId, cancellationToken);
+        
+        if (user == null) 
+            throw new NotFoundException("User not found.");
 
-       var passwordResult = Password.Create(newPassword);
+        var passwordResult = Password.Create(newPassword);
         user.SetPassword(passwordResult);
         
         await unitOfWork.Repository<User>().SoftUpdateAsync(user, cancellationToken);

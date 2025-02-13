@@ -1,42 +1,50 @@
 using Application.Common.Interfaces;
 using Application.CQRS.User.Commands;
+using Domain.Common.Exceptions;
 using Domain.Entities;
 using Domain.Interfaces;
+using Domain.Specification;
 using Domain.ValueObjects;
 
 
 namespace Application.Services;
 
-public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork) : IUserService
+public class UserService(IUnitOfWork unitOfWork) : IUserService
 {
-
     public async Task<bool> IsEmailExistsAsync(Email email, CancellationToken cancellationToken)
     {
-        return await userRepository.IsEmailUniqueAsync(email, cancellationToken);
+        var spec = new EmailUniqueSpecification(email);
+        
+        var userExists = await unitOfWork.Repository<User>()
+            .ExistsAsync(spec, cancellationToken);
+        return !userExists;
     }
 
     public async Task<User> AddUserAsync(User user, CancellationToken cancellationToken)
     {
-        userRepository.Insert(user); 
+       var newUser = await unitOfWork.Repository<User>().AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken); 
-        return user;
+        return newUser;
     }
-
-
-    public Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
+    
+    public async Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
-        return userRepository.GetByIdAsync(userId, cancellationToken);
+        return await unitOfWork.Repository<User>().GetByIdAsync(userId, cancellationToken);
     }
-
-
+    
     public async Task<User?> LoginAsync(
         LoginCommand command,
          CancellationToken cancellationToken = default)
     {
         var email = Email.Create(command.Email);
 
-        var user = await userRepository.GetByEmailAsync(email, cancellationToken);
+        var spec = new EmailSpecification(email);
+        var user = await unitOfWork.Repository<User>()
+            .FindOneAsync(spec, cancellationToken);
 
+        if (user == null)
+            throw new NotFoundException("User not found");
+            
         bool isPasswordValid = user?.VerifyPassword(command.Password) ?? false;
 
         return isPasswordValid ? user : null;
@@ -48,12 +56,21 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork)
        CancellationToken cancellationToken)
     {
         Email emailResult = Email.Create(email);
-
-        var user = await userRepository.GetByEmailAsync(emailResult, cancellationToken);
-
+        
+        var spec = new EmailSpecification(emailResult);
+        var user = await unitOfWork.Repository<User>()
+            .FindOneAsync(spec, cancellationToken);
+        
         return user?.VerifyPassword(password) ?? false;
     }
 
+    public async Task<User?> GetByEmailAsync(Email email, CancellationToken cancellationToken = default)
+    {
+        var spec = new EmailSpecification(email);
+        var user = await unitOfWork.Repository<User>()
+            .FindOneAsync(spec, cancellationToken);
+        return user;
+    }
 }
 
 

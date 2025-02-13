@@ -6,9 +6,6 @@ public class RefreshToken : AggregateRoot ,IAggregateRoot
 {
     public string Token { get; private set; }
     public DateTime ExpiresAt { get; private set; }
-    private DateTime? RevokedAt { get; set; }
-    public bool IsActive => RevokedAt == null && DateTime.UtcNow < ExpiresAt;
-    
     public Guid UserId { get; private init; }
     public User User { get; private init; }
 
@@ -28,11 +25,6 @@ public class RefreshToken : AggregateRoot ,IAggregateRoot
         return new RefreshToken(userId, token, expiresAt);
     }
     
-    public void Revoke()
-    {
-        RevokedAt = DateTime.UtcNow;
-    }
-
     /// <summary>
     /// Replaces the current token with a new one and updates the expiration time.
     /// </summary>
@@ -40,6 +32,5 @@ public class RefreshToken : AggregateRoot ,IAggregateRoot
     {
         Token = newToken;
         ExpiresAt = newExpiry;
-        RevokedAt = null; // Ensure token remains active
     }
 }

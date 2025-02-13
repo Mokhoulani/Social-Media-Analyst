@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Threading;
@@ -93,7 +92,9 @@ public class Repository<T> : IRepository<T> where T : Entity, IAggregateRoot
         Specification<T> specification,
         CancellationToken cancellationToken = default)
     {
-        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet.AsQueryable(), specification);
+        var queryWithSpec = SpecificationEvaluator.GetQuery(
+            _dbSet.AsQueryable(), 
+            specification);
         return await queryWithSpec.AnyAsync(cancellationToken);
     }
 

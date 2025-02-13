@@ -1,6 +1,7 @@
 using Application.Common.Interfaces;
 using Application.Common.Mod;
 using Application.CQRS.User.Commands;
+using Domain.Common.Exceptions;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Specification;
@@ -24,12 +25,13 @@ public class AuthService(
     {
         var user = await userService.LoginAsync(command, cancellationToken);
         
-        string accessToken = jwtProvider.Generate(user);
         if (user == null)
         {
             throw new UnauthorizedAccessException("User not found.");
         }
         
+        string accessToken = jwtProvider.Generate(user);
+     
         string refreshToken = tokenService.GenerateRefreshToken();
         DateTime expiryDate = tokenService.GetRefreshTokenExpiryDate();
         
@@ -53,25 +55,19 @@ public class AuthService(
             .FindOneAsync(spec, cancellationToken);
 
         if (storedToken == null)
-        {
             throw new UnauthorizedAccessException("Invalid or expired refresh token.");
-        }
 
         var user = await userService.GetUserByIdAsync(storedToken.UserId, cancellationToken);
         
         if (user == null)
-        {
-            throw new UnauthorizedAccessException("User not found.");
-        }
+            throw new NotFoundException("User not found.");
         
         string newAccessToken = jwtProvider.Generate(user);
         string newRefreshToken = tokenService.GenerateRefreshToken();
         
         DateTime expiryDate = tokenService.GetRefreshTokenExpiryDate();
-        DateTime? slidingExpiry = tokenService.GetSlidingExpirationDate();
         
         storedToken.Replace(newRefreshToken, expiryDate);
-        storedToken.Revoke();
         await unitOfWork.Repository<RefreshToken>().SoftUpdateAsync(storedToken, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         
