@@ -1,3 +1,4 @@
+using Application.Common.Interfaces;
 using Application.CQRS.User.Events;
 using Application.Services;
 using Domain.DomainEvents;
@@ -8,6 +9,7 @@ namespace Application.CQRS.Authentication.Events;
 
 public class ResetPasswordEventHandler(
     ILogger<UserSignedUpEventHandler> logger,
+    IUserService userService,
     EmailService emailService)
     : INotificationHandler<UserResetPasswordDomainEvent>
 {
@@ -17,14 +19,17 @@ public class ResetPasswordEventHandler(
     {
         try
         {
-            logger.LogInformation("Handling UserResetPasswordDomainEvent for UserId: {UserId}", notification.UserId);
+            var user = await userService.GetUserByIdAsync(notification.UserId, cancellationToken);
+            
+            if (user == null)
+                throw new NullReferenceException("User not found");
 
-            // Generate a reset password link (Assuming there's a method for this)
-            string resetLink = $"https://yourapp.com/reset-password?token={notification}";
-
-            // Send the password reset email
+            var email = user.Email.Value;
+            
+            string resetLink = $"http://localhost:5014/api/Auth/reset-password";
+            
             await emailService.SendPasswordResetEmailAsync(
-                "mo@gmail.com",
+                email,
                 resetLink,
                 cancellationToken);
 

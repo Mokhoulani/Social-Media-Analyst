@@ -29,12 +29,13 @@ public static class DependencyInjection
         services.AddMediatR(typeof(AssemblyReference).Assembly);
       
         ConfigureValidation(services);
-        ConfigureCache(services);
+        // ConfigureCache(services);
         ConfigureProblemDetails(services, environment);
         ConfigureMapping(services);
         
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IPasswordResetService, PasswordResetService>();
 
         services.AddTransient<EmailService>();
         return services;
@@ -60,7 +61,6 @@ public static class DependencyInjection
     private static void ConfigureValidation(IServiceCollection services)
     {
         services.AddValidatorsFromAssembly(typeof(SignUpValidator).Assembly);
-        services.AddValidatorsFromAssembly(typeof(LoginValidator).Assembly);
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
     }
     
@@ -123,7 +123,7 @@ public static class DependencyInjection
 
                 return problemDetails;
             });
-
+            
             // Map other exceptions to ProblemDetails
             opts.Map<System.Exception>((ctx, ex) =>
             {

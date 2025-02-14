@@ -6,11 +6,12 @@ namespace Domain.Entities;
 
 public class PasswordResetToken : AggregateRoot ,IAggregateRoot
 {
-    public Guid UserId { get; private init; } 
     public string Token { get; private init; }
     public DateTime ExpiresAt { get; init; }
     public bool Used { get; set; } = false;
-    
+    public Guid UserId { get; private init; } 
+    public User User { get; private init; }
+
 
     private PasswordResetToken() { }
 

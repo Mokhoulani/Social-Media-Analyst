@@ -4,10 +4,12 @@ using Application.CQRS.Authentication.Commands;
 
 namespace Application.CQRS.Authentication.Handlers;
 
-// public class ResetPasswordHandler(IPasswordResetService passwordResetService) : ICommandHandler<ResetPasswordCommand>
-// {
-//     public async Task Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
-//     {
-//         await passwordResetService.ResetPasswordAsync(request.Token, request.NewPassword, cancellationToken);
-//     }
-// }
+public class ResetPasswordHandler(IPasswordResetService passwordResetService) :
+    ICommandHandler<ResetPasswordCommand,bool>
+{
+    public async Task<bool> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
+    {
+      return  await passwordResetService
+          .ResetPasswordAsync(request.Token, request.NewPassword, cancellationToken);
+    }
+}

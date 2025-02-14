@@ -4,6 +4,7 @@ using Domain.Common.Exceptions;
 using Domain.Entities;
 using Domain.Interfaces;
 using Domain.Specification;
+using Domain.Specification.Users;
 using Domain.ValueObjects;
 
 

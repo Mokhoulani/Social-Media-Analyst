@@ -13,7 +13,7 @@ public class PasswordResetService(
     IUserService userService)
     : IPasswordResetService
 {
-    public async Task RequestPasswordResetAsync(string email, CancellationToken cancellationToken)
+    public async Task<bool> RequestPasswordResetAsync(string email, CancellationToken cancellationToken)
     {
         var emailResult = Email.Create(email);
         var user = await userService.GetByEmailAsync(emailResult, cancellationToken);
@@ -28,9 +28,10 @@ public class PasswordResetService(
         
         await unitOfWork.Repository<PasswordResetToken>().AddAsync(resetToken, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
-    public async Task ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken)
+    public async Task<bool> ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken)
     {
         var spec = new ValidResetTokenSpecification(token);
         
@@ -38,21 +39,23 @@ public class PasswordResetService(
             .FindOneAsync(spec, cancellationToken);
     
         if (resetToken == null)
-            throw new InvalidOperationException("Invalid or expired token.");
-
+           return false;
+        
         var user = await userService.GetUserByIdAsync(resetToken.UserId, cancellationToken);
         
         if (user == null) 
-            throw new NotFoundException("User not found.");
-
+           return false;
+        
         var passwordResult = Password.Create(newPassword);
         user.SetPassword(passwordResult);
         
         await unitOfWork.Repository<User>().SoftUpdateAsync(user, cancellationToken);
+        resetToken.MarkAsUsed();
+        await unitOfWork.Repository<PasswordResetToken>().SoftUpdateAsync(resetToken, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         resetToken.MarkAsUsed();
         await unitOfWork.Repository<PasswordResetToken>().AddAsync(resetToken, cancellationToken);
+        return true;
     }
-    
 }

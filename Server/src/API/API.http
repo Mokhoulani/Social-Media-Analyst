@@ -31,3 +31,22 @@ Content-Type: application/json
 {
   "RefreshToken": "2nONgUkDSb8IjymUBplEKfvO14TLofPkYUKA7JA2j3VbFEm0mZSEXyWyDPbt+xT9LczCT7izUBlnS20Xn/YkeQ=="
 }
+
+
+###
+POST http://localhost:5014/api/Auth/request-reset
+Content-Type: application/json
+
+{
+  "Email": "test20@test.com"
+}
+
+
+###
+POST http://localhost:5014/api/Auth/reset-password
+Content-Type: application/json
+
+{
+  "Token": "4xT9Vt9iflCnDuFU2M8/Fg+yx17I8k6sunxg4TttKXbS9XWJxbfakLFHkwk1UK7zY5pm19iFLKL28KflDDTKUw==",
+  "NewPassword": "1234567"
+}

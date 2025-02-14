@@ -14,17 +14,7 @@ public class RefreshTokenHandler(IAuthService authService,
     public async Task<TokenResponse> Handle(
         RefreshTokenCommand command, CancellationToken cancellationToken)
     {
-        string cacheKey = $"refresh-token-{command.RefreshToken}"; 
-        
-        var cachedToken = await cache.GetOrCreateAsync<TokenResponse>(
-            cacheKey, async token =>
-        {
-            var storedToken = await authService.RefreshAsync(
+            return await authService.RefreshAsync(
                 command.RefreshToken,cancellationToken);
-            
-            return storedToken;
-        }, cancellationToken: cancellationToken);
-
-        return cachedToken; 
     }
 }

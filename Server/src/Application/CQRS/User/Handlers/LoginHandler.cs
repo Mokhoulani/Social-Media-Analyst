@@ -14,17 +14,7 @@ internal sealed class LoginCommandHandler(IAuthService authService,
         LoginCommand command,
         CancellationToken cancellationToken)
     {
-        string cacheKey = $"refresh-token-{command}"; 
-        
-        var cachedToken = await cache.GetOrCreateAsync<TokenResponse>(
-            cacheKey, async token =>
-            {
-                var storedToken = await authService.LoginAsync(
+                return await authService.LoginAsync(
                     command,cancellationToken);
-            
-                return storedToken;
-            }, cancellationToken: cancellationToken);
-
-        return cachedToken;
     }
 }

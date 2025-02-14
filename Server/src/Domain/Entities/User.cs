@@ -31,6 +31,7 @@ public sealed class User : AggregateRoot, IAggregateRoot
     public Password Password { get;private set; }
     
     public IEnumerable<RefreshToken>? RefreshTokens { get;private set; }
+    public IEnumerable<PasswordResetToken>? PasswordResetTokens { get;private set; }
     
     public static User Create(
         Guid id,

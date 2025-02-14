@@ -10,7 +10,7 @@ namespace Api.Controllers;
 
 
 [Route("api/[controller]")]
-public class UserController(ISender sender, ILogger<UserController> logger) : ApiController(sender, logger)
+public class UserController(ISender sender) : ApiController(sender)
 {
     /// <summary>
     /// Create a new user

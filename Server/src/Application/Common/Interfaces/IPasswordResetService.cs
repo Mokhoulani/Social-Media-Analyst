@@ -1,7 +1,8 @@
+
 namespace Application.Common.Interfaces;
 
 public interface IPasswordResetService
 {
-    Task RequestPasswordResetAsync(string email, CancellationToken cancellationToken);
-    Task ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken);
+    Task<bool> RequestPasswordResetAsync(string email, CancellationToken cancellationToken);
+    Task<bool> ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken);
 }
