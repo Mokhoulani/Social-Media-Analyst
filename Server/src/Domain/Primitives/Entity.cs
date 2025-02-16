@@ -4,52 +4,24 @@ public abstract class Entity : IEquatable<Entity>
 {
     protected Entity(Guid id) => Id = id;
 
-    protected Entity()
-    {
-    }
+    protected Entity() { }
 
     public Guid Id { get; private init; }
 
-    public static bool operator ==(Entity? first, Entity? second) =>
-        first is not null && second is not null && first.Equals(second);
-
-    public static bool operator !=(Entity? first, Entity? second) =>
-        !(first == second);
-
-    public bool Equals(Entity? other)
+    public static bool operator ==(Entity? first, Entity? second)
     {
-        if (other is null)
-        {
-            return false;
-        }
-
-        if (other.GetType() != GetType())
-        {
-            return false;
-        }
-
-        return other.Id == Id;
+        if (first is null && second is null) return true;
+        if (first is null || second is null) return false;
+        return first.Equals(second);
     }
 
-    public override bool Equals(object? obj)
-    {
-        if (obj is null)
-        {
-            return false;
-        }
+    public static bool operator !=(Entity? first, Entity? second) => !(first == second);
 
-        if (obj.GetType() != GetType())
-        {
-            return false;
-        }
+    public bool Equals(Entity? other) =>
+        other is not null && other.GetType() == GetType() && other.Id == Id;
 
-        if (obj is not Entity entity)
-        {
-            return false;
-        }
+    public override bool Equals(object? obj) =>
+        obj is Entity entity && Equals(entity);
 
-        return entity.Id == Id;
-    }
-
-    public override int GetHashCode() => Id.GetHashCode() * 41;
+    public override int GetHashCode() => HashCode.Combine(Id, GetType());
 }

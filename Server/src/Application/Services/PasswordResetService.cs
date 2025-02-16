@@ -43,7 +43,7 @@ public class PasswordResetService(
         
         var user = await userService.GetUserByIdAsync(resetToken.UserId, cancellationToken);
         
-        if (user == null) 
+        if (user is null) 
            return false;
         
         var passwordResult = Password.Create(newPassword);

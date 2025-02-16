@@ -1,8 +1,11 @@
-﻿namespace Domain.Primitives;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace Domain.Primitives;
 
 public abstract class ValueObject : IEquatable<ValueObject>
 {
-    public abstract IEnumerable<object> GetAtomicValues();
+    protected abstract IEnumerable<object?> GetAtomicValues();
 
     public bool Equals(ValueObject? other)
     {
@@ -16,10 +19,12 @@ public abstract class ValueObject : IEquatable<ValueObject>
 
     public override int GetHashCode()
     {
-        return GetAtomicValues()
-            .Aggregate(
-                default(int),
-                HashCode.Combine);
+        var hash = new HashCode();
+        foreach (var value in GetAtomicValues())
+        {
+            hash.Add(value);
+        }
+        return hash.ToHashCode();
     }
 
     private bool ValuesAreEqual(ValueObject other)

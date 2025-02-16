@@ -26,7 +26,7 @@ public sealed class Password : ValueObject
         return BCrypt.Net.BCrypt.Verify(plainTextPassword, Hash);
     }
     
-    public override IEnumerable<object> GetAtomicValues()
+    protected override IEnumerable<object> GetAtomicValues()
     {
         yield return Hash;
     }
