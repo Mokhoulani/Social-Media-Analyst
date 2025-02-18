@@ -1,15 +1,17 @@
 using Application.CQRS.User.Commands;
 using Domain.Entities;
+using Domain.Errors;
+using Domain.Shared;
 using Domain.ValueObjects;
 
 namespace Application.Common.Interfaces;
 
 public interface IUserService
 {
-    Task<bool> IsEmailExistsAsync(Email email, CancellationToken cancellationToken);
-    Task<User> AddUserAsync(User user, CancellationToken cancellationToken);
-    Task<User?> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken);
-    Task<User?> LoginAsync(LoginCommand command, CancellationToken cancellationToken = default);
-    Task<bool> IsPasswordValidAsync(string email, string password, CancellationToken cancellationToken= default);
-    Task<User?> GetByEmailAsync(Email user, CancellationToken cancellationToken = default);
+    Task<Result<bool>> IsEmailExistsAsync(Email email, CancellationToken cancellationToken);
+    Task<Result<User>> AddUserAsync(User user, CancellationToken cancellationToken);
+    Task<Result<User>> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken);
+    Task<Result<User>> LoginAsync(LoginCommand command, CancellationToken cancellationToken = default);
+    Task<Result<bool>> IsPasswordValidAsync(string email, string password, CancellationToken cancellationToken= default);
+    Task<Result<User>> GetByEmailAsync(Email user, CancellationToken cancellationToken = default);
 }

@@ -3,7 +3,9 @@ using Application.Common.Mod;
 using Application.CQRS.User.Commands;
 using Domain.Common.Exceptions;
 using Domain.Entities;
+using Domain.Errors;
 using Domain.Interfaces;
+using Domain.Shared;
 using Domain.Specification;
 
 
@@ -19,59 +21,62 @@ public class AuthService(
     /// <summary>
     /// Handles user login, generates an access token and a refresh token.
     /// </summary>
-    public async Task<TokenResponse> LoginAsync(
+    public async Task<Result<TokenResponse>> LoginAsync(
         LoginCommand command,
         CancellationToken cancellationToken)
     {
-        var user = await userService.LoginAsync(command, cancellationToken);
-        
-        if (user == null)
-        {
-            throw new UnauthorizedAccessException("User not found.");
-        }
-        
+        var userResult = await userService.LoginAsync(command, cancellationToken);
+
+        if (userResult.IsFailure)
+            return Result.Failure<TokenResponse>(userResult.Error);
+
+        var user = userResult.Value;
+    
         string accessToken = jwtProvider.Generate(user);
-     
         string refreshToken = tokenService.GenerateRefreshToken();
         DateTime expiryDate = tokenService.GetRefreshTokenExpiryDate();
-        
-        var refreshTokenEntity = RefreshToken.Create(
-            user.Id, refreshToken, expiryDate);
-        
+    
+        var refreshTokenEntity = RefreshToken.Create(user.Id, refreshToken, expiryDate);
+    
         await unitOfWork.Repository<RefreshToken>().AddAsync(refreshTokenEntity, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new TokenResponse(accessToken, refreshToken);
+        return Result.Success(new TokenResponse(accessToken, refreshToken));
     }
+
 
     /// <summary>
     /// Refreshes the access token using a valid refresh token.
     /// </summary>
-    public async Task<TokenResponse> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
+    public async Task<Result<TokenResponse>> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
     {
         var spec = new ValidRefreshTokenSpecification(refreshToken);
 
         var storedToken = await unitOfWork.Repository<RefreshToken>()
             .FindOneAsync(spec, cancellationToken);
 
-        if (storedToken == null)
-            throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+        if (storedToken.IsFailure)
+            return Result.Failure<TokenResponse>(DomainErrors.NotFound<RefreshToken>());
 
-        var user = await userService.GetUserByIdAsync(storedToken.UserId, cancellationToken);
+        var user = await userService.GetUserByIdAsync(storedToken.Value.UserId, cancellationToken);
         
-        if (user == null)
-            throw new NotFoundException("User not found.");
+        if (user.IsFailure)
+           return Result.Failure<TokenResponse>(DomainErrors.User.NotFound);
         
-        string newAccessToken = jwtProvider.Generate(user);
+        string newAccessToken = jwtProvider.Generate(user.Value);
         string newRefreshToken = tokenService.GenerateRefreshToken();
         
         DateTime expiryDate = tokenService.GetRefreshTokenExpiryDate();
         
-        storedToken.Replace(newRefreshToken, expiryDate);
-        await unitOfWork.Repository<RefreshToken>().SoftUpdateAsync(storedToken, cancellationToken);
+        storedToken.Value.Replace(newRefreshToken, expiryDate);
+        
+       var updateResult = await unitOfWork.Repository<RefreshToken>().SoftUpdateAsync(storedToken.Value, cancellationToken);
+       if (updateResult.IsFailure)
+           return Result.Failure<TokenResponse>(DomainErrors.NotFound<RefreshToken>());
+       
         await unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return new TokenResponse(newAccessToken, newRefreshToken);
+        return Result.Success(new TokenResponse(newAccessToken, newRefreshToken));
     }
  
 }

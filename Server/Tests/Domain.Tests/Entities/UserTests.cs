@@ -1,24 +1,26 @@
-using FluentAssertions;
 using Domain.Entities;
 using Domain.ValueObjects;
+using FluentAssertions;
+
+namespace Domain.Tests.Entities;
 
 public class UserTests
 {
     [Fact]
     public void User_Should_Have_Valid_Name_And_Email()
     {
-        var email = Email.Create("johndoe@example.com");
-        var firstName = FirstName.Create("John");
-        var lastName = LastName.Create("Doe");
-        var password = Password.Create("SecurePassword123!");
+        var emailResult = Email.Create("johndoe@example.com");
+        var firstNameResult = FirstName.Create("John");
+        var lastNameResult = LastName.Create("Doe");
+        var passwordResult = Password.Create("SecurePassword123!");
+        
         // Arrange
         var user = User.Create(
             Guid.NewGuid(),
-            email,
-            firstName,
-            lastName,
-            password
-        );
+            emailResult.Value,
+            firstNameResult.Value,
+            lastNameResult.Value,
+            passwordResult.Value);
 
         // Act & Assert
         user.FirstName.Value.Should().NotBeNullOrWhiteSpace();

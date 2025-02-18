@@ -16,54 +16,51 @@ public class WebapiWebApplicationFactory : WebApplicationFactory<Program>
     {
         builder.ConfigureServices(services =>
         {
-            // Remove the existing DbContextOptions configuration
             services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));
 
-            // Add SQLite in-memory database for testing
             string? connectionString = GetConnectionString();
             services.AddSqlite<ApplicationDbContext>(connectionString);
+            
+            ApplicationDbContext dbContextApp = CreateDbContext(services);
+            
+            dbContextApp.Database.EnsureDeleted();
+            dbContextApp.Database.EnsureCreated();
 
-            // Build the service provider
-            var serviceProvider = services.BuildServiceProvider();
-
-            // Create a scope to resolve the DbContext
-            using var scope = serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-            // Ensure the database is deleted and recreated
-            dbContext.Database.EnsureDeleted();
-            dbContext.Database.EnsureCreated();
-
-            // Seed test data
-            SeedTestData(dbContext);
+            SeedTestData(dbContextApp);
         });
     }
     
     private static string? GetConnectionString()
     {
         var configuration = new ConfigurationBuilder()
-            .AddUserSecrets<WebapiWebApplicationFactory>() // ✅ Loads from User Secrets
+            .AddUserSecrets<WebapiWebApplicationFactory>()
             .Build();
         return configuration.GetConnectionString("testDb");
+    }
+    
+    private static ApplicationDbContext CreateDbContext(IServiceCollection services)
+    {
+        var serviceProvider = services.BuildServiceProvider();
+        var scope = serviceProvider.CreateAsyncScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        return context;
     }
 
     private void SeedTestData(ApplicationDbContext context)
     {
-        // Create test data
-        var email = Email.Create("johndoe@example.com");
-        var firstName = FirstName.Create("John");
-        var lastName = LastName.Create("Doe");
-        var password = Password.Create("SecurePassword123!");
+        var emailResult = Email.Create("johndoe@example.com");
+        var firstNameResult = FirstName.Create("John");
+        var lastNameResult = LastName.Create("Doe");
+        var passwordResult = Password.Create("SecurePassword123!");
 
         var testUser = User.Create(
             Guid.Parse("70ebadd4-e923-4584-b82f-52175d8c80db"),
-            email,
-            firstName,
-            lastName,
-            password
+            emailResult.Value,
+            firstNameResult.Value,
+            lastNameResult.Value,
+            passwordResult.Value
         );
-
-        // Add test data to the database
+        
         context.Set<User>().Add(testUser);
          context.SaveChanges();
     }

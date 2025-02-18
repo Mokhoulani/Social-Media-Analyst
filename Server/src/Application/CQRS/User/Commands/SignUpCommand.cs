@@ -1,10 +1,12 @@
 using Application.Abstractions.Messaging;
 using Application.Common.Mod.ViewModels;
+using Domain.Shared;
+using MediatR;
 
 namespace Application.CQRS.User.Commands;
 
 
-public sealed class SignUpCommand : ICommand<AppUserViewModel>
+public sealed class SignUpCommand : ICommand<Result<AppUserViewModel>>
 {
     /// <summary>
     ///     Initiates a new instance of the <see cref="SignUpCommand" /> class.

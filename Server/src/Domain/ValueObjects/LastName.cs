@@ -1,4 +1,6 @@
-﻿using Domain.Primitives;
+﻿using Domain.Errors;
+using Domain.Primitives;
+using Domain.Shared;
 
 
 namespace Domain.ValueObjects;
@@ -14,11 +16,16 @@ public sealed class LastName : ValueObject
 
     public string Value { get; }
 
-    public static LastName Create(string lastName)
-    {
-        return new LastName(lastName);
-    }
-
+    public static Result<LastName> Create(string lastName) =>
+        Result.Create(lastName)
+            .Ensure(
+                l => !string.IsNullOrWhiteSpace(l),
+                DomainErrors.LastName.Empty)
+            .Ensure(
+                l => l.Length <= MaxLength,
+                DomainErrors.LastName.TooLong)
+            .Map(l => new LastName(l));
+    
     protected override IEnumerable<object> GetAtomicValues()
     {
         yield return Value;

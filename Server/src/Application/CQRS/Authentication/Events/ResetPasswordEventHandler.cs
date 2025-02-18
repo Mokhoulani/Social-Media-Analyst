@@ -1,6 +1,7 @@
 using Application.Common.Interfaces;
 using Application.CQRS.User.Events;
 using Application.Services;
+using Domain.Common.Exceptions;
 using Domain.DomainEvents;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -21,10 +22,10 @@ public class ResetPasswordEventHandler(
         {
             var user = await userService.GetUserByIdAsync(notification.UserId, cancellationToken);
             
-            if (user == null)
-                throw new NullReferenceException("User not found");
+            if (user.IsFailure)
+                throw new NotFoundException("User not found");
 
-            var email = user.Email.Value;
+            var email = user.Value.Email.Value;
             
             string resetLink = $"http://localhost:5014/api/Auth/reset-password";
             

@@ -1,3 +1,4 @@
+using System.Text;
 using FluentAssertions;
 using Api.Tests.Common;
 
@@ -22,4 +23,29 @@ public class UserControllerTests(WebapiWebApplicationFactory factory) :
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
     }
+    
+    
+    [Fact]
+    public async Task LoginUser_Should_Return_OK()
+    {
+        // Arrange
+        var user = new
+        {
+            Email = "johndoe@example.com",
+            Password = "SecurePassword123!"
+        };
+
+        var content = new StringContent(
+            System.Text.Json.JsonSerializer.Serialize(user),
+            Encoding.UTF8,
+            "application/json"
+        );
+
+        // Act
+        var response = await _client.PostAsync("/api/user/login", content); 
+
+        // Assert
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+    }
+
 }

@@ -1,7 +1,8 @@
 using Application.Common.Interfaces;
-using Domain.Common.Exceptions;
 using Domain.Entities;
+using Domain.Errors;
 using Domain.Interfaces;
+using Domain.Shared;
 using Domain.Specification;
 using Domain.ValueObjects;
 
@@ -13,49 +14,55 @@ public class PasswordResetService(
     IUserService userService)
     : IPasswordResetService
 {
-    public async Task<bool> RequestPasswordResetAsync(string email, CancellationToken cancellationToken)
+    public async Task<Result<bool>> RequestPasswordResetAsync(string email, CancellationToken cancellationToken)
     {
         var emailResult = Email.Create(email);
-        var user = await userService.GetByEmailAsync(emailResult, cancellationToken);
         
-        if (user == null)
-            throw new NotFoundException("User not found");
+        if (emailResult.IsFailure)
+            return (Result<bool>)Result.Failure(emailResult.Error);
+        
+        var user = await userService.GetByEmailAsync(emailResult.Value, cancellationToken);
+
+        if (user.IsFailure)
+            return (Result<bool>)Result.Failure(DomainErrors.User.NotFound);
 
         var token =  tokenService.GenerateRefreshToken();
         var expiresAt = DateTime.UtcNow.AddHours(1);
 
-        var resetToken = PasswordResetToken.Create(user.Id, token, expiresAt);
+        var resetToken = PasswordResetToken.Create(user.Value.Id, token, expiresAt);
         
         await unitOfWork.Repository<PasswordResetToken>().AddAsync(resetToken, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return true;
+        return Result.Success(true);
     }
 
-    public async Task<bool> ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken)
+    public async Task<Result<bool>> ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken)
     {
         var spec = new ValidResetTokenSpecification(token);
         
         var resetToken = await unitOfWork.Repository<PasswordResetToken>()
             .FindOneAsync(spec, cancellationToken);
     
-        if (resetToken == null)
-           return false;
+        if (resetToken.IsFailure)
+            return (Result<bool>)Result.Failure(DomainErrors.NotFound<PasswordResetToken>());
         
-        var user = await userService.GetUserByIdAsync(resetToken.UserId, cancellationToken);
+        var user = await userService.GetUserByIdAsync(resetToken.Value.UserId, cancellationToken);
         
-        if (user is null) 
-           return false;
+        if (user.IsFailure) 
+            return (Result<bool>)Result.Failure(DomainErrors.User.NotFound);
         
         var passwordResult = Password.Create(newPassword);
-        user.SetPassword(passwordResult);
         
-        await unitOfWork.Repository<User>().SoftUpdateAsync(user, cancellationToken);
-        resetToken.MarkAsUsed();
-        await unitOfWork.Repository<PasswordResetToken>().SoftUpdateAsync(resetToken, cancellationToken);
+        if (passwordResult.IsFailure)
+            return (Result<bool>)Result.Failure(DomainErrors.Password.NotValid);
+        
+        user.Value.SetPassword(passwordResult.Value);
+        await unitOfWork.Repository<User>().SoftUpdateAsync(user.Value, cancellationToken);
+        
+        resetToken.Value.MarkAsUsed();
+        await unitOfWork.Repository<PasswordResetToken>().SoftUpdateAsync(resetToken.Value, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        resetToken.MarkAsUsed();
-        await unitOfWork.Repository<PasswordResetToken>().AddAsync(resetToken, cancellationToken);
-        return true;
+        
+        return Result.Success(true);
     }
 }

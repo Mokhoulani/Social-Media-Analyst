@@ -27,8 +27,10 @@ public class UserController(ISender sender) : ApiController(sender)
         CancellationToken cancellationToken)
     {
             var user = await Sender.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(GetUserById),
-                new { id = user.Id }, user);
+            
+            if (user.IsSuccess)
+                return Ok(user.Value);
+            return BadRequest(user.Error);
     }
 
     /// <summary>
@@ -57,10 +59,12 @@ public class UserController(ISender sender) : ApiController(sender)
     {
         var command = new LoginCommand(request.Email,request.Password);
 
-        var token = await Sender.Send(
+        var tokenResult = await Sender.Send(
             command,
             cancellationToken);
         
-        return Ok(token);
+        if (tokenResult.IsSuccess)
+            return Ok(tokenResult.Value);
+        return BadRequest(tokenResult.Error);
     }
 }

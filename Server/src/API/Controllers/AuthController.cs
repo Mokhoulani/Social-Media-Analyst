@@ -24,8 +24,10 @@ public class AuthController(ISender sender) : ApiController(sender)
         CancellationToken cancellationToken)
     {
         var result = await Sender.Send(command, cancellationToken);
-        return result ? Ok("Password reset link sent.") :
-            BadRequest("Invalid email.");
+        
+        if (result.IsSuccess)
+            return Ok(result.Value);
+        return BadRequest(result.Error);
     }
 
     [HttpPost("reset-password")]
@@ -34,8 +36,10 @@ public class AuthController(ISender sender) : ApiController(sender)
         CancellationToken cancellationToken)
     {
         var result = await Sender.Send(command, cancellationToken);
-        return result ? Ok("Password updated successfully.") :
-            BadRequest("Invalid or expired token.");
+       
+        if (result.IsSuccess)
+            return Ok(result.Value);
+        return BadRequest(result.Error);
     }
 }
 

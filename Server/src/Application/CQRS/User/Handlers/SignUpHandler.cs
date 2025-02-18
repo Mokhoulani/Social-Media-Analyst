@@ -5,7 +5,7 @@ using Domain.ValueObjects;
 using Application.Abstractions.Messaging;
 using Application.Common.Interfaces;
 using Application.Common.Mod.ViewModels;
-
+using Domain.Shared;
 
 namespace Application.CQRS.User.Handlers;
 
@@ -15,29 +15,41 @@ public class SignUpHandler(
     ILogger<SignUpHandler> logger)
     : ICommandHandler<SignUpCommand, AppUserViewModel>
 {
-    public async Task<AppUserViewModel> Handle(
+    public async Task<Result<AppUserViewModel>> Handle(
         SignUpCommand request,
-         CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
-        Email emailResult = Email.Create(request.Email);
-        FirstName firstNameResult = FirstName.Create(request.FirstName);
-        LastName lastNameResult = LastName.Create(request.LastName);
-        Password passwordResult = Password.Create(request.Password);
+        var emailResult = Email.Create(request.Email);
+        if (emailResult.IsFailure)
+            return Result.Failure<AppUserViewModel>(emailResult.Error);
+
+        var firstNameResult = FirstName.Create(request.FirstName);
+        if (firstNameResult.IsFailure)
+            return Result.Failure<AppUserViewModel>(firstNameResult.Error);
+
+        var lastNameResult = LastName.Create(request.LastName);
+        if (lastNameResult.IsFailure)
+            return Result.Failure<AppUserViewModel>(lastNameResult.Error);
+
+        var passwordResult = Password.Create(request.Password);
+        if (passwordResult.IsFailure)
+            return Result.Failure<AppUserViewModel>(passwordResult.Error);
 
         var user = Domain.Entities.User.Create(
             Guid.NewGuid(),
-            emailResult,
-            firstNameResult,
-            lastNameResult,
-            passwordResult
+            emailResult.Value,
+            firstNameResult.Value,
+            lastNameResult.Value,
+            passwordResult.Value
         );
 
-        await userService.AddUserAsync(user, cancellationToken);
+        var userResult = await userService.AddUserAsync(user, cancellationToken);
+        if (passwordResult.IsFailure)
+            return Result.Failure<AppUserViewModel>(userResult.Error);
 
-        logger.LogInformation("User with ID: {UserId}  has been signed up successfully",
-            user.Id);
-        return mapper.Map<AppUserViewModel>(user);
+        logger.LogInformation("User with ID: {UserId} has been signed up successfully", user.Id);
+
+        var userViewModel = mapper.Map<AppUserViewModel>(user);
+        return Result.Success(userViewModel);
     }
-   
 }
-

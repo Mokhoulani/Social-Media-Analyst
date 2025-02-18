@@ -35,8 +35,9 @@ public class SignUpValidator : AbstractValidator<SignUpCommand>
         string email,
         CancellationToken cancellationToken)
     {
-        Email emailResult = Email.Create(email);
-        
-        return await _userService.IsEmailExistsAsync(emailResult, cancellationToken);
+       var emailResult = Email.Create(email);
+       
+        var result = await _userService.IsEmailExistsAsync(emailResult.Value, cancellationToken);
+        return result.IsSuccess;
     }
 }

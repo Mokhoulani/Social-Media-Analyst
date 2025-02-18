@@ -1,19 +1,13 @@
 ﻿namespace Domain.Shared;
 
-public sealed class Error : IEquatable<Error>
+public sealed class Error(string code, string message) : IEquatable<Error>
 {
     public static readonly Error None = new(string.Empty, string.Empty);
     public static readonly Error NullValue = new("Error.NullValue", "The specified result value is null.");
 
-    public Error(string code, string message)
-    {
-        Code = code;
-        Message = message;
-    }
+    private string Code { get; } = code;
 
-    public string Code { get; }
-
-    public string Message { get; }
+    private string Message { get; } = message;
 
     public static implicit operator string(Error error) => error.Code;
 
