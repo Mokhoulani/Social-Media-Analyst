@@ -92,8 +92,7 @@ public static class DomainErrors
             "Password is invalid.");
     }
     
-    public static Error NotFound<T>() where T : Entity
-    {
-        return new Error($"{typeof(T).Name}.NotFound", $"{typeof(T).Name} not found.");
-    }
+    public static Error NotFound<T>() => new(
+        $"{typeof(T).Name}.NotFound", 
+        $"{typeof(T).Name} not found.");
 }

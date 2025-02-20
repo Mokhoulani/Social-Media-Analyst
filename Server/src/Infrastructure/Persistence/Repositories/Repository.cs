@@ -22,7 +22,7 @@ public class Repository<T>(ApplicationDbContext applicationDbContext) : IReposit
         try
         {
             await _dbSet.AddAsync(entity, cancellationToken);
-            return Result.Success(entity);
+            return entity;
         }
         catch (Exception ex)
         {
@@ -34,24 +34,24 @@ public class Repository<T>(ApplicationDbContext applicationDbContext) : IReposit
     {
         var entity = await _dbSet.FindAsync([id], cancellationToken);
 
-        return entity is null ? Result.Failure<T>(DomainErrors.NotFound<T>()) :
-            Result.Success(entity);
+        return entity is null ? DomainErrors.NotFound<T>() :
+           entity;
     }
     
     public async Task<Result<T>> GetAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
         var entity = await _dbSet.FirstOrDefaultAsync(predicate, cancellationToken);
 
-        return entity is null ? Result.Failure<T>(DomainErrors.NotFound<T>()) :
-            Result.Success(entity);
+        return entity is null ? DomainErrors.NotFound<T>() :
+            entity;
     }
 
     public async Task<Result<List<T>>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         var entities = await _dbSet.ToListAsync(cancellationToken);
 
-        return entities.Count == 0 ? Result.Failure<List<T>>(DomainErrors.NotFound<T>())
-            : Result.Success(entities);
+        return entities.Count == 0 ? DomainErrors.NotFound<T>()
+            : entities;
     }
     
     public async Task<Result<T>> SoftUpdateAsync(T entity, CancellationToken cancellationToken = default)
@@ -59,27 +59,27 @@ public class Repository<T>(ApplicationDbContext applicationDbContext) : IReposit
         var existingEntity = await _dbSet.FindAsync([entity.Id], cancellationToken);
     
         if (existingEntity is null)
-            return Result.Failure<T>(DomainErrors.NotFound<T>());
+            return DomainErrors.NotFound<T>();
 
         _dbSet.Entry(existingEntity).CurrentValues.SetValues(entity);
-        return Result.Success(existingEntity);
+        return existingEntity;
     }
 
     public async Task<Result<T>> FullUpdateAsync(T entity, CancellationToken cancellationToken = default)
     {
        _dbSet.Entry(entity).State = EntityState.Modified;
        await Task.CompletedTask;
-       return Result.Success(entity);
+       return entity;
     }
 
     public async Task<Result<T>> DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
         var entity = await _dbSet.FindAsync( [id] , cancellationToken);
         if (entity is null)
-            return Result.Failure<T>(DomainErrors.NotFound<T>());
+            return DomainErrors.NotFound<T>();
         
         _dbSet.Remove(entity);
-        return Result.Success(entity);
+        return entity;
     }
 
 
@@ -92,8 +92,8 @@ public class Repository<T>(ApplicationDbContext applicationDbContext) : IReposit
         
        var entity = await queryWithSpec.FirstOrDefaultAsync(cancellationToken);
        
-        return entity is null ? Result.Failure<T>(DomainErrors.NotFound<T>()) :
-            Result.Success(entity);
+        return entity is null ? DomainErrors.NotFound<T>() :
+            entity;
     }
 
     public async Task<Result<List<T>>> FindManyAsync(
@@ -106,8 +106,8 @@ public class Repository<T>(ApplicationDbContext applicationDbContext) : IReposit
         
         var list = await queryWithSpec.ToListAsync(cancellationToken);
         
-        return list.Count == 0 ? Result.Failure<List<T>>(DomainErrors.NotFound<T>())
-            : Result.Success(list);
+        return list.Count == 0 ? DomainErrors.NotFound<T>()
+            : list;
     }
 
     public async Task<Result<bool>> ExistsAsync(
@@ -117,10 +117,8 @@ public class Repository<T>(ApplicationDbContext applicationDbContext) : IReposit
         var queryWithSpec = SpecificationEvaluator.GetQuery(
             _dbSet.AsQueryable(), 
             specification);
-
-        var exists = await queryWithSpec.AnyAsync(cancellationToken);
-
-        return Result.Success(exists);
+        
+        return await queryWithSpec.AnyAsync(cancellationToken);
     }
 
     public async Task<Result<int>> CountAsync(
@@ -131,8 +129,6 @@ public class Repository<T>(ApplicationDbContext applicationDbContext) : IReposit
             _dbSet.AsQueryable(),
             specification);
         
-        var count = await queryWithSpec.CountAsync(cancellationToken);
-
-        return Result.Success(count);
+         return await queryWithSpec.CountAsync(cancellationToken);
     }
 }

@@ -14,8 +14,12 @@ public class AuthController(ISender sender) : ApiController(sender)
     public async Task<IActionResult> RefreshToken(
         [FromBody] RefreshTokenCommand command, CancellationToken token)
     {
-        var tokenResponse = await Sender.Send(command,token);
-        return Ok(tokenResponse);
+        var tokenResponseResult = await Sender.Send(command,token);
+        
+        if (tokenResponseResult.IsSuccess)
+            return Ok(tokenResponseResult.Value);
+        
+        return BadRequest(tokenResponseResult.Error);
     }
     
     [HttpPost("request-reset")]
@@ -24,9 +28,10 @@ public class AuthController(ISender sender) : ApiController(sender)
         CancellationToken cancellationToken)
     {
         var result = await Sender.Send(command, cancellationToken);
-        
+
         if (result.IsSuccess)
             return Ok(result.Value);
+                
         return BadRequest(result.Error);
     }
 
@@ -39,6 +44,7 @@ public class AuthController(ISender sender) : ApiController(sender)
        
         if (result.IsSuccess)
             return Ok(result.Value);
+        
         return BadRequest(result.Error);
     }
 }

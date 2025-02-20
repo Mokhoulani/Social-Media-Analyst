@@ -1,43 +1,40 @@
-﻿using System.Text.Json;
+﻿using Application.Abstractions.Messaging;
+using Application.Cache;
 using MediatR;
-using Microsoft.Extensions.Caching.Hybrid;
-using Microsoft.Extensions.Logging;
+using ZiggyCreatures.Caching.Fusion;
 
 
 namespace Application.Common.Behaviours;
 
-public class CachingBehavior<TRequest, TResponse>(HybridCache cache, ILogger<CachingBehavior<TRequest, TResponse>> logger)
-    : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+public class CacheBehavior<TRequest, TResponse>(IFusionCache cache) : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IQuery<TResponse> 
 {
     public async Task<TResponse> Handle(
-        TRequest request,
-        RequestHandlerDelegate<TResponse> next,
+        TRequest request, 
+        RequestHandlerDelegate<TResponse> next, 
         CancellationToken cancellationToken)
     {
-        // Generate a deterministic cache key
-        string cacheKey = $"{typeof(TRequest).Name}-{JsonSerializer.Serialize(request)}";
-
-        try
+        
+        if (typeof(TRequest)
+                .GetCustomAttributes(typeof(CacheAttribute), false)
+                .FirstOrDefault() is not CacheAttribute cacheAttribute)
         {
-            logger.LogInformation("Checking cache for key: {CacheKey}", cacheKey);
-
-            var cachedResponse = await cache.GetOrCreateAsync<TResponse>(
-                cacheKey,
-                async token =>
-                {
-                    logger.LogInformation("Cache miss for key: {CacheKey}", cacheKey);
-                    return await next();
-                },
-                cancellationToken: cancellationToken);
-
-            logger.LogInformation("Cache hit for key: {CacheKey}", cacheKey);
-            return cachedResponse;
+            return await next(); 
         }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error occurred while handling caching for request: {Request}", typeof(TRequest).Name);
-            throw;
-        }
+
+        var cacheKey = GenerateCacheKey(request, cacheAttribute);
+        
+        return await cache.GetOrSetAsync(
+            cacheKey,
+            async (token) => await next(),
+            options => options
+                .SetDuration(TimeSpan.FromSeconds(cacheAttribute.DurationInSeconds))
+                .SetFailSafe(true)
+                .SetFactoryTimeouts(TimeSpan.FromSeconds(5)),
+            token: cancellationToken);
+    }
+    private static string GenerateCacheKey(TRequest request, CacheAttribute cacheAttribute)
+    {
+        return $"{typeof(TRequest).Name}:{string.Format(cacheAttribute.CacheKeyTemplate, request)}";
     }
 }

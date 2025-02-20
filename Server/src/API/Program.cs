@@ -7,35 +7,10 @@ using Infrastructure.BackgroundJobs;
 using Infrastructure.Extensions;
 using Infrastructure.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Caching.Hybrid;
 using Quartz;
 
 
-
-
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddAuthorization();
-
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = "localhost:6379";
-});
-
-builder.Services.AddHybridCache(options =>
-{
-    // Maximum size of cached items
-    options.MaximumPayloadBytes = 1024 * 1024 * 10; // 10MB
-    options.MaximumKeyLength = 512;
-
-    // Default timeouts
-    options.DefaultEntryOptions = new HybridCacheEntryOptions
-    {
-        Expiration = TimeSpan.FromMinutes(30),
-        LocalCacheExpiration = TimeSpan.FromMinutes(30)
-    };
-});
-
 
 builder
     .Services
@@ -51,7 +26,7 @@ string connectionString = builder.Configuration.GetConnectionString("Database")!
 
 builder.Services.AddControllers();
 
-builder.Services.AddInfrastructureLayer();
+builder.Services.AddInfrastructureLayer(builder.Configuration);
 builder.Services.AddApplicationLayer(builder.Environment);
 
 builder.Services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();

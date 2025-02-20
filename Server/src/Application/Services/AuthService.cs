@@ -28,7 +28,7 @@ public class AuthService(
         var userResult = await userService.LoginAsync(command, cancellationToken);
 
         if (userResult.IsFailure)
-            return Result.Failure<TokenResponse>(userResult.Error);
+            return DomainErrors.User.NotFound;
 
         var user = userResult.Value;
     

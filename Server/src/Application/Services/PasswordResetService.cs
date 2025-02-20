@@ -19,12 +19,12 @@ public class PasswordResetService(
         var emailResult = Email.Create(email);
         
         if (emailResult.IsFailure)
-            return (Result<bool>)Result.Failure(emailResult.Error);
+            return DomainErrors.Email.Empty;
         
         var user = await userService.GetByEmailAsync(emailResult.Value, cancellationToken);
 
         if (user.IsFailure)
-            return (Result<bool>)Result.Failure(DomainErrors.User.NotFound);
+            return DomainErrors.User.NotFound;
 
         var token =  tokenService.GenerateRefreshToken();
         var expiresAt = DateTime.UtcNow.AddHours(1);
@@ -33,7 +33,7 @@ public class PasswordResetService(
         
         await unitOfWork.Repository<PasswordResetToken>().AddAsync(resetToken, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return Result.Success(true);
+        return true;
     }
 
     public async Task<Result<bool>> ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken)
@@ -44,17 +44,17 @@ public class PasswordResetService(
             .FindOneAsync(spec, cancellationToken);
     
         if (resetToken.IsFailure)
-            return (Result<bool>)Result.Failure(DomainErrors.NotFound<PasswordResetToken>());
+            return DomainErrors.NotFound<PasswordResetToken>();
         
         var user = await userService.GetUserByIdAsync(resetToken.Value.UserId, cancellationToken);
         
         if (user.IsFailure) 
-            return (Result<bool>)Result.Failure(DomainErrors.User.NotFound);
+            return DomainErrors.User.NotFound;
         
         var passwordResult = Password.Create(newPassword);
         
         if (passwordResult.IsFailure)
-            return (Result<bool>)Result.Failure(DomainErrors.Password.NotValid);
+            return DomainErrors.Password.NotValid;
         
         user.Value.SetPassword(passwordResult.Value);
         await unitOfWork.Repository<User>().SoftUpdateAsync(user.Value, cancellationToken);
@@ -63,6 +63,6 @@ public class PasswordResetService(
         await unitOfWork.Repository<PasswordResetToken>().SoftUpdateAsync(resetToken.Value, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
         
-        return Result.Success(true);
+        return true;
     }
 }

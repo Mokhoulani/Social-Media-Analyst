@@ -19,7 +19,7 @@ POST http://localhost:5014/api/User/login
 Content-Type: application/json
 
 {
-  "Email": "test20@test.com",
+  "Email": "test19@test.com",
   "Password": "123456"
 }
 
@@ -29,7 +29,7 @@ POST http://localhost:5014/api/Auth/refresh-token
 Content-Type: application/json
 
 {
-  "RefreshToken": "2nONgUkDSb8IjymUBplEKfvO14TLofPkYUKA7JA2j3VbFEm0mZSEXyWyDPbt+xT9LczCT7izUBlnS20Xn/YkeQ=="
+  "RefreshToken": "LvCQ/gPA8LIeC4sNi0lsEpLCfV/5/U2Ktw+ghbIFQeBNq+6WWBuwwjjICkwyc6u1CZclFKvckgavylnd13PUAA=="
 }
 
 
@@ -38,7 +38,7 @@ POST http://localhost:5014/api/Auth/request-reset
 Content-Type: application/json
 
 {
-  "Email": "test20@test.com"
+  "Email": ""
 }
 
 

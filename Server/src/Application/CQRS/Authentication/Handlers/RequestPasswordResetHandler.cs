@@ -11,7 +11,7 @@ public class RequestPasswordResetHandler(IPasswordResetService passwordResetServ
 {
     public async Task<Result<bool>> Handle(RequestPasswordResetCommand request, CancellationToken cancellationToken)
     {
-       return await passwordResetService
+      return await passwordResetService
            .RequestPasswordResetAsync(request.Email, cancellationToken);
     }
 }

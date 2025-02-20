@@ -18,28 +18,20 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
         
         var userExists = await unitOfWork.Repository<User>()
             .ExistsAsync(spec, cancellationToken);
-        
-        if(userExists.IsFailure)
-            return (Result<bool>)Result.Failure(userExists.Error);
-        
-        return Result.Success(userExists.Value);
+        return userExists.IsFailure ? DomainErrors.User.NotFound : userExists.Value;
     }
 
     public async Task<Result<User>> AddUserAsync(User user, CancellationToken cancellationToken)
     {
        var newUser = await unitOfWork.Repository<User>().AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken); 
-        return newUser;
+        return newUser.IsFailure ? DomainErrors.User.NotFound : newUser.Value;
     }
     
     public async Task<Result<User>> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var userResult = await unitOfWork.Repository<User>().GetByIdAsync(userId, cancellationToken);
-        
-        if (userResult.IsFailure)
-         return (Result<User>)Result.Failure(DomainErrors.User.NotFound);
-        
-        return Result.Success(userResult.Value);
+         return userResult.IsFailure ? DomainErrors.User.NotFound : userResult.Value;
     }
     
     public async Task<Result<User>> LoginAsync(
@@ -49,7 +41,7 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
         Result<Email> emailResult = Email.Create(command.Email);
 
         if (emailResult.IsFailure)
-            return Result.Failure<User>(emailResult.Error);
+            return emailResult.Error;
         
 
         var spec = new EmailSpecification(emailResult.Value);
@@ -57,15 +49,15 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
             .FindOneAsync(spec, cancellationToken);
 
         if (user.IsFailure)
-            return Result.Failure<User>(DomainErrors.User.NotFound);
+            return DomainErrors.User.NotFound;
 
 
         bool isPasswordValid = user.Value.VerifyPassword(command.Password);
 
         if (!isPasswordValid)
-            return Result.Failure<User>(DomainErrors.User.InvalidCredentials);
+            return DomainErrors.User.InvalidCredentials;
 
-        return Result.Success(user.Value);
+        return user.Value;
     }
     
     public async Task<Result<bool>> IsPasswordValidAsync(

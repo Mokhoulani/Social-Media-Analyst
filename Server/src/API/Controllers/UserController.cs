@@ -46,9 +46,10 @@ public class UserController(ISender sender) : ApiController(sender)
     public async Task<IActionResult> GetUserById(string id, CancellationToken cancellationToken)
     {
         var query = new GetUserByIdQuery(id);
-        var user = await Sender.Send(query, cancellationToken);
-        
-        return Ok(user);
+        var userResult = await Sender.Send(query, cancellationToken);
+        if (userResult.IsSuccess)
+            return Ok(userResult.Value);
+        return BadRequest(userResult.Error);
     }
 
 

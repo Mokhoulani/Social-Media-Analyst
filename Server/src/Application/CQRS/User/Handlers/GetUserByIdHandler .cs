@@ -4,25 +4,36 @@ using Application.Abstractions.Messaging;
 using Application.Common.Interfaces;
 using Application.Common.Mod.ViewModels;
 using Domain.Shared;
+using ZiggyCreatures.Caching.Fusion;
 
 
 namespace Application.CQRS.User.Handlers;
 
 public class GetUserByIdQueryHandler(
     IUserService userService,
+    IFusionCache cache,
     IMapper mapper)
-    : ICommandHandler<GetUserByIdQuery, AppUserViewModel>
+    : IQueryHandler<GetUserByIdQuery, AppUserViewModel>
 {
     public async Task<Result<AppUserViewModel>> Handle(
         GetUserByIdQuery request,
-         CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
-        var user = await userService.GetUserByIdAsync(Guid.Parse(request.Id), cancellationToken);
-
-        if (user == null)
-            throw new Exception("User not found");
-
-        return mapper.Map<AppUserViewModel>(user);
+        var userResult=  await userService.GetUserByIdAsync(Guid.Parse(request.Id), cancellationToken);
+        return userResult.IsFailure ? userResult.Error : 
+            mapper.Map<AppUserViewModel>(userResult.Value);
     }
 }
+
+
+// var cacheKey = $"User_{request.Id}"; 
+//         
+// var userResult = await cache.GetOrSetAsync<Result<Domain.Entities.User>>(
+//     cacheKey,
+//     async _ => await userService.GetUserByIdAsync(Guid.Parse(request.Id), cancellationToken),
+//     options => options
+//         .SetDuration(TimeSpan.FromMinutes(1))  
+//         .SetFailSafe(true, TimeSpan.FromHours(1), TimeSpan.FromSeconds(30)),
+//     token: cancellationToken 
+// );
 

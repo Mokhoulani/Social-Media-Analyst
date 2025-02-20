@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 
 
+
 namespace Application.Common.Extensions;
 
 public static class DependencyInjection
@@ -25,11 +26,12 @@ public static class DependencyInjection
     {
         ArgumentNullException.ThrowIfNull(services);
         
+     
         // Register MediatR
         services.AddMediatR(typeof(AssemblyReference).Assembly);
-      
+        
         ConfigureValidation(services);
-        // ConfigureCache(services);
+        ConfigureCacheBehavior(services);
         ConfigureProblemDetails(services, environment);
         ConfigureMapping(services);
         
@@ -64,9 +66,9 @@ public static class DependencyInjection
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
     }
     
-    private static void ConfigureCache(IServiceCollection services)
+    private static void  ConfigureCacheBehavior(IServiceCollection services)
     {
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CacheBehavior<,>));
     }
     
     private static void ConfigureMapping(IServiceCollection services)

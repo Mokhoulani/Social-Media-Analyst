@@ -7,15 +7,14 @@ using Microsoft.Extensions.Caching.Hybrid;
 
 namespace Application.CQRS.User.Handlers;
 
-internal sealed class LoginCommandHandler(IAuthService authService,
-    HybridCache cache)
+internal sealed class LoginCommandHandler(IAuthService authService)
     : ICommandHandler<LoginCommand, TokenResponse>
 {
     public async Task<Result<TokenResponse>> Handle(
         LoginCommand command,
         CancellationToken cancellationToken)
     {
-                return await authService.LoginAsync(
-                    command,cancellationToken);
+        return await authService.LoginAsync(
+            command,cancellationToken);
     }
 }

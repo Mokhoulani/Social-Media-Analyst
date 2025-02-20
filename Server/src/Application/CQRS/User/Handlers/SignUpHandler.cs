@@ -20,20 +20,24 @@ public class SignUpHandler(
         CancellationToken cancellationToken)
     {
         var emailResult = Email.Create(request.Email);
+        
         if (emailResult.IsFailure)
-            return Result.Failure<AppUserViewModel>(emailResult.Error);
+            return emailResult.Error;
 
         var firstNameResult = FirstName.Create(request.FirstName);
+        
         if (firstNameResult.IsFailure)
-            return Result.Failure<AppUserViewModel>(firstNameResult.Error);
+            return firstNameResult.Error;
 
         var lastNameResult = LastName.Create(request.LastName);
+        
         if (lastNameResult.IsFailure)
-            return Result.Failure<AppUserViewModel>(lastNameResult.Error);
+            return lastNameResult.Error;
 
         var passwordResult = Password.Create(request.Password);
+        
         if (passwordResult.IsFailure)
-            return Result.Failure<AppUserViewModel>(passwordResult.Error);
+            return passwordResult.Error;
 
         var user = Domain.Entities.User.Create(
             Guid.NewGuid(),
@@ -44,12 +48,12 @@ public class SignUpHandler(
         );
 
         var userResult = await userService.AddUserAsync(user, cancellationToken);
+        
         if (passwordResult.IsFailure)
-            return Result.Failure<AppUserViewModel>(userResult.Error);
+            return userResult.Error;
 
         logger.LogInformation("User with ID: {UserId} has been signed up successfully", user.Id);
-
-        var userViewModel = mapper.Map<AppUserViewModel>(user);
-        return Result.Success(userViewModel);
+        
+        return   mapper.Map<AppUserViewModel>(user);
     }
 }
