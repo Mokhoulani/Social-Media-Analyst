@@ -1,12 +1,12 @@
-using Xunit;
-using Moq;
-using FluentAssertions;
-using Domain.Interfaces;
 using Application.Common.Interfaces;
 using Application.Services;
-using Domain.ValueObjects;
 using Domain.Entities;
-using System;
+using Domain.Interfaces;
+using Domain.ValueObjects;
+using FluentAssertions;
+using Moq;
+
+namespace Application.Tests.Services;
 
 public class UserServiceTests
 {
@@ -36,10 +36,10 @@ public class UserServiceTests
 
         var user = User.Create(
             Guid.NewGuid(),
-            email,
-            firstName,
-            lastName,
-            password
+            email.Value,
+            firstName.Value,
+            lastName.Value,
+            password.Value
         );
 
         // Simulate behavior: Adding user to repository

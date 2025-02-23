@@ -1,0 +1,33 @@
+﻿version: '3.4'
+
+services:
+  app:
+    image: mydockerapp:latest  # The image name for your application
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: src/api/Dockerfile
+    ports:
+      - "5000:80"  # Map local port 5000 to container port 80
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - Serilog__WriteTo__0__Args__serverUrl=http://seq:5341  # Ensuring logs are sent to Seq
+    depends_on:
+      seq:
+        condition: service_healthy  # Ensures that Seq is ready before the app starts
+
+  seq:
+    image: datalust/seq:latest
+    container_name: seq
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "5341:5341"  # Expose Seq ingestion port
+      - "8081:80"    # Expose Seq web UI
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/"]
+      interval: 10s
+      retries: 3
+      start_period: 10s
+      timeout: 5s

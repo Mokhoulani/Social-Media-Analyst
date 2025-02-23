@@ -9,6 +9,7 @@ using Mapster;
 using MapsterMapper;
 using MediatR;
 using Hellang.Middleware.ProblemDetails;
+using MediatR.Pipeline;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -69,6 +70,7 @@ public static class DependencyInjection
     private static void  ConfigureCacheBehavior(IServiceCollection services)
     {
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CacheBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
     }
     
     private static void ConfigureMapping(IServiceCollection services)

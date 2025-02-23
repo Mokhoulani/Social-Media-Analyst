@@ -8,9 +8,13 @@ using Infrastructure.Extensions;
 using Infrastructure.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Quartz;
+using Serilog;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
 
 builder
     .Services
@@ -77,6 +81,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
+app.UseSerilogRequestLogging();
 app.UseProblemDetails();
 app.UseHttpsRedirection();
 app.UseRouting();
