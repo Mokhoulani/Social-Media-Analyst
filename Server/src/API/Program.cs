@@ -71,17 +71,20 @@ builder.Services.ConfigureOptions<JwtBearerOptionsSetup>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer();
-
+builder.Services.AddControllers();
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
 var app = builder.Build();
 
 
+app.UseDefaultFiles();
+app.MapStaticAssets();
+
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
 }
-
-
 app.UseSerilogRequestLogging();
 app.UseProblemDetails();
 app.UseHttpsRedirection();
@@ -90,7 +93,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapFallbackToFile("/index.html");
 app.Run();
 
 
