@@ -1,109 +1,104 @@
 using Api.OptionsSetup;
 using Application.Common.Extensions;
-using Infrastructure.Persistence;
 using Hellang.Middleware.ProblemDetails;
-using Microsoft.EntityFrameworkCore;
-using Infrastructure.BackgroundJobs;
 using Infrastructure.Extensions;
-using Infrastructure.Interceptors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Quartz;
 using Serilog;
 
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Host.UseSerilog((context, configuration) =>
-    configuration.ReadFrom.Configuration(context.Configuration));
-
-builder
-    .Services
-    .Scan(
-        selector => selector
-            .FromAssemblies(
-                Infrastructure.AssemblyReference.Assembly)
-            .AddClasses(false)
-            .AsImplementedInterfaces()
-            .WithScopedLifetime());
-
-string connectionString = builder.Configuration.GetConnectionString("Database")!;
-
-builder.Services.AddControllers();
-
-builder.Services.AddInfrastructureLayer(builder.Configuration);
-builder.Services.AddApplicationLayer(builder.Environment);
-
-builder.Services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
-
-builder.Services.AddDbContext<ApplicationDbContext>(
-    (sp, optionsBuilder) =>
+public partial class Program
+{
+    public static void Main(string[] args)
     {
-        var inteceptor = sp.GetService<ConvertDomainEventsToOutboxMessagesInterceptor>();
+        ConfigureLogger();
 
-        optionsBuilder.UseSqlite(connectionString,b=>b.MigrationsAssembly("API"))
-            .AddInterceptors(inteceptor);
-    });
+        try
+        {
+            StartApplication(args);
+        }
+        catch (Exception e)
+        {
+            Log.Fatal(e, "Error during startup");
+        }
+        finally
+        {
+            Log.Information("Shutting down");
+            Log.CloseAndFlush();
+        }
+    }
 
-builder.Services.AddQuartz(configure =>
-{
-    var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
+    private static void ConfigureLogger()
+    {
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .CreateBootstrapLogger();
+    }
 
-    configure
-        .AddJob<ProcessOutboxMessagesJob>(jobKey)
-        .AddTrigger(
-            trigger =>
-                trigger.ForJob(jobKey)
-                    .WithSimpleSchedule(
-                        schedule =>
-                            schedule.WithIntervalInSeconds(10)
-                                .RepeatForever()));
+    private static void StartApplication(string[] args)
+    {
+        Log.Information("Starting up");
 
-    configure.UseMicrosoftDependencyInjectionJobFactory();
-});
+        var builder = WebApplication.CreateBuilder(args);
+        ConfigureServices(builder);
+        Configure(builder.Build()).Run();
+    }
 
-builder.Services.AddQuartzHostedService();
+    private static void ConfigureServices(WebApplicationBuilder builder)
+    {
+        builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
+        builder.Services.AddControllers();
+
+        builder.Services.AddInfrastructureLayer(builder.Configuration);
+        builder.Services.AddApplicationLayer(builder.Environment);
+
+        builder.Services.AddQuartzHostedService();
+
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
+        builder.Services.ConfigureOptions<JwtOptionsSetup>();
+        builder.Services.ConfigureOptions<RefreshTokenOptionsSetup>();
+        builder.Services.ConfigureOptions<JwtBearerOptionsSetup>();
+
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer();
+
+        builder.Services.AddOpenApi();
+        builder.Services.AddReverseProxy()
+            .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+        builder.Services.AddHealthChecks();
+    }
+
+    private static WebApplication Configure(WebApplication app)
+    {
+        
+        app.UseDefaultFiles();
+        app.MapStaticAssets();
 
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapOpenApi();
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
 
-builder.Services.ConfigureOptions<JwtOptionsSetup>();
-builder.Services.ConfigureOptions<RefreshTokenOptionsSetup>();
-builder.Services.ConfigureOptions<JwtBearerOptionsSetup>();
+        app.MapReverseProxy();
+        app.UseSerilogRequestLogging();
+        app.UseProblemDetails();
+        app.UseHttpsRedirection();
+        app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer();
-builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+        app.UseHealthChecks("/health");
 
-var app = builder.Build();
-
-
-app.UseDefaultFiles();
-app.MapStaticAssets();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
+        app.MapControllers();
+        app.MapFallbackToFile("/index.html");
+        app.Run();
+        return app;
+    }
 }
-
-app.MapReverseProxy();
-app.UseSerilogRequestLogging();
-app.UseProblemDetails();
-app.UseHttpsRedirection();
-app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
-app.MapFallbackToFile("/index.html");
-app.Run();
 
 
 

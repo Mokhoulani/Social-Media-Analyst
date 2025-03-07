@@ -7,19 +7,17 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Quartz" Version="3.13.1" />
+    <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.13.1" />
+    <PackageReference Include="Scrutor" Version="6.0.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.1" />
     <PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Interfaces\" />
     <Folder Include="Outbox\" />
   </ItemGroup>
 

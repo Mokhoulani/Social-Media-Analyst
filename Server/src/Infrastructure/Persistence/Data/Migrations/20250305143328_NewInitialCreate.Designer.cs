@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250214094634_AddPasswordResetTokenTable")]
-    partial class AddPasswordResetTokenTable
+    [Migration("20250305143328_NewInitialCreate")]
+    partial class NewInitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
