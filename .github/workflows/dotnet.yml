@@ -11,7 +11,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -31,21 +30,27 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
+    - name: Debug File Structure
+      run: ls -R
+
     - name: Restore dependencies
-      run: dotnet restore ../server/server.sln
+      working-directory: server
+      run: dotnet restore server.sln
 
     - name: Build application
+      working-directory: server
       run: dotnet build --no-restore --configuration Release
 
     - name: Run tests
+      working-directory: server
       run: dotnet test --no-build --configuration Release --verbosity normal
 
     - name: Publish application
+      working-directory: server
       run: dotnet publish -c Release -o ./publish
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: published-app
-        path: ./publish
-
+        path: server/publish
