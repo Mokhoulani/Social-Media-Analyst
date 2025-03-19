@@ -18,26 +18,27 @@ public class WebapiWebApplicationFactory : WebApplicationFactory<Program>
         {
             services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));
 
-            string? connectionString = GetConnectionString();
+            string connectionString = GetConnectionString() ?? "DataSource=file::memory:?cache=shared";
             services.AddSqlite<ApplicationDbContext>(connectionString);
-            
+
             ApplicationDbContext dbContextApp = CreateDbContext(services);
-            
+
             dbContextApp.Database.EnsureDeleted();
             dbContextApp.Database.EnsureCreated();
 
             SeedTestData(dbContextApp);
         });
     }
-    
+
     private static string? GetConnectionString()
     {
         var configuration = new ConfigurationBuilder()
+            .AddEnvironmentVariables() // Add environment variables
             .AddUserSecrets<WebapiWebApplicationFactory>()
             .Build();
         return configuration.GetConnectionString("testDb");
     }
-    
+
     private static ApplicationDbContext CreateDbContext(IServiceCollection services)
     {
         var serviceProvider = services.BuildServiceProvider();
@@ -60,8 +61,9 @@ public class WebapiWebApplicationFactory : WebApplicationFactory<Program>
             lastNameResult.Value,
             passwordResult.Value
         );
-        
+
         context.Set<User>().Add(testUser);
-         context.SaveChanges();
+
+        context.SaveChanges();
     }
 }
