@@ -4,7 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <SpaRoot>..\reactapp</SpaRoot>
+    <SpaRoot>..\ReactApp</SpaRoot>
     <SpaProxyLaunchCommand>npm run web</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:51703</SpaProxyServerUrl>
   </PropertyGroup>
@@ -34,9 +34,4 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\reactappt\reactapp.esproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
 </Project>
