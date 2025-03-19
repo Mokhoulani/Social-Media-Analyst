@@ -38,12 +38,10 @@ jobs:
       working-directory: Server
       run: dotnet build --no-restore --configuration Release
 
-    - name: Set SQLite In-Memory Connection String
-      run: |
-        echo "ConnectionStrings:testDb=DataSource=file::memory:?cache=shared" >> $GITHUB_ENV
-
     - name: Run tests
       working-directory: Server
+      env:
+        ConnectionStrings__testDb: "DataSource=file::memory:?cache=shared"
       run: dotnet test --no-build --configuration Release --verbosity normal
 
     - name: Publish application
