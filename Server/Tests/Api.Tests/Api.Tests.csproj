@@ -4,7 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-  <UserSecretsId>07a7b941-bb65-487e-89db-ce090d684c92</UserSecretsId>
+    <UserSecretsId Condition="'$(CI)' == 'true'"> </UserSecretsId> 
   </PropertyGroup>
 
 <ItemGroup>
