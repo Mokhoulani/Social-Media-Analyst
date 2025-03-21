@@ -31,25 +31,25 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Restore dependencies
-      working-directory: Server
-      run: dotnet restore Server.sln
+      working-directory: Analyst
+      run: dotnet restore Analyst.sln
 
     - name: Build application
-      working-directory: Server
+      working-directory: Analyst
       run: dotnet build --no-restore --configuration Release
 
     - name: Run tests
-      working-directory: Server
+      working-directory: Analyst
       env:
         ConnectionStrings__testDb: "DataSource=file::memory:?cache=shared"
       run: dotnet test --no-build --configuration Release --verbosity normal
 
     - name: Publish application
-      working-directory: Server
+      working-directory: Analyst
       run: dotnet publish -c Release -o ./publish
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: published-app
-        path: Server/publish
+        path: Analyst/publish
