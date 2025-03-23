@@ -1,13 +1,13 @@
 using Infrastructure.BackgroundJobs;
-using Infrastructure.Interceptors;
+using Persistence.Interceptors;
 using Infrastructure.OptionsSetup;
-using Infrastructure.Persistence;
-
+using Persistence;
 using Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Persistence.Persistence;
 using Quartz;
 
 namespace Infrastructure.Extensions;

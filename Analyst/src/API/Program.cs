@@ -2,6 +2,7 @@ using Api.OptionsSetup;
 using Application.Common.Extensions;
 using Hellang.Middleware.ProblemDetails;
 using Infrastructure.Extensions;
+using Presentation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Quartz;
 using Serilog;
@@ -13,7 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 
-builder.Services.AddControllers();
+builder
+    .Services
+    .AddControllers()
+    .AddApplicationPart(Presentation.AssemblyReference.Assembly);
 
 builder.Services.AddInfrastructureLayer(builder.Configuration);
 builder.Services.AddApplicationLayer(builder.Environment);

@@ -1,9 +1,10 @@
 ﻿using Domain.Primitives;
-using Infrastructure.Outbox;
-using Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Persistence;
+using Persistence.Outbox;
+using Persistence.Persistence;
 using Quartz;
 
 namespace Infrastructure.BackgroundJobs;
