@@ -1,7 +1,6 @@
 using Infrastructure.BackgroundJobs;
 using Persistence.Interceptors;
 using Infrastructure.OptionsSetup;
-using Persistence;
 using Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -39,7 +38,7 @@ public static class DatabaseConfiguration
                 if (interceptor != null)
                     optionsBuilder.UseSqlite(
                             sqlOptions.ConnectionString,
-                            b => b.MigrationsAssembly("Infrastructure"))
+                            b => b.MigrationsAssembly("Persistence"))
                         .AddInterceptors(interceptor);
             });
         
