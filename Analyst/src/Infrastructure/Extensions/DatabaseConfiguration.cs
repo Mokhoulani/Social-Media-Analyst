@@ -1,13 +1,12 @@
 using Infrastructure.BackgroundJobs;
-using Infrastructure.Interceptors;
+using Persistence.Interceptors;
 using Infrastructure.OptionsSetup;
-using Infrastructure.Persistence;
-
 using Infrastructure.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Persistence.Persistence;
 using Quartz;
 
 namespace Infrastructure.Extensions;
@@ -39,7 +38,7 @@ public static class DatabaseConfiguration
                 if (interceptor != null)
                     optionsBuilder.UseSqlite(
                             sqlOptions.ConnectionString,
-                            b => b.MigrationsAssembly("Infrastructure"))
+                            b => b.MigrationsAssembly("Persistence"))
                         .AddInterceptors(interceptor);
             });
         
