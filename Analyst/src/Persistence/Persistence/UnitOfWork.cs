@@ -1,6 +1,6 @@
 ﻿using Domain.Interfaces;
 using Domain.Primitives;
-using Persistence.Repositories;
+using Persistence.Persistence.Repositories;
 
 namespace Persistence.Persistence;
 

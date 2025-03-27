@@ -1,17 +1,12 @@
-using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Threading;
-using System.Threading.Tasks;
 using Domain.Errors;
 using Domain.Interfaces;
 using Domain.Primitives;
 using Domain.Shared;
 using Domain.Specification;
-using Persistence.Persistence;
+using Microsoft.EntityFrameworkCore;
 
-namespace Persistence.Repositories;
+namespace Persistence.Persistence.Repositories;
 
 public class Repository<T>(ApplicationDbContext applicationDbContext) : IRepository<T>
     where T : Entity, IAggregateRoot

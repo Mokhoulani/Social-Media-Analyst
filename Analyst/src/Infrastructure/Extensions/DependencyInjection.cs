@@ -2,10 +2,10 @@ using Application.Common.Interfaces;
 using Domain.Interfaces;
 using HealthChecks.Redis;
 using Infrastructure.Authentication;
-using Persistence.Repositories;
 using Persistence.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Persistence.Persistence.Repositories;
 using ZiggyCreatures.Caching.Fusion;
 
 
