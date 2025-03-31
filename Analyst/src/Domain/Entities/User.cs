@@ -7,7 +7,7 @@ using Domain.ValueObjects;
 
 
 namespace Domain.Entities;
-public sealed class User : AggregateRoot, IAggregateRoot
+public sealed class User : AggregateRoot<Guid>, IAggregateRoot
 {
     private User(Guid id, Email email, FirstName firstName, LastName lastName, Password password)
         : base(id)
@@ -27,12 +27,12 @@ public sealed class User : AggregateRoot, IAggregateRoot
     public FirstName FirstName { get; init; }
 
     public LastName LastName { get; init; }
-    
-    public Password Password { get;private set; }
-    
-    public IEnumerable<RefreshToken>? RefreshTokens { get;private set; }
-    public IEnumerable<PasswordResetToken>? PasswordResetTokens { get;private set; }
-    
+
+    public Password Password { get; private set; }
+
+    public IEnumerable<RefreshToken>? RefreshTokens { get; private set; }
+    public IEnumerable<PasswordResetToken>? PasswordResetTokens { get; private set; }
+
     public static User Create(
         Guid id,
         Email email,

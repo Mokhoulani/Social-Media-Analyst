@@ -1,7 +1,6 @@
 using Application.Common.Interfaces;
 using Application.Common.Mod;
 using Application.CQRS.User.Commands;
-using Domain.Common.Exceptions;
 using Domain.Entities;
 using Domain.Errors;
 using Domain.Interfaces;
@@ -31,14 +30,14 @@ public class AuthService(
             return DomainErrors.User.NotFound;
 
         var user = userResult.Value;
-    
+
         string accessToken = jwtProvider.Generate(user);
         string refreshToken = tokenService.GenerateRefreshToken();
         DateTime expiryDate = tokenService.GetRefreshTokenExpiryDate();
-    
+
         var refreshTokenEntity = RefreshToken.Create(user.Id, refreshToken, expiryDate);
-    
-        await unitOfWork.Repository<RefreshToken>().AddAsync(refreshTokenEntity, cancellationToken);
+
+        await unitOfWork.Repository<RefreshToken, Guid>().AddAsync(refreshTokenEntity, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success(new TokenResponse(accessToken, refreshToken));
@@ -52,33 +51,33 @@ public class AuthService(
     {
         var spec = new ValidRefreshTokenSpecification(refreshToken);
 
-        var storedToken = await unitOfWork.Repository<RefreshToken>()
+        var storedToken = await unitOfWork.Repository<RefreshToken, Guid>()
             .FindOneAsync(spec, cancellationToken);
 
         if (storedToken.IsFailure)
             return Result.Failure<TokenResponse>(DomainErrors.NotFound<RefreshToken>());
 
         var user = await userService.GetUserByIdAsync(storedToken.Value.UserId, cancellationToken);
-        
+
         if (user.IsFailure)
-           return Result.Failure<TokenResponse>(DomainErrors.User.NotFound);
-        
+            return Result.Failure<TokenResponse>(DomainErrors.User.NotFound);
+
         string newAccessToken = jwtProvider.Generate(user.Value);
         string newRefreshToken = tokenService.GenerateRefreshToken();
-        
+
         DateTime expiryDate = tokenService.GetRefreshTokenExpiryDate();
-        
+
         storedToken.Value.Replace(newRefreshToken, expiryDate);
-        
-       var updateResult = await unitOfWork.Repository<RefreshToken>().SoftUpdateAsync(storedToken.Value, cancellationToken);
-       if (updateResult.IsFailure)
-           return Result.Failure<TokenResponse>(DomainErrors.NotFound<RefreshToken>());
-       
+
+        var updateResult = await unitOfWork.Repository<RefreshToken, Guid>().SoftUpdateAsync(storedToken.Value, cancellationToken);
+        if (updateResult.IsFailure)
+            return Result.Failure<TokenResponse>(DomainErrors.NotFound<RefreshToken>());
+
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        
+
         return Result.Success(new TokenResponse(newAccessToken, newRefreshToken));
     }
- 
+
 }
 
 

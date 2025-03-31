@@ -4,7 +4,7 @@ using Domain.Primitives;
 
 namespace Domain.Entities;
 
-public class PasswordResetToken : AggregateRoot ,IAggregateRoot
+public class PasswordResetToken : AggregateRoot<Guid> ,IAggregateRoot
 {
     public string Token { get; private init; }
     public DateTime ExpiresAt { get; init; }

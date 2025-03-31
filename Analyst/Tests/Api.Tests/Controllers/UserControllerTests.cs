@@ -8,9 +8,9 @@ public class UserControllerTests(WebapiWebApplicationFactory factory) :
     IClassFixture<WebapiWebApplicationFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
-     // run at terminal
-     // dotnet user-secrets init
-     // dotnet user-secrets set "ConnectionStrings:testDb" "DataSource=file::memory:?cache=shared"
+    // run at terminal
+    // dotnet user-secrets init
+    // dotnet user-secrets set "ConnectionStrings:testDb" "DataSource=file::memory:?cache=shared"
     [Fact]
     public async Task GetUserById_Should_Return_OK()
     {
@@ -23,8 +23,8 @@ public class UserControllerTests(WebapiWebApplicationFactory factory) :
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
     }
-    
-    
+
+
     [Fact]
     public async Task LoginUser_Should_Return_OK()
     {
@@ -42,7 +42,7 @@ public class UserControllerTests(WebapiWebApplicationFactory factory) :
         );
 
         // Act
-        var response = await _client.PostAsync("/api/user/login", content); 
+        var response = await _client.PostAsync("/api/user/login", content);
 
         // Assert
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);

@@ -2,11 +2,11 @@
 
 namespace Domain.Primitives;
 
-public abstract class AggregateRoot : Entity
+public abstract class AggregateRoot<TKey> : Entity<TKey>
 {
     private readonly List<IDomainEvent> _domainEvents = new();
 
-    protected AggregateRoot(Guid id)
+    protected AggregateRoot(TKey id)
         : base(id)
     {
     }
