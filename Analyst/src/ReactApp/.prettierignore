@@ -1,0 +1,10 @@
+# Ignore build folders
+node_modules/
+build/
+dist/
+coverage/
+obj/
+bin/
+
+# Ignore other generated files
+*.log
