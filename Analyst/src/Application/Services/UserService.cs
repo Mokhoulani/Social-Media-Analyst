@@ -15,10 +15,14 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
     public async Task<Result<bool>> IsEmailExistsAsync(Email email, CancellationToken cancellationToken)
     {
         var spec = new EmailUniqueSpecification(email);
-        
-        var userExists = await unitOfWork.Repository<User,Guid>()
+
+        var userExistsResult = await unitOfWork.Repository<User, Guid>()
             .ExistsAsync(spec, cancellationToken);
-        return userExists.IsFailure ? DomainErrors.User.NotFound : userExists.Value;
+
+        if (userExistsResult.IsFailure)
+            return Result.Failure<bool>(userExistsResult.Error);
+
+        return Result.Success(userExistsResult.Value);
     }
 
     public async Task<Result<User>> AddUserAsync(User user, CancellationToken cancellationToken)
