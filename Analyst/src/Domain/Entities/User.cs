@@ -4,7 +4,6 @@ using Domain.Primitives;
 using Domain.ValueObjects;
 
 namespace Domain.Entities;
-
 public sealed class User : AggregateRoot<Guid>, IAggregateRoot
 {
     private User(Guid id, Email email, FirstName firstName, LastName lastName, Password password) : base(id)

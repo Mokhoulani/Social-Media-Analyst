@@ -2,8 +2,7 @@ using Domain.Interfaces;
 using Domain.Primitives;
 
 namespace Domain.Entities;
-
-public class RefreshToken : AggregateRoot<Guid>, IAggregateRoot
+public class RefreshToken : AggregateRoot<Guid> ,IAggregateRoot
 {
     public string Token { get; private set; }
     public DateTime ExpiresAt { get; private set; }
