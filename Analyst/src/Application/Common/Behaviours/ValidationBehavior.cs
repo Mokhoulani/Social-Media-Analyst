@@ -5,13 +5,9 @@ using MediatR;
 namespace Application.Common.Behaviours;
 
 public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
-    : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
-    where TResponse : Result
+    : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse> where TResponse : Result
 {
-    public async Task<TResponse> Handle(
-        TRequest request,
-        RequestHandlerDelegate<TResponse> next,
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
         if (!validators.Any())
@@ -19,16 +15,12 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
             return await next();
         }
 
-        var validationResults = await Task.WhenAll(
-            validators.Select(v => v.ValidateAsync(request, cancellationToken))
-        );
+        var validationResults = await Task.WhenAll(validators
+            .Select(v => v.ValidateAsync(request, cancellationToken)));
 
-        Error[] errors = validationResults
-            .SelectMany(result => result.Errors)
+        Error[] errors = validationResults.SelectMany(result => result.Errors)
             .Where(failure => failure is not null)
-            .Select(failure => new Error(
-                failure.PropertyName,
-                failure.ErrorMessage))
+            .Select(failure => new Error(failure.PropertyName, failure.ErrorMessage))
             .Distinct()
             .ToArray();
 
@@ -40,8 +32,7 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
         return await next();
     }
 
-    private static TResult CreateValidationResult<TResult>(Error[] errors)
-        where TResult : Result
+    private static TResult CreateValidationResult<TResult>(Error[] errors) where TResult : Result
     {
         if (typeof(TResult) == typeof(Result))
         {
@@ -51,8 +42,7 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
         object validationResult = typeof(ValidationResult<>)
             .GetGenericTypeDefinition()
             .MakeGenericType(typeof(TResult).GenericTypeArguments[0])
-            .GetMethod(nameof(ValidationResult.WithErrors))!
-            .Invoke(null, new object?[] { errors })!;
+            .GetMethod(nameof(ValidationResult.WithErrors))!.Invoke(null, new object?[] { errors })!;
 
         return (TResult)validationResult;
     }

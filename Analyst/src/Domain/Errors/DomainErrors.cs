@@ -33,6 +33,10 @@ public static class DomainErrors
         public static readonly Error InvalidFormat = new(
             "Email.InvalidFormat",
             "The email format is invalid.");
+        
+        public static readonly Error Invalid = new(
+            "Email.Invalid",
+            "The email is invalid.");
     }
 
     public static class FirstName
@@ -44,6 +48,9 @@ public static class DomainErrors
         public static readonly Error TooLong = new(
             "FirstName.TooLong", 
             "First name is too long.");
+        public static readonly Error Invalid = new(
+            "FirstName.Invalid",
+            "First name is invalid.");
     }
 
     public static class LastName
@@ -55,6 +62,9 @@ public static class DomainErrors
         public static readonly Error TooLong = new(
             "LastName.TooLong",
             "Last name is too long.");
+        public static readonly Error Invalid = new(
+            "LastName.Invalid",
+            "Last name is invalid.");
     }
 
     public static class Password

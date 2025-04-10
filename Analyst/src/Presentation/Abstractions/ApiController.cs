@@ -20,7 +20,7 @@ public abstract class ApiController(ISender sender) : ControllerBase
                         "Validation Error", StatusCodes.Status400BadRequest,
                         result.Error,
                         validationResult.Errors)),
-            _ when result.Error.Code == "Authentication" => 
+            _ when result.Error.Code == "User.Unauthenticated" => 
                 StatusCode(StatusCodes.Status403Forbidden,
                     CreateProblemDetails(
                         "Forbidden", StatusCodes.Status403Forbidden,
