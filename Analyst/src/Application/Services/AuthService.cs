@@ -1,5 +1,5 @@
 using Application.Common.Interfaces;
-using Application.Common.Mod;
+using Application.Common.Mod.ViewModels;
 using Application.CQRS.User.Commands;
 using Domain.Entities;
 using Domain.Errors;
@@ -20,7 +20,7 @@ public class AuthService(
     /// <summary>
     /// Handles user login, generates an access token and a refresh token.
     /// </summary>
-    public async Task<Result<TokenResponse>> LoginAsync(
+    public async Task<Result<TokenResponseViewModel>> LoginAsync(
         LoginCommand command,
         CancellationToken cancellationToken)
     {
@@ -40,14 +40,14 @@ public class AuthService(
         await unitOfWork.Repository<RefreshToken, Guid>().AddAsync(refreshTokenEntity, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(new TokenResponse(accessToken, refreshToken));
+        return Result.Success(new TokenResponseViewModel(accessToken, refreshToken));
     }
 
 
     /// <summary>
     /// Refreshes the access token using a valid refresh token.
     /// </summary>
-    public async Task<Result<TokenResponse>> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
+    public async Task<Result<TokenResponseViewModel>> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
     {
         var spec = new ValidRefreshTokenSpecification(refreshToken);
 
@@ -55,12 +55,12 @@ public class AuthService(
             .FindOneAsync(spec, cancellationToken);
 
         if (storedToken.IsFailure)
-            return Result.Failure<TokenResponse>(DomainErrors.NotFound<RefreshToken>());
+            return Result.Failure<TokenResponseViewModel>(DomainErrors.NotFound<RefreshToken>());
 
         var user = await userService.GetUserByIdAsync(storedToken.Value.UserId, cancellationToken);
 
         if (user.IsFailure)
-            return Result.Failure<TokenResponse>(DomainErrors.User.NotFound);
+            return Result.Failure<TokenResponseViewModel>(DomainErrors.User.NotFound);
 
         string newAccessToken = jwtProvider.Generate(user.Value);
         string newRefreshToken = tokenService.GenerateRefreshToken();
@@ -71,11 +71,11 @@ public class AuthService(
 
         var updateResult = await unitOfWork.Repository<RefreshToken, Guid>().SoftUpdateAsync(storedToken.Value, cancellationToken);
         if (updateResult.IsFailure)
-            return Result.Failure<TokenResponse>(DomainErrors.NotFound<RefreshToken>());
+            return Result.Failure<TokenResponseViewModel>(DomainErrors.NotFound<RefreshToken>());
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Result.Success(new TokenResponse(newAccessToken, newRefreshToken));
+        return Result.Success(new TokenResponseViewModel(newAccessToken, newRefreshToken));
     }
 
 }

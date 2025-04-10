@@ -28,6 +28,7 @@ public static class DependencyInjection
         ConfigureValidation(services);
         ConfigureCacheBehavior(services);
         
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthenticationBehavior<,>));
         services.AddProblemDetailsConfiguration(environment);
         
         services.AddSingleton(GetConfiguredMappingConfig());

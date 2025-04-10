@@ -1,4 +1,5 @@
 using Application.Common.Interfaces;
+using Application.Common.Mod.ViewModels;
 using Domain.Entities;
 using Domain.Errors;
 using Domain.Interfaces;
@@ -14,7 +15,7 @@ public class PasswordResetService(
     IUserService userService)
     : IPasswordResetService
 {
-    public async Task<Result<bool>> RequestPasswordResetAsync(string email, CancellationToken cancellationToken)
+    public async Task<Result<PasswordResetViewModel>> RequestPasswordResetAsync(string email, CancellationToken cancellationToken)
     {
         var emailResult = Email.Create(email);
 
@@ -33,10 +34,10 @@ public class PasswordResetService(
 
         await unitOfWork.Repository<PasswordResetToken, Guid>().AddAsync(resetToken, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return true;
+        return Result.Success(new PasswordResetViewModel(true));;
     }
 
-    public async Task<Result<bool>> ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken)
+    public async Task<Result<PasswordResetViewModel>> ResetPasswordAsync(string token, string newPassword, CancellationToken cancellationToken)
     {
         var spec = new ValidResetTokenSpecification(token);
 
@@ -63,6 +64,6 @@ public class PasswordResetService(
         await unitOfWork.Repository<PasswordResetToken, Guid>().SoftUpdateAsync(resetToken.Value, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return Result.Success(new PasswordResetViewModel(true));;
     }
 }

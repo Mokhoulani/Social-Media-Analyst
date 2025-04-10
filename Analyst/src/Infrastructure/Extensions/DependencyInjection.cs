@@ -1,11 +1,9 @@
 using Application.Common.Interfaces;
-using Domain.Interfaces;
 using HealthChecks.Redis;
 using Infrastructure.Authentication;
-using Persistence.Persistence;
+using Infrastructure.Service;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using Persistence.Persistence.Repositories;
 using ZiggyCreatures.Caching.Fusion;
 using Persistence.Extensions;
 
@@ -27,7 +25,8 @@ public static class DependencyInjection
         // Register Repositories & Services
         services.AddPersistenceLayer();
         services.AddSingleton<ITokenService, TokenService>();
-
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUser, CurrentUser>();
         return services;
     }
 }

@@ -5,14 +5,13 @@ using Application.Common.Interfaces;
 using Application.Common.Mod.ViewModels;
 using Domain.Errors;
 using Domain.Shared;
-using ZiggyCreatures.Caching.Fusion;
+
 
 
 namespace Application.CQRS.User.Handlers;
 
 public class GetUserByIdQueryHandler(
     IUserService userService,
-    IFusionCache cache,
     IMapper mapper)
     : IQueryHandler<GetUserByIdQuery, AppUserViewModel>
 {
