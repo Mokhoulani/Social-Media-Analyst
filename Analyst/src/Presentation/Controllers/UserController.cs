@@ -9,30 +9,25 @@ using presentation.Contracts.User;
 
 namespace Presentation.Controllers;
 
-
 [Route("api/[controller]")]
 public class UserController(ISender sender) : ApiController(sender)
 {
     /// <summary>
     /// Create a new user
     /// </summary>
-    /// <param name="command">The CreateUserCommand</param>
+    /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>The ID of the newly created user</returns>
     [HttpPost("signup")]
     [ProducesResponseType(typeof(AppUserViewModel), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateUser(
-        [FromBody] SignUpCommand command,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateUser([FromBody] SignUpRequest request, CancellationToken cancellationToken)
     {
-            var user = await Sender.Send(command, cancellationToken);
-            
-            if (user.IsSuccess)
-                return Ok(user.Value);
+        var command = new SignUpCommand(request.FirstName, request.Email, request.LastName, request.Password);
+        var user = await Sender.Send(command, cancellationToken);
 
-            return HandleFailure(user);
+        return user.IsSuccess ? Ok(user.Value) : HandleFailure(user);
     }
 
     /// <summary>
@@ -49,28 +44,17 @@ public class UserController(ISender sender) : ApiController(sender)
     {
         var query = new GetUserByIdQuery(id);
         var userResult = await Sender.Send(query, cancellationToken);
-        
-        if (userResult.IsSuccess)
-            return Ok(userResult.Value);
-            
-        return HandleFailure(userResult);
+
+        return userResult.IsSuccess ? Ok(userResult.Value) : HandleFailure(userResult);
     }
 
-
     [HttpPost("login")]
-    public async Task<IActionResult> LoginUser(
-        [FromBody] LoginRequest request,
-        CancellationToken cancellationToken)
+    public async Task<IActionResult> LoginUser([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        var command = new LoginCommand(request.Email,request.Password);
+        var command = new LoginCommand(request.Email, request.Password);
 
-        var tokenResult = await Sender.Send(
-            command,
-            cancellationToken);
-        
-        if (tokenResult.IsSuccess)
-            return Ok(tokenResult.Value);
+        var tokenResult = await Sender.Send(command, cancellationToken);
 
-        return HandleFailure(tokenResult);
+        return tokenResult.IsSuccess ? Ok(tokenResult.Value) : HandleFailure(tokenResult);
     }
 }

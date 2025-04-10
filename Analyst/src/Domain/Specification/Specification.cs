@@ -6,8 +6,8 @@ using Domain.Primitives;
 namespace Domain.Specification;
 
 
-public abstract class Specification<TEntity>(Expression<Func<TEntity, bool>>? criteria)
-    where TEntity : Entity, IAggregateRoot
+public abstract class Specification<TEntity, TKey>(Expression<Func<TEntity, bool>>? criteria)
+    where TEntity : Entity<TKey>, IAggregateRoot
 {
     public bool IsSplitQuery { get; protected set; }
 

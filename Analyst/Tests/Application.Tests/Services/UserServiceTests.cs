@@ -11,16 +11,16 @@ namespace Application.Tests.Services;
 public class UserServiceTests
 {
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-    private readonly Mock<IRepository<User>> _userRepositoryMock;
+    private readonly Mock<IRepository<User,Guid>> _userRepositoryMock;
     private readonly IUserService _userService;
 
     public UserServiceTests()
     {
         _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _userRepositoryMock = new Mock<IRepository<User>>();
+        _userRepositoryMock = new Mock<IRepository<User,Guid>>();
 
         // Mock the repository retrieval from UnitOfWork
-        _unitOfWorkMock.Setup(uow => uow.Repository<User>()).Returns(_userRepositoryMock.Object);
+        _unitOfWorkMock.Setup(uow => uow.Repository<User,Guid>()).Returns(_userRepositoryMock.Object);
 
         _userService = new UserService(_unitOfWorkMock.Object);
     }
@@ -46,7 +46,7 @@ public class UserServiceTests
         _userRepositoryMock.Setup(repo => repo.AddAsync(user, default));
 
         // Act
-        _unitOfWorkMock.Object.Repository<User>().AddAsync(user, default);
+        _unitOfWorkMock.Object.Repository<User,Guid>().AddAsync(user, default);
 
         // Assert
         user.Should().NotBeNull();

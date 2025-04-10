@@ -5,55 +5,36 @@ using Domain.ValueObjects;
 using Application.Abstractions.Messaging;
 using Application.Common.Interfaces;
 using Application.Common.Mod.ViewModels;
+using Domain.Errors;
 using Domain.Shared;
 
 namespace Application.CQRS.User.Handlers;
 
-public class SignUpHandler(
-    IUserService userService,
-    IMapper mapper,
-    ILogger<SignUpHandler> logger)
+public class SignUpHandler(IUserService userService, IMapper mapper, ILogger<SignUpHandler> logger)
     : ICommandHandler<SignUpCommand, AppUserViewModel>
 {
-    public async Task<Result<AppUserViewModel>> Handle(
-        SignUpCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<AppUserViewModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
     {
-        var emailResult = Email.Create(request.Email);
-        
-        if (emailResult.IsFailure)
-            return emailResult.Error;
+        var result = Email.Create(request.Email)
+            .Bind(email => Password.Create(request.Password)
+                .Bind(password => FirstName.Create(request.FirstName)
+                    .Bind(firstName => LastName.Create(request.LastName)
+                        .Map(lastName => new
+                        {
+                            Email = email, Password = password, FirstName = firstName, LastName = lastName
+                        }))));
 
-        var firstNameResult = FirstName.Create(request.FirstName);
-        
-        if (firstNameResult.IsFailure)
-            return firstNameResult.Error;
+        if (result.IsFailure) return result.Error;
 
-        var lastNameResult = LastName.Create(request.LastName);
-        
-        if (lastNameResult.IsFailure)
-            return lastNameResult.Error;
-
-        var passwordResult = Password.Create(request.Password);
-        
-        if (passwordResult.IsFailure)
-            return passwordResult.Error;
-
-        var user = Domain.Entities.User.Create(
-            Guid.NewGuid(),
-            emailResult.Value,
-            firstNameResult.Value,
-            lastNameResult.Value,
-            passwordResult.Value
-        );
+        var user = Domain.Entities.User.Create(Guid.NewGuid(), result.Value.Email, result.Value.FirstName,
+            result.Value.LastName, result.Value.Password);
 
         var userResult = await userService.AddUserAsync(user, cancellationToken);
-        
-        if (passwordResult.IsFailure)
-            return userResult.Error;
+
+        if (userResult.IsFailure) return userResult.Error;
 
         logger.LogInformation("User with ID: {UserId} has been signed up successfully", user.Id);
-        
-        return   mapper.Map<AppUserViewModel>(user);
+
+        return mapper.Map<AppUserViewModel>(user);
     }
 }

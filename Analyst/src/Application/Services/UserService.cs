@@ -15,22 +15,26 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
     public async Task<Result<bool>> IsEmailExistsAsync(Email email, CancellationToken cancellationToken)
     {
         var spec = new EmailUniqueSpecification(email);
-        
-        var userExists = await unitOfWork.Repository<User>()
+
+        var userExistsResult = await unitOfWork.Repository<User, Guid>()
             .ExistsAsync(spec, cancellationToken);
-        return userExists.IsFailure ? DomainErrors.User.NotFound : userExists.Value;
+
+        if (userExistsResult.IsFailure)
+            return Result.Failure<bool>(userExistsResult.Error);
+
+        return Result.Success(userExistsResult.Value);
     }
 
     public async Task<Result<User>> AddUserAsync(User user, CancellationToken cancellationToken)
     {
-       var newUser = await unitOfWork.Repository<User>().AddAsync(user, cancellationToken);
+       var newUser = await unitOfWork.Repository<User,Guid>().AddAsync(user, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken); 
         return newUser.IsFailure ? DomainErrors.User.NotFound : newUser.Value;
     }
     
     public async Task<Result<User>> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
     {
-        var userResult = await unitOfWork.Repository<User>().GetByIdAsync(userId, cancellationToken);
+        var userResult = await unitOfWork.Repository<User,Guid>().GetByIdAsync(userId, cancellationToken);
          return userResult.IsFailure ? DomainErrors.User.NotFound : userResult.Value;
     }
     
@@ -45,7 +49,7 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
         
 
         var spec = new EmailSpecification(emailResult.Value);
-        var user = await unitOfWork.Repository<User>()
+        var user = await unitOfWork.Repository<User,Guid>()
             .FindOneAsync(spec, cancellationToken);
 
         if (user.IsFailure)
@@ -71,7 +75,7 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
             return Result.Failure<bool>(emailResult.Error);
         
         var spec = new EmailSpecification(emailResult.Value);
-        var user = await unitOfWork.Repository<User>()
+        var user = await unitOfWork.Repository<User,Guid>()
             .FindOneAsync(spec, cancellationToken);
         
         return Result.Success(user.IsFailure && user.Value.VerifyPassword(password));
@@ -80,7 +84,7 @@ public class UserService(IUnitOfWork unitOfWork) : IUserService
     public async Task<Result<User>> GetByEmailAsync(Email email, CancellationToken cancellationToken = default)
     {
         var spec = new EmailSpecification(email);
-        var user = await unitOfWork.Repository<User>()
+        var user = await unitOfWork.Repository<User,Guid>()
             .FindOneAsync(spec, cancellationToken);
         
         return user.IsFailure ? Result.Failure<User>(DomainErrors.User.NotFound) 

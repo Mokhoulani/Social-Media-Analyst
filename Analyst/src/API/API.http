@@ -1,7 +1,9 @@
 @API_HostAddress = http://localhost:5031
 
-GET {{API_HostAddress}}/api/user/70ebadd4-e923-4584-b82f-52175d8c30db
+GET {{API_HostAddress}}/api/user/ACD8BC15-E9FF-4BF8-B0AA-BFFB9C932984
 Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhY2Q4YmMxNS1lOWZmLTRiZjgtYjBhYS1iZmZiOWM5MzI5ODQiLCJlbWFpbCI6InRlc3QxOUB0ZXN0LmNvbSIsImV4cCI6MTc0NDI3NzQ4NSwiaXNzIjoiU29jaWFsTWVkaWEiLCJhdWQiOiJTb2NpYWxNZWRpYSJ9.8cDoYnn3Gzdtky01tXtr4Fb5LOGaT2wh2Fz7x6UGuvs
+
 
 ###
 POST {{API_HostAddress}}/api/User/signup
@@ -10,8 +12,8 @@ Content-Type: application/json
 {
   "FirstName": "MOh",
   "LastName": "Ko",
-  "Email": "test20@test.com",
-  "Password": "123456"
+  "Email": "test23@test.com",
+  "Password": "Aa@39888"
 }
 
 ###
@@ -29,7 +31,7 @@ POST {{API_HostAddress}}/api/Auth/refresh-token
 Content-Type: application/json
 
 {
-  "RefreshToken": "LvCQ/gPA8LIeC4sNi0lsEpLCfV/5/U2Ktw+ghbIFQeBNq+6WWBuwwjjICkwyc6u1CZclFKvckgavylnd13PUAA=="
+  "RefreshToken": "sznk7jWmgLEwW76YBRtZlCtJSxxGxyGR/8aRyW/xn5EapWK32Es725w5eBFpfsBC0mc9u4Sq0fcOdUPeBFjGsA=="
 }
 
 
@@ -38,7 +40,7 @@ POST {{API_HostAddress}}/api/Auth/request-reset
 Content-Type: application/json
 
 {
-  "Email": ""
+  "Email": "test2@test.com"
 }
 
 

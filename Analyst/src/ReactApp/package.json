@@ -1,26 +1,39 @@
 {
-  "name": "reactapp",
-  "version": "1.0.0",
-  "main": "index.ts",
-  "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
-  },
-  "dependencies": {
-    "expo": "~52.0.37",
-    "expo-status-bar": "~2.0.1",
-    "react": "18.3.1",
-    "react-native": "0.76.7",
-    "react-dom": "18.3.1",
-    "react-native-web": "~0.19.13",
-    "@expo/metro-runtime": "~4.0.1"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.25.2",
-    "@types/react": "~18.3.12",
-    "typescript": "^5.3.3"
-  },
-  "private": true
+    "name": "reactapp",
+    "version": "1.0.0",
+    "main": "index.ts",
+    "type": "module",
+    "scripts": {
+        "start": "expo start",
+        "android": "expo start --android",
+        "ios": "expo start --ios",
+        "web": "expo start --web",
+        "format": "prettier --write .",
+        "types": "npx tsc --noEmit",
+        "lint": "eslint ."
+    },
+    "dependencies": {
+        "@expo/metro-runtime": "~4.0.1",
+        "expo": "~52.0.37",
+        "expo-status-bar": "~2.0.1",
+        "react": "18.3.1",
+        "react-dom": "18.3.1",
+        "react-native": "0.76.7",
+        "react-native-web": "~0.19.13"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.25.2",
+        "@eslint/js": "^9.23.0",
+        "@types/react": "~18.3.12",
+        "eslint-config-prettier": "^10.1.1",
+        "eslint-plugin-jest": "^28.11.0",
+        "eslint-plugin-prettier": "^5.2.6",
+        "eslint-plugin-react-hooks": "^5.2.0",
+        "eslint-plugin-react-refresh": "^0.4.19",
+        "globals": "^16.0.0",
+        "prettier": "3.5.3",
+        "typescript": "^5.3.3",
+        "typescript-eslint": "^8.29.0"
+    },
+    "private": true
 }

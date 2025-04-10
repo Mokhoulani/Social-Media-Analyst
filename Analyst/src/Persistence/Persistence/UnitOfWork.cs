@@ -1,25 +1,27 @@
 ﻿using Domain.Interfaces;
 using Domain.Primitives;
-using Persistence.Repositories;
+using Persistence.Persistence.Repositories;
 
 namespace Persistence.Persistence;
 
-public sealed class UnitOfWork(
+internal sealed class UnitOfWork(
     ApplicationDbContext dbContext,
     Dictionary<Type, object> repositories) : IUnitOfWork
 {
-    public IRepository<TEntity> Repository<TEntity>() where TEntity : Entity, IAggregateRoot
+    public IRepository<TEntity, TKey> Repository<TEntity, TKey>()
+        where TEntity : Entity<TKey>, IAggregateRoot
     {
-        if (repositories.ContainsKey(typeof(TEntity)))
+        if (repositories.TryGetValue(typeof(TEntity), out var repo))
         {
-            return (IRepository<TEntity>)repositories[typeof(TEntity)];
+            return (IRepository<TEntity, TKey>)repo;
         }
 
-        var repository = new Repository<TEntity>(dbContext);
-        repositories.Add(typeof(TEntity), repository);
+        var repository = new Repository<TEntity, TKey>(dbContext);
+        repositories[typeof(TEntity)] = repository;
+
         return repository;
     }
-    
+
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);
     

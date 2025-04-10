@@ -3,4 +3,4 @@ using Domain.ValueObjects;
 
 namespace Domain.Specification.Users;
 
-public class EmailSpecification(Email email) : Specification<User>(u => u.Email == email);
+public class EmailSpecification(Email email) : Specification<User,Guid>(u => u.Email == email);

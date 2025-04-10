@@ -6,10 +6,10 @@ namespace Domain.Specification;
 
 public static class SpecificationEvaluator
 {
-    public static IQueryable<TEntity> GetQuery<TEntity>(
+    public static IQueryable<TEntity> GetQuery<TEntity,TKey>(
         IQueryable<TEntity> inputQueryable,
-        Specification<TEntity> specification)
-        where TEntity : Entity, IAggregateRoot
+        Specification<TEntity,TKey> specification)
+        where TEntity : Entity<TKey>, IAggregateRoot
     {
         IQueryable<TEntity> queryable = inputQueryable;
 
