@@ -5,8 +5,7 @@ using Domain.Specification;
 
 namespace Domain.Interfaces;
 
-public interface IRepository<T, TKey>
-    where T : Entity<TKey>, IAggregateRoot
+public interface IRepository<T, TKey> where T : Entity<TKey>, IAggregateRoot
 {
     Task<Result<T>> AddAsync(T entity, CancellationToken cancellationToken);
     Task<Result<T>> GetByIdAsync(TKey id, CancellationToken cancellationToken);

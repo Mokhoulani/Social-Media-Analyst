@@ -4,12 +4,9 @@ using Persistence.Persistence.Repositories;
 
 namespace Persistence.Persistence;
 
-internal sealed class UnitOfWork(
-    ApplicationDbContext dbContext,
-    Dictionary<Type, object> repositories) : IUnitOfWork
+internal sealed class UnitOfWork(ApplicationDbContext dbContext, Dictionary<Type, object> repositories) : IUnitOfWork
 {
-    public IRepository<TEntity, TKey> Repository<TEntity, TKey>()
-        where TEntity : Entity<TKey>, IAggregateRoot
+    public IRepository<TEntity, TKey> Repository<TEntity, TKey>() where TEntity : Entity<TKey>, IAggregateRoot
     {
         if (repositories.TryGetValue(typeof(TEntity), out var repo))
         {
@@ -24,7 +21,7 @@ internal sealed class UnitOfWork(
 
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);
-    
+
     public void Dispose()
     {
         dbContext.Dispose();

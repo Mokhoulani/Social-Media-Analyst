@@ -2,7 +2,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using Persistence;
 using Persistence.Outbox;
 using Persistence.Persistence;
 using Quartz;
@@ -14,21 +13,15 @@ public class ProcessOutboxMessagesJob(ApplicationDbContext dbContext, IPublisher
 {
     public async Task Execute(IJobExecutionContext context)
     {
-        List<OutboxMessage> messages = await dbContext
-            .Set<OutboxMessage>()
+        List<OutboxMessage> messages = await dbContext.Set<OutboxMessage>()
             .Where(m => m.ProcessedOnUtc == null)
             .Take(20)
             .ToListAsync(context.CancellationToken);
 
         foreach (OutboxMessage outboxMessage in messages)
         {
-            IDomainEvent? domainEvent = JsonConvert
-                .DeserializeObject<IDomainEvent>(
-                    outboxMessage.Content,
-                    new JsonSerializerSettings
-                    {
-                        TypeNameHandling = TypeNameHandling.All
-                    });
+            IDomainEvent? domainEvent = JsonConvert.DeserializeObject<IDomainEvent>(outboxMessage.Content,
+                new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
 
             if (domainEvent is null)
             {
