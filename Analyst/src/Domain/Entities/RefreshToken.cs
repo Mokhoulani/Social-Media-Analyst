@@ -24,7 +24,7 @@ public class RefreshToken : AggregateRoot<Guid> ,IAggregateRoot
     {
         return new RefreshToken(userId, token, expiresAt);
     }
-    
+
     /// <summary>
     /// Replaces the current token with a new one and updates the expiration time.
     /// </summary>

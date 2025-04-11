@@ -3,14 +3,10 @@ using Domain.Interfaces;
 using Domain.Primitives;
 using Domain.ValueObjects;
 
-
-
-
 namespace Domain.Entities;
 public sealed class User : AggregateRoot<Guid>, IAggregateRoot
 {
-    private User(Guid id, Email email, FirstName firstName, LastName lastName, Password password)
-        : base(id)
+    private User(Guid id, Email email, FirstName firstName, LastName lastName, Password password) : base(id)
     {
         Email = email;
         FirstName = firstName;
@@ -33,21 +29,9 @@ public sealed class User : AggregateRoot<Guid>, IAggregateRoot
     public IEnumerable<RefreshToken>? RefreshTokens { get; private set; }
     public IEnumerable<PasswordResetToken>? PasswordResetTokens { get; private set; }
 
-    public static User Create(
-        Guid id,
-        Email email,
-        FirstName firstName,
-        LastName lastName,
-        Password password)
+    public static User Create(Guid id, Email email, FirstName firstName, LastName lastName, Password password)
     {
-
-
-        var user = new User(
-            id,
-            email,
-            firstName,
-            lastName,
-            password);
+        var user = new User(id, email, firstName, lastName, password);
 
         user.RaiseDomainEvent(new UserSignedUpDomainEvent(user.Id));
 

@@ -7,5 +7,3 @@ public sealed class ApplicationDbContext(DbContextOptions options) : DbContext(o
     protected override void OnModelCreating(ModelBuilder modelBuilder) =>
         modelBuilder.ApplyConfigurationsFromAssembly(AssemblyReference.Assembly);
 }
-
-
