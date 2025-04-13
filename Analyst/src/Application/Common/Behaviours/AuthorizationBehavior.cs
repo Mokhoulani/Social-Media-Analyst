@@ -1,5 +1,5 @@
 using System.Reflection;
-using Application.Common.Interfaces;
+using Domain.Interfaces;
 using MediatR;
 using Domain.Shared;
 using Microsoft.AspNetCore.Authorization;

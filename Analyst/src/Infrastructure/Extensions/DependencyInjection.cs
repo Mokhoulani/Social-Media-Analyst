@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using ZiggyCreatures.Caching.Fusion;
 using Persistence.Extensions;
+using Domain.Interfaces;
 
 
 namespace Infrastructure.Extensions;

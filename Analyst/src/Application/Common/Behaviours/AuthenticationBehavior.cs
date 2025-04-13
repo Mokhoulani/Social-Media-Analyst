@@ -1,9 +1,9 @@
 using System.Reflection;
-using Application.Common.Interfaces;
-using Domain.Errors;
 using MediatR;
 using Domain.Shared;
 using Microsoft.AspNetCore.Authorization;
+using Domain.Interfaces;
+using Domain.Rules.AuthenticationRules;
 
 namespace Application.Common.Behaviours;
 
@@ -18,11 +18,15 @@ public sealed class AuthenticationBehavior<TRequest, TResponse>(ICurrentUser cur
 
         if (allowAnonymous) return await next();
 
-        if (currentUser.IsAuthenticated && !string.IsNullOrWhiteSpace(currentUser.UserId)) return await next();
+        var rule = new MustBeAuthenticatedRule(currentUser);
 
-        var failureResult = CreateFailureResult<TResponse>(AuthenticationErrors.User.Unauthenticated.Code,
-            AuthenticationErrors.User.Unauthenticated.Message);
-        return failureResult;
+        if (rule.IsBroken())
+        {
+            var failureResult = CreateFailureResult<TResponse>(rule.Error.Code, rule.Error.Message);
+            return failureResult;
+        }
+
+        return await next();
     }
 
     private TResponse CreateFailureResult<T>(string errorCode, string errorMessage) where T : Result

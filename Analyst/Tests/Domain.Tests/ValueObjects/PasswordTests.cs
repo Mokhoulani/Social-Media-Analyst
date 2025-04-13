@@ -1,7 +1,7 @@
 using Domain.ValueObjects;
 using FluentAssertions;
 
-namespace Domain.Tests.Entities;
+namespace Domain.Tests.ValueObjects;
 
 public class PasswordTests
 {

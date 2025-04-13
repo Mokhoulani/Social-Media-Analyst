@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Application.Common.Interfaces;
+using Domain.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
 

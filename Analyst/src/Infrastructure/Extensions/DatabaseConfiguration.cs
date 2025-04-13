@@ -21,7 +21,8 @@ public static class DatabaseConfiguration
             .Scan(
                 selector => selector
                     .FromAssemblies(
-                        Infrastructure.AssemblyReference.Assembly)
+                        Infrastructure.AssemblyReference.Assembly,
+                        Persistence.AssemblyReference.Assembly)
                     .AddClasses(false)
                     .AsImplementedInterfaces()
                     .WithScopedLifetime());
@@ -30,18 +31,20 @@ public static class DatabaseConfiguration
         var sqlOptions = services.BuildServiceProvider().GetRequiredService<IOptions<SqlOptions>>().Value;
         
         services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
-        
+        services.AddSingleton<UpdateAuditableEntitiesInterceptor>();
+
         services.AddDbContext<ApplicationDbContext>(
             (sp, optionsBuilder) =>
             {
-                var interceptor = sp.GetService<ConvertDomainEventsToOutboxMessagesInterceptor>();
-                if (interceptor != null)
+                var convertInterceptor = sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>();
+                var auditInterceptor = sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>();
+
                     optionsBuilder.UseSqlite(
                             sqlOptions.ConnectionString,
                             b => b.MigrationsAssembly("Persistence"))
-                        .AddInterceptors(interceptor);
+                        .AddInterceptors(convertInterceptor, auditInterceptor);
             });
-        
+
         services.AddQuartz(configure =>
         {
             var jobKey = new JobKey(nameof(ProcessOutboxMessagesJob));
@@ -53,10 +56,9 @@ public static class DatabaseConfiguration
                         trigger.ForJob(jobKey)
                             .WithSimpleSchedule(
                                 schedule =>
-                                    schedule.WithIntervalInSeconds(10)
+                                    schedule.WithIntervalInSeconds(100)
                                         .RepeatForever()));
 
-            configure.UseMicrosoftDependencyInjectionJobFactory();
         });
        
         services.AddHealthChecks().AddSqlite(sqlOptions.ConnectionString);
