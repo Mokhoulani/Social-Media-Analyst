@@ -5,7 +5,6 @@ using Domain.ValueObjects;
 using Application.Abstractions.Messaging;
 using Application.Common.Interfaces;
 using Application.Common.Mod.ViewModels;
-using Domain.Errors;
 using Domain.Shared;
 
 namespace Application.CQRS.User.Handlers;

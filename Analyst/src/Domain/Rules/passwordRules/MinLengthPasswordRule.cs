@@ -3,9 +3,9 @@ using Domain.Shared;
 
 namespace Domain.Rules.passwordRules;
 
-public class MinLengthPasswordRule(string password, int maxLength) : Rule
+public class MinLengthPasswordRule(string password, int minLength) : Rule
 {
-    public override bool IsBroken() => password.Length > maxLength;
+    public override bool IsBroken() => password.Length < minLength;
 
     public override Error Error => DomainErrors.Password.TooShort;
 }

@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-using Domain.Errors;
 using Domain.Primitives;
 using Domain.Rules;
 using Domain.Rules.passwordRules;
