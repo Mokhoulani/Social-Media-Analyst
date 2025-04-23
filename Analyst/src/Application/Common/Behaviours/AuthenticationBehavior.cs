@@ -4,6 +4,7 @@ using Domain.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Domain.Interfaces;
 using Domain.Rules.AuthenticationRules;
+using Domain.Shared.ResultTypes.AuthenticationResult;
 
 namespace Application.Common.Behaviours;
 
@@ -29,27 +30,19 @@ public sealed class AuthenticationBehavior<TRequest, TResponse>(ICurrentUser cur
         return await next();
     }
 
-    private TResponse CreateFailureResult<T>(string errorCode, string errorMessage) where T : Result
+    private TResult CreateFailureResult<TResult>(string code, string message) where TResult : Result
     {
-        var genericType = typeof(TResponse).GetGenericArguments().FirstOrDefault();
-
-        if (genericType == null)
+        if (typeof(TResult) == typeof(Result))
         {
-            return (TResponse)(object)Result.Failure(new Error(errorCode, errorMessage));
+            return (AuthenticationResult.Unauthenticated(code, message) as TResult)!;
         }
 
-        var failureMethod = typeof(Result).GetMethods()
-            .FirstOrDefault(m => m is { Name: nameof(Result.Failure), IsGenericMethod: true });
+        var authenticatedResult = typeof(AuthenticationResult<>)
+            .GetGenericTypeDefinition()
+            .MakeGenericType(typeof(TResult).GenericTypeArguments[0])
+            .GetMethod(nameof(AuthenticationResult.Unauthenticated))!
+            .Invoke(null, [code, message])!;
 
-        if (failureMethod == null)
-        {
-            throw new InvalidOperationException("Could not find the Failure method for type: " + typeof(TResponse));
-        }
-
-        var genericFailureMethod = failureMethod.MakeGenericMethod(genericType);
-
-        var result = genericFailureMethod.Invoke(null, new object[] { new Error(errorCode, errorMessage) });
-
-        return ((TResponse)result!)!;
+        return (TResult)authenticatedResult;
     }
 }

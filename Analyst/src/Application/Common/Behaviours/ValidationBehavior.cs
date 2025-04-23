@@ -1,4 +1,5 @@
 using Domain.Shared;
+using Domain.Shared.ResultTypes.ValidationResult;
 using FluentValidation;
 using MediatR;
 

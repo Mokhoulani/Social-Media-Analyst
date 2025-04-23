@@ -8,6 +8,6 @@ namespace Domain.Rules.AuthenticationRules
     {
         public override bool IsBroken() => !currentUser.IsAuthenticated || string.IsNullOrWhiteSpace(currentUser.UserId);
 
-        public override Error Error => AuthenticationErrors.User.Unauthenticated;
+        public override Error Error => AuthenticationErrors.Unauthenticated;
     }
 }

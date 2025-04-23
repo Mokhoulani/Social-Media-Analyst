@@ -4,7 +4,7 @@ public abstract class Entity<TKey> : IEquatable<Entity<TKey>>
 {
     protected Entity(TKey id) => Id = id;
 
-    protected Entity() { }
+    protected Entity() => Id = default!;
 
     public TKey Id { get; private init; }
 
