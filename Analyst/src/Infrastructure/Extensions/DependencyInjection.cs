@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using ZiggyCreatures.Caching.Fusion;
 using Persistence.Extensions;
 using Domain.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace Infrastructure.Extensions;
@@ -22,6 +23,10 @@ public static class DependencyInjection
 
         services.AddSingleton<RedisHealthCheck>();
         services.AddSingleton<IFusionCache, FusionCache>();
+
+        services.AddAuthorization();
+        services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
         // Register Repositories & Services
         services.AddPersistenceLayer();
