@@ -1,5 +1,6 @@
 ﻿using Domain.Shared;
 using Domain.Shared.ResultTypes.AuthenticationResult;
+using Domain.Shared.ResultTypes.AuthorizationResult;
 using Domain.Shared.ResultTypes.ValidationResult;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -31,6 +32,15 @@ public abstract class ApiController(ISender sender) : ControllerBase
                      StatusCodes.Status401Unauthorized,
                      result.Error,
                      authenticationResult.Errors)),
+         
+         IAuthorizationResult authorizationResult =>
+             StatusCode(StatusCodes.Status403Forbidden,
+                 CreateProblemDetails(
+                     "Unauthorized",
+                     StatusCodes.Status403Forbidden,
+                     result.Error,
+                     authorizationResult.Errors)),
+
 
          _ => BadRequest(CreateProblemDetails(
              "Bad Request",

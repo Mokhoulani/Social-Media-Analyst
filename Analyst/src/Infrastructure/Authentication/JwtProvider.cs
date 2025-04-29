@@ -8,22 +8,28 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Authentication;
 
-internal sealed class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
+internal sealed class JwtProvider(IOptions<JwtOptions> options, IPermissionService permissionService) : IJwtProvider
 {
     private readonly JwtOptions _options = options.Value;
 
-    public string Generate(User user)
+    public async Task<string> GenerateAsync(User user)
     {
-        var claims = new Claim[]
+        var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Name, user.FirstName.Value),
             new(JwtRegisteredClaimNames.Email, user.Email.Value)
         };
+
+        var permissions = await permissionService.GetPermissionsAsync(user.Id);
+
+        claims.AddRange(permissions.Select(permission => new Claim(CustomClaims.Permissions, permission)));
 
         var signingCredentials = new SigningCredentials(
             new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_options.SecretKey)),
             SecurityAlgorithms.HmacSha256);
+
 
         var token = new JwtSecurityToken(
             _options.Issuer,
@@ -33,7 +39,7 @@ internal sealed class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
             DateTime.UtcNow.AddMinutes(_options.ExpiryMinutes),
             signingCredentials);
 
-        string tokenValue = new JwtSecurityTokenHandler()
+        var tokenValue = new JwtSecurityTokenHandler()
             .WriteToken(token);
 
         return tokenValue;

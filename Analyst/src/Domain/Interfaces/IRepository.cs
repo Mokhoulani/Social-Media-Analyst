@@ -18,4 +18,5 @@ public interface IRepository<T, TKey> where T : Entity<TKey>, IAggregateRoot
     Task<Result<List<T>>> FindManyAsync(Specification<T, TKey> specification, CancellationToken cancellationToken);
     Task<Result<bool>> ExistsAsync(Specification<T, TKey> specification, CancellationToken cancellationToken);
     Task<Result<int>> CountAsync(Specification<T, TKey> specification, CancellationToken cancellationToken);
+    IQueryable<T> AsQueryable(bool trackChanges = false);
 }

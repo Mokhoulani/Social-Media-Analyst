@@ -10,4 +10,5 @@ public interface ICurrentUser
     bool IsInRole(string role);
     string? GetClaim(string claimType);
     ICurrentUser GetCurrentUser();
+    IEnumerable<string> GetPermissions();
 }

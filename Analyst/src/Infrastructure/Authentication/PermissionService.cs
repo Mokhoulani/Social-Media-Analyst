@@ -1,31 +1,24 @@
 ﻿using Domain.Entities;
+using Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Persistence.Persistence;
+
 
 namespace Infrastructure.Authentication;
 
-public class PermissionService : IPermissionService
+public class PermissionService(IUnitOfWork unitOfWork) : IPermissionService
 {
-    private readonly ApplicationDbContext _context;
-
-    public PermissionService(ApplicationDbContext context)
+    public async Task<HashSet<string>> GetPermissionsAsync(Guid userId)
     {
-        _context = context;
-    }
-
-    public async Task<HashSet<string>> GetPermissionsAsync(Guid memberId)
-    {
-        IEnumerable<Role>[] roles = await _context.Set<User>()
+        var roles = await unitOfWork.Repository<User,Guid>().AsQueryable()
             .Include(x => x.Roles)
             .ThenInclude(x => x.Permissions)
-            .Where(x => x.Id == memberId)
-            .Select(x => x.Roles)
-            .ToArrayAsync();
-
+            .Where(x => x.Id == userId)
+            .SelectMany(x => x.Roles) 
+            .ToListAsync();
+        
         return roles
-            .SelectMany(x => x)
-            .SelectMany(x => x.Permissions)
-            .Select(x => x.Name)
-            .ToHashSet();
+            .SelectMany(role => role.Permissions) 
+            .Select(permission => permission.Name) 
+            .ToHashSet(StringComparer.OrdinalIgnoreCase); 
     }
 }

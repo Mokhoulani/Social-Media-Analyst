@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Domain.Interfaces;
+using Infrastructure.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
 
@@ -26,4 +27,9 @@ public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUse
     public string? GetClaim(string claimType) => httpContextAccessor.HttpContext?.User?.FindFirstValue(claimType);
 
     public ICurrentUser GetCurrentUser() => this;
+    
+    public IEnumerable<string> GetPermissions()
+    {
+        return ClaimsPrincipal?.FindAll(CustomClaims.Permissions).Select(c => c.Value) ?? Enumerable.Empty<string>();
+    }
 }
