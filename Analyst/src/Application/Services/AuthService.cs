@@ -27,7 +27,7 @@ public class AuthService(
 
         var user = userResult.Value;
 
-        var accessToken = await jwtProvider.GenerateAsync(user);
+        var accessToken = jwtProvider.Generate(user);
         var refreshToken = tokenService.GenerateRefreshToken();
         var expiryDate = tokenService.GetRefreshTokenExpiryDate();
 
@@ -55,7 +55,7 @@ public class AuthService(
 
         if (user.IsFailure) return Result.Failure<TokenResponseViewModel>(DomainErrors.User.NotFound);
 
-        var newAccessToken = await jwtProvider.GenerateAsync(user.Value);
+        var newAccessToken =  jwtProvider.Generate(user.Value);
         var newRefreshToken = tokenService.GenerateRefreshToken();
 
         var expiryDate = tokenService.GetRefreshTokenExpiryDate();

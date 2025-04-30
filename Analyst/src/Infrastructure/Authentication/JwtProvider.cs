@@ -12,7 +12,7 @@ internal sealed class JwtProvider(IOptions<JwtOptions> options, IPermissionServi
 {
     private readonly JwtOptions _options = options.Value;
 
-    public async Task<string> GenerateAsync(User user)
+    public string Generate(User user)
     {
         var claims = new List<Claim>
         {
@@ -20,10 +20,6 @@ internal sealed class JwtProvider(IOptions<JwtOptions> options, IPermissionServi
             new(JwtRegisteredClaimNames.Name, user.FirstName.Value),
             new(JwtRegisteredClaimNames.Email, user.Email.Value)
         };
-
-        var permissions = await permissionService.GetPermissionsAsync(user.Id);
-
-        claims.AddRange(permissions.Select(permission => new Claim(CustomClaims.Permissions, permission)));
 
         var signingCredentials = new SigningCredentials(
             new SymmetricSecurityKey(

@@ -1,23 +1,32 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Authentication;
 
-public class PermissionAuthorizationHandler
-    : AuthorizationHandler<PermissionRequirement>
+public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
 {
-    protected override Task HandleRequirementAsync(
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public PermissionAuthorizationHandler(IServiceScopeFactory serviceScopeFactory)
+    {
+        _serviceScopeFactory = serviceScopeFactory;
+    }
+
+    protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
-        var permissions = context
-            .User
-            .Claims
-            .Where(x => x.Type == CustomClaims.Permissions)
-            .Select(x => x.Value)
-            .ToHashSet();
+        var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!Guid.TryParse(userId, out var parsedUserId))
+            return;
+
+        using var scope = _serviceScopeFactory.CreateScope();
+        var permissionService = scope.ServiceProvider.GetRequiredService<IPermissionService>();
+
+        var permissions = await permissionService.GetPermissionsAsync(parsedUserId);
 
         if (permissions.Contains(requirement.Permission)) context.Succeed(requirement);
-
-        return Task.CompletedTask;
     }
 }
