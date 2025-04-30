@@ -1,4 +1,5 @@
 using Domain.Shared;
+using Domain.Shared.ResultTypes.ValidationResult;
 using FluentValidation;
 using MediatR;
 
@@ -38,12 +39,13 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
         {
             return (ValidationResult.WithErrors(errors) as TResult)!;
         }
+         
+        var genericType = typeof(ValidationResult<>).MakeGenericType(typeof(TResult).GenericTypeArguments[0]);
+        
+        var method = genericType.GetMethod(nameof(ValidationResult<object>.WithErrors), new[] { typeof(Error[]) });
 
-        object validationResult = typeof(ValidationResult<>)
-            .GetGenericTypeDefinition()
-            .MakeGenericType(typeof(TResult).GenericTypeArguments[0])
-            .GetMethod(nameof(ValidationResult.WithErrors))!.Invoke(null, new object?[] { errors })!;
-
+        object validationResult = method!.Invoke(null, new object[] { errors })!;
+        
         return (TResult)validationResult;
     }
 }

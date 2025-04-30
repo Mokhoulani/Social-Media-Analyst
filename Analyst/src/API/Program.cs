@@ -17,7 +17,7 @@ builder.Host.UseSerilog((context, configuration) =>
 builder
     .Services
     .AddControllers()
-    .AddApplicationPart(Presentation.AssemblyReference.Assembly);
+    .AddApplicationPart(AssemblyReference.Assembly);
 
 builder.Services.AddInfrastructureLayer(builder.Configuration);
 builder.Services.AddApplicationLayer(builder.Environment);

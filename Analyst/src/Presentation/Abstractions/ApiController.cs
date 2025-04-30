@@ -1,4 +1,7 @@
 ﻿using Domain.Shared;
+using Domain.Shared.ResultTypes.AuthenticationResult;
+using Domain.Shared.ResultTypes.AuthorizationResult;
+using Domain.Shared.ResultTypes.ValidationResult;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,27 +14,39 @@ public abstract class ApiController(ISender sender) : ControllerBase
     protected readonly ISender Sender = sender;
 
     protected IActionResult HandleFailure(Result result) =>
-        result switch
-        {
-            { IsSuccess: true } => throw new InvalidOperationException(),
-            IValidationResult validationResult =>
-                BadRequest(
-                    CreateProblemDetails(
-                        "Validation Error", StatusCodes.Status400BadRequest,
-                        result.Error,
-                        validationResult.Errors)),
-            _ when result.Error.Code == "User.Unauthenticated" => 
-                StatusCode(StatusCodes.Status403Forbidden,
-                    CreateProblemDetails(
-                        "Forbidden", StatusCodes.Status403Forbidden,
-                        result.Error)),
-            _ => BadRequest(
-                CreateProblemDetails(
-                    "Bad Request",
-                    StatusCodes.Status400BadRequest,
-                    result.Error))
-        };
+     result switch
+     {
+         { IsSuccess: true } => throw new InvalidOperationException(),
 
+         IValidationResult validationResult =>
+             BadRequest(CreateProblemDetails(
+                 "Validation Error",
+                 StatusCodes.Status400BadRequest,
+                 result.Error,
+                 validationResult.Errors)),
+
+         IAuthenticationResult authenticationResult =>
+             StatusCode(StatusCodes.Status401Unauthorized,
+                 CreateProblemDetails(
+                     "Unauthenticated",
+                     StatusCodes.Status401Unauthorized,
+                     result.Error,
+                     authenticationResult.Errors)),
+         
+         IAuthorizationResult authorizationResult =>
+             StatusCode(StatusCodes.Status403Forbidden,
+                 CreateProblemDetails(
+                     "Unauthorized",
+                     StatusCodes.Status403Forbidden,
+                     result.Error,
+                     authorizationResult.Errors)),
+
+
+         _ => BadRequest(CreateProblemDetails(
+             "Bad Request",
+             StatusCodes.Status400BadRequest,
+             result.Error))
+     };
 
     private static ProblemDetails CreateProblemDetails(
         string title,

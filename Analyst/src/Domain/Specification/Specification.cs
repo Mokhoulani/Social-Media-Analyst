@@ -19,14 +19,17 @@ public abstract class Specification<TEntity, TKey>(Expression<Func<TEntity, bool
 
     public Expression<Func<TEntity, object>>? OrderByDescendingExpression { get; private set; }
 
+    public LambdaExpression? Selector { get; private set; }
+
     protected void AddInclude(Expression<Func<TEntity, object>> includeExpression) =>
         IncludeExpressions.Add(includeExpression);
 
-    protected void AddOrderBy(
-        Expression<Func<TEntity, object>> orderByExpression) =>
+    protected void AddOrderBy(Expression<Func<TEntity, object>> orderByExpression) =>
         OrderByExpression = orderByExpression;
 
-    protected void AddOrderByDescending(
-        Expression<Func<TEntity, object>> orderByDescendingExpression) =>
+    protected void AddOrderByDescending(Expression<Func<TEntity, object>> orderByDescendingExpression) =>
         OrderByDescendingExpression = orderByDescendingExpression;
-} 
+
+    protected void AddSelector<TOut>(Expression<Func<TEntity, TOut>> selector) =>
+        Selector = selector;
+}

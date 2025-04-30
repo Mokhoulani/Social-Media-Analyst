@@ -1,6 +1,6 @@
-using System.Text.RegularExpressions;
-using Domain.Errors;
 using Domain.Primitives;
+using Domain.Rules;
+using Domain.Rules.passwordRules;
 using Domain.Shared;
 
 namespace Domain.ValueObjects;
@@ -17,33 +17,23 @@ public sealed class Password : ValueObject
     {
         Hash = hash;
     }
-    
+
     public static Result<Password> Create(string plainTextPassword)
     {
-        return Result.Create(plainTextPassword)
-            .Ensure(
-                p => !string.IsNullOrWhiteSpace(p),
-                DomainErrors.Password.Empty)
-            .Ensure(
-                p => p.Length >= MinLength,
-                DomainErrors.Password.TooShort)
-            .Ensure(
-                p => p.Length <= MaxLength,
-                DomainErrors.Password.TooLong)
-            .Ensure(
-                p => Regex.IsMatch(p, @"[A-Z]"),
-                DomainErrors.Password.MissingUpperCase)
-            .Ensure(
-                p => Regex.IsMatch(p, @"[a-z]"),
-                DomainErrors.Password.MissingLowerCase)
-            .Ensure(
-                p => Regex.IsMatch(p, @"\d"),
-                DomainErrors.Password.MissingDigit)
-            .Ensure(
-                p => Regex.IsMatch(p, @"[\W_]"),
-                DomainErrors.Password.MissingSpecialChar)
+        return RuleValidator
+            .Validate(plainTextPassword,
+            [
+            new NotEmptyPasswordRule(plainTextPassword),
+            new MinLengthPasswordRule(plainTextPassword, MinLength),
+            new MaxLengthPasswordRule(plainTextPassword, MaxLength),
+            new MustContainUppercaseRule(plainTextPassword),
+            new MustContainLowercaseRule(plainTextPassword),
+            new MustContainDigitRule(plainTextPassword),
+            new MustContainSpecialCharRule(plainTextPassword)
+            ])
             .Map(p => new Password(BCrypt.Net.BCrypt.HashPassword(p, workFactor: 12)));
     }
+
 
     public bool Verify(string plainTextPassword)
     {

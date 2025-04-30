@@ -4,5 +4,5 @@ namespace Application.Common.Interfaces;
 
 public interface IJwtProvider
 {
-    string Generate(User user);
+   string Generate(User user);
 }

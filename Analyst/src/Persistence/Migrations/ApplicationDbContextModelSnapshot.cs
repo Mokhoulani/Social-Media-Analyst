@@ -47,6 +47,83 @@ namespace API.Migrations
                     b.ToTable("PasswordResetToken", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.Permission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permission", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "ReadUser"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "UpdateUser"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "DeleteUser"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "CreateUser"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "ReadRole"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "UpdateRole"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "DeleteRole"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "CreateRole"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "ReadPermission"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "UpdatePermission"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "DeletePermission"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Name = "CreatePermission"
+                        });
+                });
+
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -72,6 +149,65 @@ namespace API.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("RefreshToken", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Role", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Registered"
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Entities.RolePermission", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("RoleId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("RolePermission");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 1
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 2
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 3
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 4
+                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -102,7 +238,7 @@ namespace API.Migrations
                     b.ToTable("User", (string)null);
                 });
 
-            modelBuilder.Entity("Infrastructure.Outbox.OutboxMessage", b =>
+            modelBuilder.Entity("Persistence.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -130,6 +266,21 @@ namespace API.Migrations
                     b.ToTable("OutboxMessage", (string)null);
                 });
 
+            modelBuilder.Entity("RoleUser", b =>
+                {
+                    b.Property<int>("RolesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("UsersId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("RolesId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("RoleUser");
+                });
+
             modelBuilder.Entity("Domain.Entities.PasswordResetToken", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
@@ -150,6 +301,21 @@ namespace API.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Entities.RolePermission", b =>
+                {
+                    b.HasOne("Domain.Entities.Permission", null)
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -173,6 +339,21 @@ namespace API.Migrations
                         });
 
                     b.Navigation("Password")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("RoleUser", b =>
+                {
+                    b.HasOne("Domain.Entities.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

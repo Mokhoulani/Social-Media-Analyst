@@ -1,5 +1,5 @@
 ﻿using Application.Abstractions.Messaging;
-using Application.Cache;
+using Application.Common.CustomAttributes;
 using MediatR;
 using ZiggyCreatures.Caching.Fusion;
 

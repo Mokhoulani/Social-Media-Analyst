@@ -1,6 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 using Domain.Errors;
 using Domain.Primitives;
+using Domain.Rules;
+using Domain.Rules.EmailRules;
 using Domain.Shared;
 
 
@@ -15,20 +17,20 @@ public sealed class Email : ValueObject
     {
         Value = value;
     }
-    
-    public static Result<Email> Create(string email) =>
-        Result.Create(email)
-            .Ensure(
-                e => !string.IsNullOrWhiteSpace(e),
-                DomainErrors.Email.Empty)
-            .Ensure(
-                e => e.Length <= MaxLength,
-                DomainErrors.Email.TooLong)
-            .Ensure(
-                e => Regex.IsMatch(e, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"),
-                DomainErrors.Email.InvalidFormat)
+
+    public static Result<Email> Create(string email)
+    {
+        return RuleValidator
+            .Validate(email,
+                [
+                new NotEmptyRule(email),
+                new MaxLengthRule(email, MaxLength),
+                new EmailFormatRule(email)
+                ])
             .Map(e => new Email(e));
-    
+    }
+
+
     protected override IEnumerable<object> GetAtomicValues()
     {
         yield return Value;

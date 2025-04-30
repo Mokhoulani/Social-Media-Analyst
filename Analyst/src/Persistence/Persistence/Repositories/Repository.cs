@@ -109,4 +109,9 @@ public class Repository<T, TKey>(ApplicationDbContext applicationDbContext) : IR
 
         return await queryWithSpec.CountAsync(cancellationToken);
     }
+    
+    public IQueryable<T> AsQueryable(bool trackChanges = false)
+    {
+        return trackChanges ? _dbSet.AsQueryable() : _dbSet.AsNoTracking();
+    }
 }

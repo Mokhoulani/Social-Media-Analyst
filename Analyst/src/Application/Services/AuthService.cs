@@ -55,7 +55,7 @@ public class AuthService(
 
         if (user.IsFailure) return Result.Failure<TokenResponseViewModel>(DomainErrors.User.NotFound);
 
-        var newAccessToken = jwtProvider.Generate(user.Value);
+        var newAccessToken =  jwtProvider.Generate(user.Value);
         var newRefreshToken = tokenService.GenerateRefreshToken();
 
         var expiryDate = tokenService.GetRefreshTokenExpiryDate();
