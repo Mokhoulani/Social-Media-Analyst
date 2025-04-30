@@ -1,13 +1,12 @@
+using Domain.Entities;
+using Domain.ValueObjects;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Domain.Entities;
-using Domain.ValueObjects;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Persistence.Persistence;
-
 
 namespace Api.Tests.Common;
 
@@ -19,10 +18,10 @@ public class WebapiWebApplicationFactory : WebApplicationFactory<Program>
         {
             services.RemoveAll(typeof(DbContextOptions<ApplicationDbContext>));
 
-            string connectionString = GetConnectionString() ?? "DataSource=file::memory:?cache=shared";
+            var connectionString = GetConnectionString() ?? "DataSource=file::memory:?cache=shared";
             services.AddSqlite<ApplicationDbContext>(connectionString);
 
-            ApplicationDbContext dbContextApp = CreateDbContext(services);
+            var dbContextApp = CreateDbContext(services);
 
             dbContextApp.Database.EnsureDeleted();
             dbContextApp.Database.EnsureCreated();
@@ -62,6 +61,10 @@ public class WebapiWebApplicationFactory : WebApplicationFactory<Program>
             lastNameResult.Value,
             passwordResult.Value
         );
+
+        var registeredRole = context.Set<Role>().First(r => r.Id == Role.Registered.Id);
+
+        testUser.Roles.Add(registeredRole);
 
         context.Set<User>().Add(testUser);
 
