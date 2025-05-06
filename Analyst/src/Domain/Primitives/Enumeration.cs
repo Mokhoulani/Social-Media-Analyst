@@ -6,8 +6,7 @@ namespace Domain.Primitives;
 /// Represents an enumeration of objects with a unique numeric identifier and a name.
 /// </summary>
 /// <typeparam name="TEnum">The type of the enumeration.</typeparam>
-public abstract class Enumeration<TEnum> : IEquatable<Enumeration<TEnum>>
-    where TEnum : Enumeration<TEnum>
+public abstract class Enumeration<TEnum> : Entity<int>, IEquatable<Enumeration<TEnum>> where TEnum : Enumeration<TEnum>
 {
     private static readonly Lazy<Dictionary<int, TEnum>> EnumerationsDictionary =
         new(() => CreateEnumerationDictionary(typeof(TEnum)));
@@ -17,10 +16,8 @@ public abstract class Enumeration<TEnum> : IEquatable<Enumeration<TEnum>>
     /// </summary>
     /// <param name="id">The enumeration identifier.</param>
     /// <param name="name">The enumeration name.</param>
-    protected Enumeration(int id, string name)
-        : this()
+    protected Enumeration(int id, string name) : base(id)
     {
-        Id = id;
         Name = name;
     }
 
@@ -30,12 +27,7 @@ public abstract class Enumeration<TEnum> : IEquatable<Enumeration<TEnum>>
     /// <remarks>
     /// Required for deserialization.
     /// </remarks>
-    protected Enumeration() => Name = string.Empty;
-
-    /// <summary>
-    /// Gets the identifier.
-    /// </summary>
-    public int Id { get; protected init; }
+    protected Enumeration() : base() => Name = string.Empty;
 
     /// <summary>
     /// Gets the name.
@@ -70,14 +62,16 @@ public abstract class Enumeration<TEnum> : IEquatable<Enumeration<TEnum>>
     /// </summary>
     /// <param name="id">The enumeration identifier.</param>
     /// <returns>The enumeration instance that matches the specified identifier, if it exists.</returns>
-    public static TEnum? FromId(int id) => EnumerationsDictionary.Value.TryGetValue(id, out TEnum? enumeration) ? enumeration : null;
+    public static TEnum? FromId(int id) =>
+        EnumerationsDictionary.Value.TryGetValue(id, out TEnum? enumeration) ? enumeration : null;
 
     /// <summary>
     /// Creates an enumeration of the specified type based on the specified name.
     /// </summary>
     /// <param name="name">The enumeration name.</param>
     /// <returns>The enumeration instance that matches the specified name, if it exists.</returns>
-    public static TEnum? FromName(string name) => EnumerationsDictionary.Value.Values.SingleOrDefault(x => x.Name == name);
+    public static TEnum? FromName(string name) =>
+        EnumerationsDictionary.Value.Values.SingleOrDefault(x => x.Name == name);
 
     /// <summary>
     /// Checks if the enumeration with the specified identifier exists.
@@ -116,7 +110,8 @@ public abstract class Enumeration<TEnum> : IEquatable<Enumeration<TEnum>>
     /// <inheritdoc />
     public override int GetHashCode() => Id.GetHashCode() * 37;
 
-    private static Dictionary<int, TEnum> CreateEnumerationDictionary(Type enumType) => GetFieldsForType(enumType).ToDictionary(t => t.Id);
+    private static Dictionary<int, TEnum> CreateEnumerationDictionary(Type enumType) =>
+        GetFieldsForType(enumType).ToDictionary(t => t.Id);
 
     private static IEnumerable<TEnum> GetFieldsForType(Type enumType) =>
         enumType.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)

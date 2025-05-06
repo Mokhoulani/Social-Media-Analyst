@@ -6,10 +6,12 @@ using Application.Abstractions.Messaging;
 using Application.Common.Interfaces;
 using Application.Common.Mod.ViewModels;
 using Domain.Shared;
+using Domain.Shared.Extensions;
+using Domain.Interfaces;
 
 namespace Application.CQRS.User.Handlers;
 
-public class SignUpHandler(IUserService userService, IMapper mapper, ILogger<SignUpHandler> logger)
+public class SignUpHandler(IUserService userService, IPermissionService permissionService, IMapper mapper, ILogger<SignUpHandler> logger)
     : ICommandHandler<SignUpCommand, AppUserViewModel>
 {
     public async Task<Result<AppUserViewModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
@@ -20,13 +22,21 @@ public class SignUpHandler(IUserService userService, IMapper mapper, ILogger<Sig
                     .Bind(firstName => LastName.Create(request.LastName)
                         .Map(lastName => new
                         {
-                            Email = email, Password = password, FirstName = firstName, LastName = lastName
+                            Email = email,
+                            Password = password,
+                            FirstName = firstName,
+                            LastName = lastName
                         }))));
-
+     
         if (result.IsFailure) return result.Error;
+
+        var role = await permissionService.GetRoleByNameAsync("registered", cancellationToken);
 
         var user = Domain.Entities.User.Create(Guid.NewGuid(), result.Value.Email, result.Value.FirstName,
             result.Value.LastName, result.Value.Password);
+
+        if (role.IsSuccess)
+            user.Roles.Add(role.Value);
 
         var userResult = await userService.AddUserAsync(user, cancellationToken);
 

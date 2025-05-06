@@ -1,6 +1,7 @@
 ﻿using Domain.Errors;
 using Domain.Primitives;
 using Domain.Shared;
+using Domain.Shared.Extensions;
 
 
 namespace Domain.ValueObjects;

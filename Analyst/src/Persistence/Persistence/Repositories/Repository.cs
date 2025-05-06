@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Persistence.Persistence.Repositories;
 
 public class Repository<T, TKey>(ApplicationDbContext applicationDbContext) : IRepository<T, TKey>
-    where T : Entity<TKey>, IAggregateRoot
+    where T : Entity<TKey>, IAggregateRoot where TKey : notnull
 {
     private readonly DbSet<T> _dbSet = applicationDbContext.Set<T>();
 
@@ -77,7 +77,7 @@ public class Repository<T, TKey>(ApplicationDbContext applicationDbContext) : IR
     public async Task<Result<T>> FindOneAsync(Specification<T, TKey> specification,
         CancellationToken cancellationToken = default)
     {
-        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet.AsQueryable(), specification);
+        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet, specification);
 
         var entity = await queryWithSpec.FirstOrDefaultAsync(cancellationToken);
 
@@ -87,7 +87,7 @@ public class Repository<T, TKey>(ApplicationDbContext applicationDbContext) : IR
     public async Task<Result<List<T>>> FindManyAsync(Specification<T, TKey> specification,
         CancellationToken cancellationToken = default)
     {
-        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet.AsQueryable(), specification);
+        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet, specification);
 
         var list = await queryWithSpec.ToListAsync(cancellationToken);
 
@@ -97,7 +97,7 @@ public class Repository<T, TKey>(ApplicationDbContext applicationDbContext) : IR
     public async Task<Result<bool>> ExistsAsync(Specification<T, TKey> specification,
         CancellationToken cancellationToken = default)
     {
-        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet.AsQueryable(), specification);
+        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet, specification);
 
         return await queryWithSpec.AnyAsync(cancellationToken);
     }
@@ -105,7 +105,7 @@ public class Repository<T, TKey>(ApplicationDbContext applicationDbContext) : IR
     public async Task<Result<int>> CountAsync(Specification<T, TKey> specification,
         CancellationToken cancellationToken = default)
     {
-        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet.AsQueryable(), specification);
+        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet, specification);
 
         return await queryWithSpec.CountAsync(cancellationToken);
     }

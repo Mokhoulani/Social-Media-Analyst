@@ -26,9 +26,9 @@ public sealed class User : AggregateRoot<Guid>, IAggregateRoot
 
     public Password Password { get; private set; }
 
-    public ICollection<RefreshToken>? RefreshTokens { get; private set; } = new List<RefreshToken>();
-    public ICollection<PasswordResetToken>? PasswordResetTokens { get; private set; } = new List<PasswordResetToken>();
-    public ICollection<Role> Roles { get; private set; } = new List<Role>();
+    public ICollection<RefreshToken>? RefreshTokens { get; private set; } = [];
+    public ICollection<PasswordResetToken>? PasswordResetTokens { get; private set; } = [];
+    public ICollection<Role> Roles { get; private set; } = [];
     
     public static User Create(Guid id, Email email, FirstName firstName, LastName lastName, Password password)
     {

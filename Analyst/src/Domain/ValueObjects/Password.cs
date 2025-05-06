@@ -2,6 +2,7 @@ using Domain.Primitives;
 using Domain.Rules;
 using Domain.Rules.passwordRules;
 using Domain.Shared;
+using Domain.Shared.Extensions;
 
 namespace Domain.ValueObjects;
 
