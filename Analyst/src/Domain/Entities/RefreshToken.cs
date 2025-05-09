@@ -2,18 +2,18 @@ using Domain.Interfaces;
 using Domain.Primitives;
 
 namespace Domain.Entities;
-public class RefreshToken : AggregateRoot<Guid> ,IAggregateRoot
+public class RefreshToken : Entity<Guid> ,IAggregateRoot
 {
-    public string Token { get; private set; }
+    public string Token { get; private set; } = string.Empty;
     public DateTime ExpiresAt { get; private set; }
     public Guid UserId { get; private init; }
-    public User User { get; private init; }
+    public User? User { get; private init; }
 
     private RefreshToken()
     {
     }
 
-    public RefreshToken(Guid userId, string token, DateTime expiresAt)
+    public RefreshToken(Guid Id, Guid userId, string token, DateTime expiresAt): base(Id)
     {
         UserId = userId;
         Token = token;
@@ -22,7 +22,7 @@ public class RefreshToken : AggregateRoot<Guid> ,IAggregateRoot
 
     public static RefreshToken Create(Guid userId, string token, DateTime expiresAt)
     {
-        return new RefreshToken(userId, token, expiresAt);
+        return new RefreshToken(Guid.NewGuid(),userId, token, expiresAt);
     }
 
     /// <summary>
