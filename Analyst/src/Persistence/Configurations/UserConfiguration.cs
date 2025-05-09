@@ -16,25 +16,54 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder
             .Property(x => x.Email)
-            .HasConversion(x => x.Value, v => Email.Create(v).Value);
+            .HasConversion(x => x.Value,
+                v => Email.Create(v)
+                    .Value);
 
         builder
             .Property(x => x.FirstName)
-            .HasConversion(x => x.Value, v => FirstName.Create(v).Value)
+            .HasConversion(x => x.Value,
+                v => FirstName.Create(v)
+                    .Value)
             .HasMaxLength(FirstName.MaxLength);
 
         builder
             .Property(x => x.LastName)
-            .HasConversion(x => x.Value, v => LastName.Create(v).Value)
+            .HasConversion(x => x.Value,
+                v => LastName.Create(v)
+                    .Value)
             .HasMaxLength(LastName.MaxLength);
 
-        builder.OwnsOne(u => u.Password, passwordBuilder =>
-        {
-            passwordBuilder.Property(p => p.Hash)
-                .HasColumnName("PasswordHash")
-                .IsRequired();
-        });
-        
-        builder.HasIndex(x => x.Email).IsUnique();
+        builder.Property(x => x.CreatedOnUtc)
+          .IsRequired();
+
+        builder.Property(x => x.ModifiedOnUtc)
+            .IsRequired(false);
+
+        builder.OwnsOne(u => u.Password,
+            passwordBuilder =>
+            {
+                passwordBuilder.Property(p => p.Hash)
+                    .HasColumnName("PasswordHash")
+                    .IsRequired();
+            });
+
+        builder.HasMany(x => x.RefreshTokens)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(x => x.PasswordResetTokens)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(x => x.SocialMediaUsages)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(x => x.Email)
+            .IsUnique();
     }
 }

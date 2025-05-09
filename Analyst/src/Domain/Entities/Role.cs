@@ -1,11 +1,12 @@
-﻿using Domain.Primitives;
+using Domain.Interfaces;
+using Domain.Primitives;
 
 namespace Domain.Entities;
 
-public sealed class Role(int id, string name) : Enumeration<Role>(id, name)
+public sealed class Role(int id, string name) : Enumeration<Role>(id, name) , IAggregateRoot
 {
     public static readonly Role Registered = new(1, "Registered");
 
-    public ICollection<Permission> Permissions { get; set; } = new List<Permission>();
-    public ICollection<User> Users { get; set; } = new List<User>();
+    public ICollection<Permission> Permissions { get; set; } = [];
+    public ICollection<User> Users { get; set; } = [];
 }

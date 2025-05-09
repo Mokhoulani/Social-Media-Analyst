@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence.Persistence;
 
@@ -10,9 +11,11 @@ using Persistence.Persistence;
 namespace API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250509120124_AddEntitiesSchem")]
+    partial class AddEntitiesSchem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
@@ -78,83 +81,6 @@ namespace API.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("PasswordResetToken", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Entities.Permission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Permission", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "ReadUser"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "UpdateUser"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "DeleteUser"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "CreateUser"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "ReadRole"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "UpdateRole"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "DeleteRole"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Name = "CreateRole"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Name = "ReadPermission"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Name = "UpdatePermission"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Name = "DeletePermission"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Name = "CreatePermission"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.Permission", b =>

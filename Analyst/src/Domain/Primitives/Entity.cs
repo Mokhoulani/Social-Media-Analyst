@@ -1,12 +1,12 @@
 ﻿namespace Domain.Primitives;
 
-public abstract class Entity<TKey> : IEquatable<Entity<TKey>>
+public abstract class Entity<TKey>(TKey id) : IEquatable<Entity<TKey>> where TKey : notnull
 {
-    protected Entity(TKey id) => Id = id;
+    protected Entity() : this(default!)
+    {
+    }
 
-    protected Entity() => Id = default!;
-
-    public TKey Id { get; private init; }
+    public TKey Id { get; private init; } = id;
 
     public static bool operator ==(Entity<TKey>? first, Entity<TKey>? second)
     {
@@ -18,16 +18,12 @@ public abstract class Entity<TKey> : IEquatable<Entity<TKey>>
     public static bool operator !=(Entity<TKey>? first, Entity<TKey>? second) => !(first == second);
 
     public bool Equals(Entity<TKey>? other)
-{
-    if (ReferenceEquals(this, other)) return true;
-    if (other is null || other.GetType() != GetType()) return false;
-    
-    return EqualityComparer<TKey>.Default.Equals(other.Id, Id);
-}
+    {
+        if (ReferenceEquals(this, other)) return true;
+        if (other is null || other.GetType() != GetType()) return false;
+        return EqualityComparer<TKey>.Default.Equals(other.Id, Id);
+    }
 
-
-    public override bool Equals(object? obj) =>
-        obj is Entity<TKey> entity && Equals(entity);
-
+    public override bool Equals(object? obj) => obj is Entity<TKey> entity && Equals(entity);
     public override int GetHashCode() => HashCode.Combine(Id, GetType());
 }

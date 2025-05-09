@@ -6,17 +6,17 @@ namespace Domain.Entities;
 
 public class PasswordResetToken : AggregateRoot<Guid> ,IAggregateRoot
 {
-    public string Token { get; private init; }
+    public string Token { get; private init; } = string.Empty;
     public DateTime ExpiresAt { get; init; }
     public bool Used { get; set; } = false;
     public Guid UserId { get; private init; }
-    public User User { get; private init; }
+    public User? User { get; private init; }
 
     private PasswordResetToken()
     {
     }
 
-    private PasswordResetToken(Guid userId, string token, DateTime expiresAt)
+    private PasswordResetToken(Guid Id,Guid userId, string token, DateTime expiresAt) : base(Id)
     {
         UserId = userId;
         Token = token;
@@ -25,7 +25,7 @@ public class PasswordResetToken : AggregateRoot<Guid> ,IAggregateRoot
 
     public static PasswordResetToken Create(Guid userId, string token, DateTime expiresAt)
     {
-        var passwordResetToken = new PasswordResetToken(userId, token, expiresAt);
+        var passwordResetToken = new PasswordResetToken(Guid.NewGuid(), userId, token, expiresAt);
 
         passwordResetToken.RaiseDomainEvent(new UserResetPasswordDomainEvent(userId));
 

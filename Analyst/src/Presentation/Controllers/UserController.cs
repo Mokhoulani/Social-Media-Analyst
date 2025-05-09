@@ -42,6 +42,7 @@ public class UserController(ISender sender) : ApiController(sender)
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetUserById(string id, CancellationToken cancellationToken)
     {
+
         var query = new GetUserByIdQuery(id);
         var userResult = await Sender.Send(query, cancellationToken);
 
