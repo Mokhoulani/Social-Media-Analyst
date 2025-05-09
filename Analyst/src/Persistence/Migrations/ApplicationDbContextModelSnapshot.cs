@@ -157,6 +157,83 @@ namespace API.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Domain.Entities.Permission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permission", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "ReadUser"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "UpdateUser"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "DeleteUser"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "CreateUser"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "ReadRole"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "UpdateRole"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "DeleteRole"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "CreateRole"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "ReadPermission"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "UpdatePermission"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "DeletePermission"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Name = "CreatePermission"
+                        });
+                });
+
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
