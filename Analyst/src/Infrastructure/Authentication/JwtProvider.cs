@@ -3,13 +3,12 @@ using System.Security.Claims;
 using System.Text;
 using Application.Common.Interfaces;
 using Domain.Entities;
-using Domain.Interfaces;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Authentication;
 
-internal sealed class JwtProvider(IOptions<JwtOptions> options, IPermissionService permissionService) : IJwtProvider
+internal sealed class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
     private readonly JwtOptions _options = options.Value;
 

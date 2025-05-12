@@ -1,7 +1,7 @@
-using Infrastructure.Authentication;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
-namespace Api.OptionsSetup;
+namespace Infrastructure.Authentication;
 
 public class RefreshTokenOptionsSetup(IConfiguration configuration) : IConfigureOptions<RefreshTokenOptions>
 {

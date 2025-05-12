@@ -1,14 +1,14 @@
 using Application.Common.Interfaces;
+using Domain.Interfaces;
 using HealthChecks.Redis;
 using Infrastructure.Authentication;
 using Infrastructure.Service;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using ZiggyCreatures.Caching.Fusion;
-using Persistence.Extensions;
-using Domain.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Persistence.Extensions;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace Infrastructure.Extensions;
 
@@ -27,6 +27,13 @@ public static class DependencyInjection
         services.AddAuthorization();
         services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
         services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+
+        services.ConfigureOptions<JwtOptionsSetup>();
+        services.ConfigureOptions<RefreshTokenOptionsSetup>();
+        services.ConfigureOptions<JwtBearerOptionsSetup>();
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer();
 
         // Register Repositories & Services
         services.AddPersistenceLayer();

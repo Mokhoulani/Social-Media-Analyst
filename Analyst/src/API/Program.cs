@@ -1,12 +1,9 @@
-using Api.OptionsSetup;
 using Application.Common.Extensions;
 using Hellang.Middleware.ProblemDetails;
 using Infrastructure.Extensions;
 using Presentation;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Quartz;
 using Serilog;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,15 +24,18 @@ builder.Services.AddQuartzHostedService();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.ConfigureOptions<JwtOptionsSetup>();
-builder.Services.ConfigureOptions<RefreshTokenOptionsSetup>();
-builder.Services.ConfigureOptions<JwtBearerOptionsSetup>();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer();
-
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy => policy
+            .WithOrigins("http://localhost:8081")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
+});
 
 var app = builder.Build();
 
@@ -60,11 +60,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseHealthChecks("/health");
+app.UseCors("AllowFrontend");
 
 app.MapControllers();
 app.MapFallbackToFile("/index.html");
 app.Run();
 
 
-
-public partial class Program { }
+public partial class Program
+{
+}
