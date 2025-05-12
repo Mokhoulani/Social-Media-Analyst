@@ -10,7 +10,7 @@ public sealed class Password : ValueObject
 {
     private const int MinLength = 8;
     private const int MaxLength = 50;
-    public string Hash { get; } 
+    public string Hash { get; } = string.Empty;
     
     private Password() { }
 

@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Authentication;
 
-internal sealed class JwtProvider(IOptions<JwtOptions> options, IPermissionService permissionService) : IJwtProvider
+internal sealed class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
 {
     private readonly JwtOptions _options = options.Value;
 

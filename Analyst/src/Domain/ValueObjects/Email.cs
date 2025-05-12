@@ -20,10 +20,11 @@ public sealed class Email : ValueObject
     {
         return RuleValidator
             .Validate(email,
+                [
                 new NotEmptyRule(email),
-                new MaxLengthRule(email,
-                    MaxLength),
-                new EmailFormatRule(email))
+                new MaxLengthRule(email, MaxLength),
+                new EmailFormatRule(email)
+                ])
             .Map(e => new Email(e));
     }
     
