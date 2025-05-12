@@ -19,10 +19,15 @@ public sealed class Email : ValueObject
     public static Result<Email> Create(string email)
     {
         return RuleValidator
-            .Validate(email, new NotEmptyRule(email), new MaxLengthRule(email, MaxLength), new EmailFormatRule(email))
+            .Validate(email,
+                [
+                new NotEmptyRule(email),
+                new MaxLengthRule(email, MaxLength),
+                new EmailFormatRule(email)
+                ])
             .Map(e => new Email(e));
     }
-
+    
     protected override IEnumerable<object> GetAtomicValues()
     {
         yield return Value;
