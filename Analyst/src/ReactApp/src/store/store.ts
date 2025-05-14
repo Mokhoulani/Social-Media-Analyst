@@ -1,7 +1,7 @@
 import { Action, configureStore, Middleware } from '@reduxjs/toolkit'
 import { createEpicMiddleware } from 'redux-observable'
-import { rootEpic } from './root-epic'
-import { rootReducer, RootState } from './root-reducer'
+import { rootEpic } from './root.epic'
+import { rootReducer, RootState } from './root.reducer'
 
 export type Dependencies = object
 

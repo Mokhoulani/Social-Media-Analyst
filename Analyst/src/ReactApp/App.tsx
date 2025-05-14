@@ -9,7 +9,7 @@ import {
     View,
 } from 'react-native'
 import { Provider, useSelector } from 'react-redux'
-import { BaseApi } from './src/service/api/base-api' // Adjust path to your SimpleApi implementation
+import { APIClient } from './src/api/apiClient' // Adjust path to your SimpleApi implementation
 import { AuthFacade } from './src/store/auth/facade'
 import { authSelectors } from './src/store/auth/selectors'
 import { store } from './src/store/store'
@@ -57,40 +57,14 @@ function LoginScreen() {
 
 export default function App() {
     useEffect(() => {
-        // Setup request interceptor for auth token
-        BaseApi.addRequestInterceptor((requestConfig) => {
-            const token = getStoredToken()
-            if (token) {
-                requestConfig.headers = {
-                    ...requestConfig.headers,
-                    Authorization: `Bearer ${token}`,
-                }
-            }
-            return requestConfig
-        })
-
-        // Setup response interceptor for error handling
-        BaseApi.addResponseInterceptor(
-            (response) => {
-                // You can transform successful responses here
-                return response
-            },
-            (error) => {
-                // Handle errors globally
-                if (error.response?.status === 401) {
-                    // Handle unauthorized error (e.g., logout user)
-                    AuthFacade.refreshToken()
-                }
-                return Promise.reject(error)
-            }
-        )
-    }, [])
+        APIClient.setup();
+    }, []);
 
     return (
         <Provider store={store}>
             <LoginScreen />
         </Provider>
-    )
+    );
 }
 
 const styles = StyleSheet.create({

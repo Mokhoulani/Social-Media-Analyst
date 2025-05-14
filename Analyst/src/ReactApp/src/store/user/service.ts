@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs'
 import { User } from '../../entities/user'
-import { BaseApi } from '../../service/api/base-api'
+import { APIClient } from '../../api/apiClient'
 
 export interface GetUserPayload {
     accecsToken: string
@@ -20,7 +20,7 @@ export const UserService = {
      * Gets the current user profile
      * @returns Observable with user data
      */
-    getUser: (): Observable<User> => BaseApi.get<User>('/User/get-user'),
+    getUser: (): Observable<User> => APIClient.get<User>('/User/get-user'),
 
     /**
      * Updates user profile information
@@ -28,7 +28,7 @@ export const UserService = {
      * @returns Observable with updated user data
      */
     updateUser: (userData: Partial<User>): Observable<User> =>
-        BaseApi.put<User>('/User/update', userData),
+        APIClient.put<User>('/User/update', userData),
 
     /**
      * If you need the full response with headers, status, etc.

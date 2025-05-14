@@ -1,7 +1,7 @@
 import { Epic, combineEpics } from 'redux-observable'
 import { Action } from 'typesafe-actions'
 import { authEpics } from './auth/epic'
-import { RootState } from './root-reducer'
+import { RootState } from './root.reducer'
 import { Dependencies } from './store'
 import { userEpics } from './user/epic'
 

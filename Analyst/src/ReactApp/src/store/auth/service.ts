@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs'
-import { BaseApi } from '../../service/api/base-api'
+import { APIClient } from '../../api/apiClient'
 
 export interface LoginPayload {
     email: string
@@ -72,20 +72,20 @@ type RefreshTokenPayload = string
 
 export const AuthService = {
     login: (payload: LoginPayload): Observable<AuthResponse> =>
-        BaseApi.post<AuthResponse>('/User/login', payload),
+        APIClient.post<AuthResponse>('/User/login', payload),
 
     signUp: (payload: SignUpPayload): Observable<AuthResponse> =>
-        BaseApi.post<AuthResponse>('/User/signup', payload),
+        APIClient.post<AuthResponse>('/User/signup', payload),
 
     refreshToken: (
         refreshToken: RefreshTokenPayload
     ): Observable<RefreshTokenResponse> =>
-        BaseApi.post<RefreshTokenResponse>('/auth/refresh-token', {
+        APIClient.post<RefreshTokenResponse>('/auth/refresh-token', {
             refreshToken,
         }),
 
     logout: (token: string): Observable<void> =>
-        BaseApi.post<void>('/User/logout', undefined, {
+        APIClient.post<void>('/User/logout', undefined, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
