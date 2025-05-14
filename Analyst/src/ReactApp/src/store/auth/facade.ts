@@ -1,3 +1,4 @@
+import { getStoredRefreshToken } from '../../utils/jwt-utils'
 import { store } from '../store'
 import { AuthActions } from './actions'
 import { authSelectors } from './selectors'
@@ -33,6 +34,15 @@ export const AuthFacade = {
      */
     refreshToken: () => {
         const refreshToken = authSelectors.selectRefreshToken(store.getState())
+        if (refreshToken) {
+            store.dispatch(AuthActions.refreshTokenRequest({ refreshToken }))
+        } else {
+            console.error('No refresh token available')
+        }
+    },
+
+    refreshTokenInterCeptor: () => {
+        const refreshToken = getStoredRefreshToken()
         if (refreshToken) {
             store.dispatch(AuthActions.refreshTokenRequest({ refreshToken }))
         } else {

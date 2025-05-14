@@ -2,10 +2,11 @@ import { Action } from '@reduxjs/toolkit'
 import { Epic, ofType } from 'redux-observable'
 import { of } from 'rxjs'
 import { catchError, map, mergeMap, tap } from 'rxjs/operators'
-import { Dependencies, RootState } from '../store'
+import { RootState } from '../root-reducer'
+import { Dependencies } from '../store'
 import { AuthActions } from './actions'
 import { AuthEffects } from './effects'
-import { AuthSevice } from './service'
+import { AuthService } from './service'
 
 export const loginEpic: Epic<Action, Action, RootState, Dependencies> = (
     action$
@@ -13,7 +14,7 @@ export const loginEpic: Epic<Action, Action, RootState, Dependencies> = (
     action$.pipe(
         ofType(AuthActions.loginRequest.type),
         mergeMap((action) =>
-            AuthSevice.login(
+            AuthService.login(
                 (action as ReturnType<typeof AuthActions.loginRequest>).payload
             ).pipe(
                 map((response) => {
@@ -58,7 +59,7 @@ export const signUpEpic: Epic<Action, Action, RootState, Dependencies> = (
     action$.pipe(
         ofType(AuthActions.signUpRequest.type),
         mergeMap((action) =>
-            AuthSevice.signUp(
+            AuthService.signUp(
                 (action as ReturnType<typeof AuthActions.signUpRequest>).payload
             ).pipe(
                 map((response) => {
@@ -103,9 +104,9 @@ export const refreshTokenEpic: Epic<Action, Action, RootState, Dependencies> = (
     action$.pipe(
         ofType(AuthActions.refreshTokenRequest.type),
         mergeMap((action) =>
-            AuthSevice.refreshToken(
+            AuthService.refreshToken(
                 (action as ReturnType<typeof AuthActions.refreshTokenRequest>)
-                    .payload
+                    .payload.refreshToken
             ).pipe(
                 map((response) => {
                     if (
@@ -155,7 +156,7 @@ export const logoutEpic: Epic<Action, Action, RootState, Dependencies> = (
             // Only call API if a token is provided
             const logoutAction = action as ReturnType<typeof AuthActions.logout>
             if (logoutAction.payload?.token) {
-                return AuthSevice.logout(logoutAction.payload.token).pipe(
+                return AuthService.logout(logoutAction.payload.token).pipe(
                     map(() => {
                         // Just complete the action, the reducer will handle state reset
                         return AuthActions.logoutComplete()

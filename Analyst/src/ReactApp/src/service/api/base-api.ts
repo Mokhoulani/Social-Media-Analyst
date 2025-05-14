@@ -1,205 +1,93 @@
-import { catchError, map, Observable, retry, throwError } from 'rxjs'
-import { ajax, AjaxError, AjaxResponse } from 'rxjs/ajax'
-import {
-    ApiResponse,
-    ErrorResponse,
-    SuccessResponse,
-    UnauthorizedError,
-    ValidationError,
-} from '../../types/types'
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { Observable, from, throwError } from 'rxjs'
+import { catchError, map, retry } from 'rxjs/operators'
+
+type RequestInterceptor = (config: AxiosRequestConfig) => AxiosRequestConfig
+type ResponseInterceptor = (response: AxiosResponse) => AxiosResponse
 
 export class BaseApi {
-    private static apiUrl = process.env.API_URL || 'http://localhost:5031/api'
-    private static defaultTimeout = 30000 // 30 seconds
+    private static axios = axios.create({
+        baseURL: 'http://localhost:5031/api',
+    })
+    private static requestInterceptors: RequestInterceptor[] = []
+    private static responseInterceptors: ResponseInterceptor[] = []
 
-    /**
-     * Creates headers object with content type and optional auth token
-     */
-    private static getHeaders(token?: string): Record<string, string> {
-        const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
-        }
-
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`
-        }
-
-        return headers
+    // Add request interceptor
+    static addRequestInterceptor(interceptor: RequestInterceptor) {
+        this.requestInterceptors.push(interceptor)
     }
 
-    /**
-     * Shared method for making HTTP requests
-     */
-    private static request<T>(
-        method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-        endpoint: string,
-        token?: string,
-        data?: unknown,
-        params?: Record<string, string>
-    ): Observable<ApiResponse<T>> {
-        let url = `${this.apiUrl}${endpoint}`
+    // Add response interceptor
+    static addResponseInterceptor(interceptor: ResponseInterceptor, p0?: (error: any) => Promise<never>) {
+        this.responseInterceptors.push(interceptor)
+    }
 
-        if (params && method === 'GET') {
-            const query = new URLSearchParams(params).toString()
-            if (query) {
-                url += `?${query}`
+    static get<T = any>(
+        url: string,
+        config?: AxiosRequestConfig
+    ): Observable<T> {
+        return this.request<T>({ ...config, method: 'GET', url })
+    }
+
+    static post<T = any>(
+        url: string,
+        data?: any,
+        config?: AxiosRequestConfig
+    ): Observable<T> {
+        return this.request<T>({ ...config, method: 'POST', url, data })
+    }
+
+    // ... other HTTP methods (put, delete, etc)
+
+    private static applyRequestInterceptors(
+        config: AxiosRequestConfig
+    ): AxiosRequestConfig {
+        return this.requestInterceptors.reduce(
+            (acc, interceptor) => interceptor(acc),
+            config
+        )
+    }
+
+    private static applyResponseInterceptors(
+        response: AxiosResponse
+    ): AxiosResponse {
+        return this.responseInterceptors.reduce(
+            (acc, interceptor) => interceptor(acc),
+            response
+        )
+    }
+
+    private static request<T = any>(config: AxiosRequestConfig): Observable<T> {
+        const interceptedConfig = this.applyRequestInterceptors(config)
+
+        return from(this.axios.request<T>(interceptedConfig)).pipe(
+            map((response: AxiosResponse<T>) => {
+                const processedResponse =
+                    this.applyResponseInterceptors(response)
+                return processedResponse.data
+            }),
+            catchError((error: AxiosError) =>
+                throwError(() => this.handleError(error))
+            ),
+            retry({ count: 2, delay: 1000 })
+        )
+    }
+
+    private static handleError(error: AxiosError) {
+        if (!error.response) {
+            return {
+                status: 0,
+                message: 'Network Error',
+                details: error.message || 'Cannot connect to server',
             }
         }
 
-        return ajax({
-            url,
-            method,
-            headers: this.getHeaders(token),
-            body: data,
-            timeout: this.defaultTimeout,
-        }).pipe(
-            // You can tweak retry count or move it to GET-only if needed
-            method === 'GET' ? retry(1) : map((res) => res),
-            map((res) => this.handleResponse<T>(this.castResponse<T>(res))),
-            catchError((err) => this.handleError(err))
-        )
-    }
-
-    /**
-     * GET request
-     */
-    public static get<T>(
-        endpoint: string,
-        token?: string,
-        params?: Record<string, string>
-    ): Observable<ApiResponse<T>> {
-        return this.request<T>('GET', endpoint, token, null, params)
-    }
-
-    /**
-     * POST request
-     */
-    public static post<T, D>(
-        endpoint: string,
-        data: D | null,
-        token?: string
-    ): Observable<ApiResponse<T>> {
-        return this.request<T>('POST', endpoint, token, data)
-    }
-
-    /**
-     * PUT request
-     */
-    public static put<T, D>(
-        endpoint: string,
-        data: D,
-        token?: string
-    ): Observable<ApiResponse<T>> {
-        return this.request<T>('PUT', endpoint, token, data)
-    }
-
-    /**
-     * PATCH request
-     */
-    public static patch<T, D>(
-        endpoint: string,
-        data: D,
-        token?: string
-    ): Observable<ApiResponse<T>> {
-        return this.request<T>('PATCH', endpoint, token, data)
-    }
-
-    /**
-     * DELETE request
-     */
-    public static delete<T>(
-        endpoint: string,
-        token?: string
-    ): Observable<ApiResponse<T>> {
-        return this.request<T>('DELETE', endpoint, token)
-    }
-
-    /**
-     * Safely cast AjaxResponse from unknown
-     */
-    private static castResponse<T>(
-        response: AjaxResponse<unknown>
-    ): AjaxResponse<SuccessResponse<T>> {
-        return response as AjaxResponse<SuccessResponse<T>>
-    }
-
-    /**
-     * Handle successful API responses
-     */
-    private static handleResponse<T>(
-        response: AjaxResponse<SuccessResponse<T>>
-    ): SuccessResponse<T> {
         return {
-            accessToken: response.response?.accessToken,
-            refreshToken: response.response?.refreshToken,
-            data: response.response?.data as T,
+            status: error.response.status,
+            message: error.response.statusText,
+            details: error.response.data,
         }
-    }
-
-    /**
-     * Handle API errors based on status code
-     */
-    private static handleError(error: AjaxError): Observable<never> {
-        if (process.env.NODE_ENV !== 'production') {
-            console.error('API Error:', error)
-        }
-
-        if (error.status === 400) {
-            return throwError(() => error.response as ValidationError)
-        }
-
-        if (error.status === 401) {
-            return throwError(() => error.response as UnauthorizedError)
-        }
-
-        if (error.status === 404) {
-            return throwError(
-                () =>
-                    ({
-                        type: 'NotFoundError',
-                        title: 'Resource Not Found',
-                        status: 404,
-                        detail: 'The requested resource could not be found',
-                        errors: [],
-                    }) as ErrorResponse
-            )
-        }
-
-        if (error.status === 403) {
-            return throwError(
-                () =>
-                    ({
-                        type: 'ForbiddenError',
-                        title: 'Access Forbidden',
-                        status: 403,
-                        detail: 'You do not have permission to access this resource',
-                        errors: [],
-                    }) as ErrorResponse
-            )
-        }
-
-        if (error.status >= 500) {
-            return throwError(
-                () =>
-                    ({
-                        type: 'ServerError',
-                        title: 'Server Error',
-                        status: error.status,
-                        detail: 'An error occurred on the server',
-                        errors: [],
-                    }) as ErrorResponse
-            )
-        }
-
-        return throwError(
-            () =>
-                ({
-                    type: 'UnknownError',
-                    title: 'Unknown Error',
-                    status: error.status || 0,
-                    detail: error.message || 'An unknown error occurred',
-                    errors: [],
-                }) as ErrorResponse
-        )
     }
 }
+
+export default BaseApi

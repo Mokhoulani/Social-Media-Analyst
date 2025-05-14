@@ -2,6 +2,8 @@ using Presentation.Abstractions;
 using Application.Common.Mod.ViewModels;
 using Application.CQRS.User.Commands;
 using Application.CQRS.User.Queries;
+using Domain.Errors;
+using Domain.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
@@ -58,4 +60,22 @@ public class UserController(ISender sender) : ApiController(sender)
 
         return tokenResult.IsSuccess ? Ok(tokenResult.Value) : HandleFailure(tokenResult);
     }
+
+    [HttpGet("get-user")]
+    public async Task<IActionResult> GetUser(CancellationToken cancellationToken)
+    {
+        var token = Request.Headers.Authorization.FirstOrDefault();
+
+        if (string.IsNullOrEmpty(token))
+        {
+            return HandleFailure(Result.Failure<AppUserViewModel>(AuthenticationErrors.Unauthenticated));
+        }
+
+        var command = new GetUserCommand(token);
+
+        var userResult = await Sender.Send(command, cancellationToken);
+
+        return userResult.IsSuccess ? Ok(userResult.Value) : HandleFailure(userResult);
+    }
+
 }

@@ -1,18 +1,20 @@
-import React, { useState } from 'react'
-import { Provider } from 'react-redux'
-import { store } from './src/store/store' // adjust path if needed
 import { StatusBar } from 'expo-status-bar'
+import React, { useEffect, useState } from 'react'
 import {
+    ActivityIndicator,
+    Button,
     StyleSheet,
     Text,
-    View,
     TextInput,
-    Button,
-    ActivityIndicator,
+    View,
 } from 'react-native'
-import { AuthFacade } from './src/store/auth/facade' // adjust path if needed
-import { useSelector } from 'react-redux'
-import { authSelectors } from './src/store/auth/selectors' // adjust path if needed
+import { Provider, useSelector } from 'react-redux'
+import { BaseApi } from './src/service/api/base-api' // Adjust path to your SimpleApi implementation
+import { AuthFacade } from './src/store/auth/facade'
+import { authSelectors } from './src/store/auth/selectors'
+import { store } from './src/store/store'
+import { UserFacade } from './src/store/user/facade'
+import { getStoredToken } from './src/utils/jwt-utils'
 
 function LoginScreen() {
     const [email, setEmail] = useState('')
@@ -47,12 +49,43 @@ function LoginScreen() {
                 <Text style={styles.success}>Authenticated ✅</Text>
             )}
             {error && <Text style={styles.error}>{error}</Text>}
+            <Button title="Get User" onPress={() => UserFacade.getUser()} />
             <StatusBar style="auto" />
         </View>
     )
 }
 
 export default function App() {
+    useEffect(() => {
+        // Setup request interceptor for auth token
+        BaseApi.addRequestInterceptor((requestConfig) => {
+            const token = getStoredToken()
+            if (token) {
+                requestConfig.headers = {
+                    ...requestConfig.headers,
+                    Authorization: `Bearer ${token}`,
+                }
+            }
+            return requestConfig
+        })
+
+        // Setup response interceptor for error handling
+        BaseApi.addResponseInterceptor(
+            (response) => {
+                // You can transform successful responses here
+                return response
+            },
+            (error) => {
+                // Handle errors globally
+                if (error.response?.status === 401) {
+                    // Handle unauthorized error (e.g., logout user)
+                    AuthFacade.refreshToken()
+                }
+                return Promise.reject(error)
+            }
+        )
+    }, [])
+
     return (
         <Provider store={store}>
             <LoginScreen />

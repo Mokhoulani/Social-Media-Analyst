@@ -54,6 +54,11 @@ Content-Type: application/json
 
 ###
 
+GET {{API_HostAddress}}/api/user/get-user
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhY2Q4YmMxNS1lOWZmLTRiZjgtYjBhYS1iZmZiOWM5MzI5ODQiLCJuYW1lIjoiTU9oIiwiZW1haWwiOiJ0ZXN0MTlAdGVzdC5jb20iLCJleHAiOjE3NDcwNTYxODAsImlzcyI6IlNvY2lhbE1lZGlhIiwiYXVkIjoiU29jaWFsTWVkaWEifQ.6LG8dU6cJCkOwXq5F8DYPP-dmCyJSjPUegUXF1cFahI
+
+###
 # curl http://localhost:5031/health
 GET {{API_HostAddress}}/health
 
