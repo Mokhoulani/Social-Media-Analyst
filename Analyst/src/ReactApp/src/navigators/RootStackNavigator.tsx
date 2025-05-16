@@ -1,32 +1,29 @@
-import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Homescreen from '../screens/HomeScreen';
-import SettingsScreen from '../screens/SettingsScreen';
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import React from 'react'
+import { AuthFacade } from '../store/auth/facade'
+import AuthTabs from './AuthTabsNavigator'
+import BottomTabsNavigator from './BottomTabsNavigator'
 
 export type RootStackParamList = {
-    Homescreen: undefined;
-    Settingscreen: undefined;
-};
+    HomeScreen: undefined
+    SettingScreen: undefined
+}
 
-const RootStack = createNativeStackNavigator<RootStackParamList>();
-
-
-const isAuthenticated = true;
+const RootStack = createNativeStackNavigator<RootStackParamList>()
 
 export default function RootNavigator() {
+    const isAuthenticated = AuthFacade.isAuthenticated()
+
     return (
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
             {isAuthenticated ? (
                 <RootStack.Screen
-                    name="Homescreen"
-                    component={Homescreen}
+                    name="HomeScreen"
+                    component={BottomTabsNavigator}
                 />
             ) : (
-                <RootStack.Screen
-                    name="Settingscreen"
-                    component={SettingsScreen}
-                />
+                <RootStack.Screen name="HomeScreen" component={AuthTabs} />
             )}
         </RootStack.Navigator>
-    );
+    )
 }

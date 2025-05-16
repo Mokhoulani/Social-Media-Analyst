@@ -2,24 +2,30 @@ import {
     DarkTheme as NavigationDarkTheme,
     DefaultTheme as NavigationLightTheme,
     Theme,
-} from '@react-navigation/native';
+} from '@react-navigation/native'
 import {
     adaptNavigationTheme,
     MD3DarkTheme,
     MD3LightTheme,
-} from 'react-native-paper';
-import { ThemeProp } from 'react-native-paper/lib/typescript/types';
+} from 'react-native-paper'
+import { ThemeProp } from 'react-native-paper/lib/typescript/types'
 
 const { LightTheme, DarkTheme } = adaptNavigationTheme({
     reactNavigationLight: NavigationLightTheme,
     reactNavigationDark: NavigationDarkTheme,
-});
+})
 
-export type AppTheme = ThemeProp & Theme;
+export type AppTheme = ThemeProp & Theme
 
 export const combinedLightTheme: AppTheme = {
     ...MD3LightTheme,
     ...LightTheme,
+    fonts: {
+        ...MD3LightTheme.fonts,
+        ...LightTheme.fonts,
+    },
+    isV3: true,
+    roundness: 4,
     colors: {
         ...MD3LightTheme.colors,
         ...LightTheme.colors,
@@ -64,11 +70,17 @@ export const combinedLightTheme: AppTheme = {
         onSurfaceDisabled: 'rgba(29, 27, 30, 0.38)',
         backdrop: 'rgba(51, 47, 55, 0.4)',
     },
-};
+}
 
 export const combinedDarkTheme = {
     ...MD3DarkTheme,
     ...DarkTheme,
+    fonts: {
+        ...MD3DarkTheme.fonts,
+        ...DarkTheme.fonts,
+    },
+    isV3: true,
+    roundness: 4,
     colors: {
         ...MD3DarkTheme.colors,
         ...DarkTheme.colors,
@@ -113,5 +125,4 @@ export const combinedDarkTheme = {
         onSurfaceDisabled: 'rgba(231, 225, 229, 0.38)',
         backdrop: 'rgba(51, 47, 55, 0.4)',
     },
-} satisfies AppTheme;
-  
+} satisfies AppTheme

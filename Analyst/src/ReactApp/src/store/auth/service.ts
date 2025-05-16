@@ -1,3 +1,4 @@
+import { AxiosHeaders } from 'axios'
 import { Observable } from 'rxjs'
 import { APIClient } from '../../api/apiClient'
 
@@ -86,8 +87,8 @@ export const AuthService = {
 
     logout: (token: string): Observable<void> =>
         APIClient.post<void>('/User/logout', undefined, {
-            headers: {
+            headers: new AxiosHeaders({
                 Authorization: `Bearer ${token}`,
-            },
+            }),
         }),
 }

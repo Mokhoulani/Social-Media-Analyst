@@ -7,6 +7,7 @@ import { themeReducer } from './theme/reducer'
 export const rootReducer = combineReducers({
     auth: authReducer,
     user: userReducer,
+    theme: themeReducer,
 })
 
 export type RootState = {

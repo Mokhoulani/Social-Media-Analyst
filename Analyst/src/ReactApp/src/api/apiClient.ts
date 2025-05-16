@@ -1,99 +1,234 @@
-import { Observable, throwError } from 'rxjs';
-import { ajax, AjaxRequest, AjaxResponse, AjaxError } from 'rxjs/ajax';
-import { catchError, map } from 'rxjs/operators';
-import { getStoredToken } from '../utils/jwt-utils';
+import axios, {
+    AxiosError,
+    AxiosHeaders,
+    AxiosResponse,
+    InternalAxiosRequestConfig,
+} from 'axios'
+import { from, Observable, throwError, timer } from 'rxjs'
+import { catchError, delay, map, switchMap, tap } from 'rxjs/operators'
+import { getStoredToken } from '../utils/jwt-utils'
+import { RefreshTokenRequest } from './refreshTokenRequest'
 
-interface EnhancedConfig extends Partial<AjaxRequest> {
-    skipAuth?: boolean;
-    retryCount?: number;
+type EnhancedConfig = InternalAxiosRequestConfig<unknown> & {
+    skipAuth?: boolean
+    retryCount?: number
+    retryDelay?: number
+    retryStatusCodes?: number[]
+    _retry?: boolean
 }
 
-type RequestInterceptor = (config: EnhancedConfig) => EnhancedConfig;
-type ResponseInterceptor = (response: any) => any;
+type RequestInterceptor = (config: EnhancedConfig) => EnhancedConfig
+type ResponseInterceptor = (response: unknown) => unknown
 
 export class APIClient {
-    private static baseURL = process.env.API_URL || 'http://localhost:5031/api';
-    private static requestInterceptors: RequestInterceptor[] = [];
-    private static responseInterceptors: ResponseInterceptor[] = [];
+    private static axiosInstance = axios.create({
+        baseURL: process.env.API_URL || 'http://localhost:5031/api',
+    })
 
-    static setup() {
+    private static requestInterceptors: RequestInterceptor[] = []
+    private static responseInterceptors: ResponseInterceptor[] = []
+
+    private static defaultRetryCount = 2
+    private static defaultRetryDelay = 1000
+    private static defaultRetryStatusCodes = [408, 429, 500, 502, 503, 504]
+
+    public static setup() {
         this.addRequestInterceptor((config) => {
             if (!config.skipAuth) {
-                const token = getStoredToken();
-                config.headers = {
-                    ...config.headers,
-                    Authorization: `Bearer ${token}`,
-                };
+                const token = getStoredToken()
+                if (token) {
+                    config.headers['Authorization'] = `Bearer ${token}`
+                }
             }
-            return config;
-        });
+            return config
+        })
+
+        this.axiosInstance.interceptors.request.use((config) => {
+            return this.applyRequestInterceptors(config as EnhancedConfig)
+        })
+
+        this.axiosInstance.interceptors.response.use(
+            (response) => {
+                response.data = this.applyResponseInterceptors(response.data)
+                return response
+            },
+            (error) => Promise.reject(error)
+        )
     }
 
     static addRequestInterceptor(interceptor: RequestInterceptor) {
-        this.requestInterceptors.push(interceptor);
+        this.requestInterceptors.push(interceptor)
     }
 
     static addResponseInterceptor(interceptor: ResponseInterceptor) {
-        this.responseInterceptors.push(interceptor);
+        this.responseInterceptors.push(interceptor)
+    }
+
+    private static applyRequestInterceptors(
+        config: EnhancedConfig
+    ): EnhancedConfig {
+        return this.requestInterceptors.reduce(
+            (acc, interceptor) => interceptor(acc),
+            config
+        )
+    }
+
+    private static applyResponseInterceptors(response: unknown): unknown {
+        return this.responseInterceptors.reduce(
+            (acc, interceptor) => interceptor(acc),
+            response
+        )
     }
 
     static get<T>(url: string, config?: EnhancedConfig): Observable<T> {
-        return this.request<T>({ ...config, method: 'GET', url });
+        return this.request<T>({
+            ...config,
+            method: 'get',
+            url,
+            headers: config?.headers ?? new AxiosHeaders(),
+        })
     }
 
-    static post<T, D = any>(url: string, body?: D, config?: EnhancedConfig): Observable<T> {
-        return this.request<T>({ ...config, method: 'POST', url, body });
+    static post<T, D = unknown>(
+        url: string,
+        data?: D,
+        config?: EnhancedConfig
+    ): Observable<T> {
+        return this.request<T>({
+            ...config,
+            method: 'post',
+            url,
+            data,
+            headers: config?.headers ?? new AxiosHeaders(),
+        })
     }
 
-    static put<T, D = any>(url: string, body?: D, config?: EnhancedConfig): Observable<T> {
-        return this.request<T>({ ...config, method: 'PUT', url, body });
-    }
-
-    static patch<T, D = any>(url: string, body?: D, config?: EnhancedConfig): Observable<T> {
-        return this.request<T>({ ...config, method: 'PATCH', url, body });
+    static patch<T, D = unknown>(
+        url: string,
+        data?: D,
+        config?: EnhancedConfig
+    ): Observable<T> {
+        return this.request<T>({
+            ...config,
+            method: 'patch',
+            url,
+            data,
+            headers: config?.headers ?? new AxiosHeaders(),
+        })
     }
 
     static delete<T>(url: string, config?: EnhancedConfig): Observable<T> {
-        return this.request<T>({ ...config, method: 'DELETE', url });
+        return this.request<T>({
+            ...config,
+            method: 'delete',
+            url,
+            headers: config?.headers ?? new AxiosHeaders(),
+        })
     }
 
-    private static applyInterceptors(config: EnhancedConfig): EnhancedConfig {
-        return this.requestInterceptors.reduce((acc, interceptor) => interceptor(acc), config);
-    }
-
-    private static applyResponseInterceptors(response: any): any {
-        return this.responseInterceptors.reduce((acc, interceptor) => interceptor(acc), response);
+    static put<T, D = unknown>(
+        url: string,
+        data?: D,
+        config?: EnhancedConfig
+    ): Observable<T> {
+        return this.request<T>({
+            ...config,
+            method: 'put',
+            url,
+            data,
+            headers: config?.headers ?? new AxiosHeaders(),
+        })
     }
 
     private static request<T>(config: EnhancedConfig): Observable<T> {
-        const finalConfig = this.applyInterceptors(config);
-        const url = `${this.baseURL}${finalConfig.url}`;
+        const retryCount = config.retryCount ?? this.defaultRetryCount
+        const retryDelay = config.retryDelay ?? this.defaultRetryDelay
+        const retryStatusCodes =
+            config.retryStatusCodes ?? this.defaultRetryStatusCodes
 
-        return ajax<T>({
-            ...finalConfig,
-            url,
-        }).pipe(
-            map((res: AjaxResponse<T>) => {
-                const intercepted = this.applyResponseInterceptors(res.response);
-                return intercepted;
-            }),
-            catchError((error: AjaxError) => throwError(() => this.handleError(error))),
-        );
-    }
+        let attempts = 0
 
-    private static handleError(error: AjaxError) {
-        if (!error.response) {
-            return {
-                status: 0,
-                message: 'Network Error',
-                details: error.message || 'Cannot connect to server',
-            };
+        const makeRequest = (): Observable<T> => {
+            return from(this.axiosInstance.request<T>(config)).pipe(
+                map((res: AxiosResponse<T>) => res.data),
+                catchError((error: AxiosError) => {
+                    const status = error.response?.status
+
+                    if (status === 401 && !config._retry) {
+                        console.log('Token expired, attempting refresh...')
+                        config._retry = true
+
+                        const tokenRefresher = new RefreshTokenRequest()
+
+                        return tokenRefresher.refreshToken().pipe(
+                            tap((newToken) => {
+                                APIClient.axiosInstance.defaults.headers.common[
+                                    'Authorization'
+                                ] = `Bearer ${newToken}`
+                                if (config.headers) {
+                                    config.headers['Authorization'] =
+                                        `Bearer ${newToken}`
+                                }
+                            }),
+                            delay(300),
+                            switchMap(() => makeRequest()),
+                            catchError((refreshError) => {
+                                console.error(
+                                    'Token refresh failed:',
+                                    refreshError
+                                )
+                                return throwError(() => this.handleError(error))
+                            })
+                        )
+                    }
+
+                    const shouldRetry =
+                        !status || retryStatusCodes.includes(status)
+
+                    if (attempts >= retryCount || !shouldRetry) {
+                        console.error(
+                            'Retry limit reached or non-retryable status.'
+                        )
+                        return throwError(() => this.handleError(error))
+                    }
+
+                    attempts++
+                    const backoffDelay = retryDelay * Math.pow(2, attempts)
+                    console.warn(
+                        `Retrying request in ${backoffDelay}ms... (Attempt ${attempts}/${retryCount})`
+                    )
+
+                    return timer(backoffDelay).pipe(
+                        switchMap(() => makeRequest())
+                    )
+                })
+            )
         }
 
+        return makeRequest()
+    }
+
+    private static handleError(error: AxiosError) {
+        if (!error) {
+            return {
+                status: 500,
+                message: 'Network Error',
+                details: 'Please check your internet connection.',
+            }
+        }
+        const status = error.response?.status
+        const data = error.response?.data
+
         return {
-            status: error.status,
-            message: error.response?.message ?? 'Error',
-            details: error.response,
-        };
+            status,
+            message: error.message || 'Request failed',
+            details:
+                typeof data === 'object' && data !== null
+                    ? data
+                    : { raw: data },
+        }
     }
 }
+
+export default APIClient
+APIClient.setup()

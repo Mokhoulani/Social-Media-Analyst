@@ -1,6 +1,7 @@
-import { createAction } from '@reduxjs/toolkit';
+import { createAction } from '@reduxjs/toolkit'
 
 export const ThemeActions = {
-    setColorMode: createAction<{ colorMode: 'light' | 'dark' | 'auto' }>('theme/setColorMode'),
-};
-
+    setColorMode: createAction<{ colorMode: 'light' | 'dark' | 'auto' }>(
+        'theme/setColorMode'
+    ),
+}
