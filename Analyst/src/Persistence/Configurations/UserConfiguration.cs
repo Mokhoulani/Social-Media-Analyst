@@ -63,6 +63,16 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(u => u.Devices)
+        .WithOne(d => d.User)
+        .HasForeignKey(d => d.UserId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(u => u.Notifications)
+            .WithOne(n => n.User)
+            .HasForeignKey(n => n.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasIndex(x => x.Email)
             .IsUnique();
     }

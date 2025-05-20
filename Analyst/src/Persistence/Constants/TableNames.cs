@@ -13,7 +13,8 @@ internal static class TableNames
     internal const string Permissions = nameof(Permission);
     internal const string UserSocialMediaUsages = nameof(UserSocialMediaUsage);
     internal const string SocialMediaPlatforms = nameof(SocialMediaPlatform);
-    internal const string Notifications = nameof(Notification);       
-    internal const string UsageSummaries = nameof(UsageSummary);  
+    internal const string Notifications = nameof(Notification);
+    internal const string UsageSummaries = nameof(UsageSummary);
     internal const string UserUsageGoals = nameof(UserUsageGoal);
+    internal const string UserDevices = nameof(UserDevice);
 }

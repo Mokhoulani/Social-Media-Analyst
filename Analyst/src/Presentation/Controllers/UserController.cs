@@ -8,6 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using presentation.Contracts.User;
+using Presentation.Contracts.User;
 
 namespace Presentation.Controllers;
 
@@ -78,4 +79,13 @@ public class UserController(ISender sender) : ApiController(sender)
         return userResult.IsSuccess ? Ok(userResult.Value) : HandleFailure(userResult);
     }
 
+    [HttpPost("device")]
+    public async Task<IActionResult> SaveDeviceToken([FromBody] DeviceTokenRequest request, CancellationToken cancellationToken)
+    {
+        var command = new DeviceTokenCommand(request.DeviceToken, request.DeviceId);
+
+        var tokenResult = await Sender.Send(command, cancellationToken);
+
+        return tokenResult.IsSuccess ? Ok(tokenResult.Value) : HandleFailure(tokenResult);
+    }
 }

@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IPasswordResetService, PasswordResetService>();
+        services.AddScoped<IUserDeviceService, UserDeviceService>();
 
         services.AddTransient<EmailService>();
         return services;

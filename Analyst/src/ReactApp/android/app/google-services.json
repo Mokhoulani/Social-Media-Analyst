@@ -1,0 +1,29 @@
+{
+    "project_info": {
+        "project_number": "971952845913",
+        "project_id": "analyst-e1f21",
+        "storage_bucket": "analyst-e1f21.firebasestorage.app"
+    },
+    "client": [
+        {
+            "client_info": {
+                "mobilesdk_app_id": "1:971952845913:android:674f40cf4e0b8eab6ead48",
+                "android_client_info": {
+                    "package_name": "com.mokhoulani.ReactApp"
+                }
+            },
+            "oauth_client": [],
+            "api_key": [
+                {
+                    "current_key": "AIzaSyA-rQPzkv_CqFmNqp3UqOa0JSxxF8DVqL4"
+                }
+            ],
+            "services": {
+                "appinvite_service": {
+                    "other_platform_oauth_client": []
+                }
+            }
+        }
+    ],
+    "configuration_version": "1"
+}

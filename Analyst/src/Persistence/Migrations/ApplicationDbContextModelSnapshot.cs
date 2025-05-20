@@ -417,6 +417,35 @@ namespace API.Migrations
                     b.ToTable("User", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Entities.UserDevice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedOnUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeviceToken")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ModifiedOnUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceToken");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserDevice", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Entities.UserSocialMediaUsage", b =>
                 {
                     b.Property<int>("Id")
@@ -536,7 +565,7 @@ namespace API.Migrations
             modelBuilder.Entity("Domain.Entities.Notification", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -628,6 +657,17 @@ namespace API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Entities.UserDevice", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany("Devices")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Domain.Entities.UserSocialMediaUsage", b =>
                 {
                     b.HasOne("Domain.Entities.SocialMediaPlatform", "Platform")
@@ -696,6 +736,10 @@ namespace API.Migrations
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
+                    b.Navigation("Devices");
+
+                    b.Navigation("Notifications");
+
                     b.Navigation("PasswordResetTokens");
 
                     b.Navigation("RefreshTokens");

@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Persistence.Persistence;
 using Quartz;
-using Infrastructure.Authentication;
 using Scrutor;
 
 namespace Infrastructure.Extensions;
@@ -19,23 +18,23 @@ public static class DatabaseConfiguration
         this IServiceCollection services,
         IConfiguration configuration)
     {
-     
-      services
-    .Scan(
-        selector => selector
-            .FromAssemblies(
-                Infrastructure.AssemblyReference.Assembly,
-                Persistence.AssemblyReference.Assembly)
-            .AddClasses(false)
-            .UsingRegistrationStrategy(RegistrationStrategy.Skip)
-            .AsMatchingInterface()
-            .WithScopedLifetime());
+
+        services
+      .Scan(
+          selector => selector
+              .FromAssemblies(
+                  Infrastructure.AssemblyReference.Assembly,
+                  Persistence.AssemblyReference.Assembly)
+              .AddClasses(false)
+              .UsingRegistrationStrategy(RegistrationStrategy.Skip)
+              .AsMatchingInterface()
+              .WithScopedLifetime());
 
 
 
         services.ConfigureOptions<SqlOptionsSetup>();
         var sqlOptions = services.BuildServiceProvider().GetRequiredService<IOptions<SqlOptions>>().Value;
-        
+
         services.AddSingleton<ConvertDomainEventsToOutboxMessagesInterceptor>();
         services.AddSingleton<UpdateAuditableEntitiesInterceptor>();
 
@@ -45,10 +44,11 @@ public static class DatabaseConfiguration
                 var convertInterceptor = sp.GetRequiredService<ConvertDomainEventsToOutboxMessagesInterceptor>();
                 var auditInterceptor = sp.GetRequiredService<UpdateAuditableEntitiesInterceptor>();
 
-                    optionsBuilder.UseSqlite(
-                            sqlOptions.ConnectionString,
-                            b => b.MigrationsAssembly("Persistence"))
-                        .AddInterceptors(convertInterceptor, auditInterceptor);
+                optionsBuilder.UseSqlite(
+                        sqlOptions.ConnectionString,
+                        b => b.MigrationsAssembly("Persistence"))
+                    .AddInterceptors(convertInterceptor, auditInterceptor)
+                    .EnableSensitiveDataLogging();
             });
 
         services.AddQuartz(configure =>
@@ -66,7 +66,7 @@ public static class DatabaseConfiguration
                                         .RepeatForever()));
 
         });
-       
+
         services.AddHealthChecks().AddSqlite(sqlOptions.ConnectionString);
     }
 }

@@ -4,9 +4,9 @@ import axios, {
     AxiosResponse,
     InternalAxiosRequestConfig,
 } from 'axios'
-import { from, Observable, throwError, timer } from 'rxjs'
+import { firstValueFrom, from, Observable, throwError, timer } from 'rxjs'
 import { catchError, delay, map, switchMap, tap } from 'rxjs/operators'
-import { getStoredToken } from '../utils/jwt-utils'
+import { getStoredToken$ } from '../utils/jwt-utils'
 import { RefreshTokenRequest } from './refreshTokenRequest'
 
 type EnhancedConfig = InternalAxiosRequestConfig<unknown> & {
@@ -22,7 +22,7 @@ type ResponseInterceptor = (response: unknown) => unknown
 
 export class APIClient {
     private static axiosInstance = axios.create({
-        baseURL: process.env.API_URL || 'http://localhost:5031/api',
+        baseURL: process.env.API_URL || 'http://192.168.8.165:5031/api',
     })
 
     private static requestInterceptors: RequestInterceptor[] = []
@@ -32,21 +32,32 @@ export class APIClient {
     private static defaultRetryDelay = 1000
     private static defaultRetryStatusCodes = [408, 429, 500, 502, 503, 504]
 
-    public static setup() {
-        this.addRequestInterceptor((config) => {
-            if (!config.skipAuth) {
-                const token = getStoredToken()
-                if (token) {
-                    config.headers['Authorization'] = `Bearer ${token}`
+    public static setup(): void {
+        this.axiosInstance.interceptors.request.use(
+            async (config) => {
+                const enhancedConfig = config as EnhancedConfig
+
+                if (!enhancedConfig.skipAuth) {
+                    try {
+                        const token = await firstValueFrom(getStoredToken$())
+                        if (token) {
+                            const headers = new AxiosHeaders(
+                                enhancedConfig.headers
+                            )
+                            headers.set('Authorization', `Bearer ${token}`)
+                            enhancedConfig.headers = headers
+                        }
+                    } catch (error) {
+                        console.warn('Error getting token', error)
+                    }
                 }
-            }
-            return config
-        })
 
-        this.axiosInstance.interceptors.request.use((config) => {
-            return this.applyRequestInterceptors(config as EnhancedConfig)
-        })
+                return this.applyRequestInterceptors(enhancedConfig)
+            },
+            (error) => Promise.reject(error)
+        )
 
+        // Response interceptor
         this.axiosInstance.interceptors.response.use(
             (response) => {
                 response.data = this.applyResponseInterceptors(response.data)

@@ -40,7 +40,10 @@ namespace Domain.Entities
                 userId,
                 message,
                 type);
-            notification.RaiseDomainEvent(new UserNotificationDomainEvent(userId));
+            notification.RaiseDomainEvent(new UserNotificationDomainEvent(
+                userId,
+                message,
+                type));
             return notification;
         }
     }

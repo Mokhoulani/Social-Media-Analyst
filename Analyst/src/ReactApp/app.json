@@ -16,13 +16,21 @@
             "supportsTablet": true
         },
         "android": {
+            "googleServicesFile": "./android/app/google-services.json",
             "adaptiveIcon": {
                 "foregroundImage": "./assets/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
-            }
+            },
+            "package": "com.mokhoulani.ReactApp"
         },
         "web": {
             "favicon": "./assets/favicon.png"
-        }
+        },
+        "extra": {
+            "eas": {
+                "projectId": "db973ddb-fa90-40cf-bdef-d91ea9c06553"
+            }
+        },
+        "owner": "mokhoulani"
     }
 }

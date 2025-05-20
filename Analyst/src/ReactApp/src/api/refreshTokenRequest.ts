@@ -1,29 +1,25 @@
 import axios from 'axios'
+import { BehaviorSubject, from, Observable, throwError } from 'rxjs'
 import {
-    BehaviorSubject,
     catchError,
     filter,
     finalize,
     map,
-    Observable,
-    shareReplay,
+    switchMap,
     take,
     tap,
-    throwError,
-} from 'rxjs'
+} from 'rxjs/operators'
 import { RefreshTokenResponse } from '../types/types'
 import {
     clearTokens,
-    getStoredRefreshToken,
-    storeToken,
+    getStoredRefreshToken$,
+    storeToken$,
 } from '../utils/jwt-utils'
 
 export class RefreshTokenRequest {
     private static refreshAxios = axios.create({
-        baseURL: 'http://localhost:5031/api/auth',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        baseURL: 'http://192.168.8.165:5031/api/auth',
+        headers: { 'Content-Type': 'application/json' },
     })
 
     private static refreshInProgress$: BehaviorSubject<string | null> =
@@ -41,41 +37,50 @@ export class RefreshTokenRequest {
 
         RefreshTokenRequest.refreshInProgress$.next('pending')
 
-        const refreshToken = getStoredRefreshToken()
-        if (!refreshToken) {
-            RefreshTokenRequest.refreshInProgress$.next(null)
-            return throwError(() => new Error('No refresh token available'))
-        }
+        return getStoredRefreshToken$().pipe(
+            switchMap((refreshToken) => {
+                if (!refreshToken) {
+                    RefreshTokenRequest.refreshInProgress$.next(null)
+                    return throwError(
+                        () => new Error('No refresh token available')
+                    )
+                }
 
-        return new Observable<RefreshTokenResponse>((observer) => {
-            RefreshTokenRequest.refreshAxios
-                .post<RefreshTokenResponse>('/refresh-token', {
-                    refreshToken,
-                })
-                .then((response) => {
-                    observer.next(response.data)
-                    observer.complete()
-                })
-                .catch((error) => observer.error(error))
-        }).pipe(
-            tap((response) => {
-                const { accessToken, refreshToken } = response
-                storeToken(accessToken, refreshToken)
-                RefreshTokenRequest.refreshInProgress$.next(accessToken)
-            }),
-            map((response) => response.accessToken),
-            catchError((error) => {
-                clearTokens()
-                RefreshTokenRequest.refreshInProgress$.next(null)
-                return throwError(
-                    () => new Error('Refresh token failed: ' + error.message)
+                return from(
+                    RefreshTokenRequest.refreshAxios.post<RefreshTokenResponse>(
+                        '/refresh-token',
+                        { refreshToken }
+                    )
+                ).pipe(
+                    map((response) => response.data),
+                    switchMap((response) =>
+                        storeToken$(
+                            response.accessToken,
+                            response.refreshToken
+                        ).pipe(
+                            tap(() =>
+                                RefreshTokenRequest.refreshInProgress$.next(
+                                    response.accessToken
+                                )
+                            ),
+                            map(() => response.accessToken)
+                        )
+                    ),
+                    catchError((error) => {
+                        clearTokens()
+                        RefreshTokenRequest.refreshInProgress$.next(null)
+                        return throwError(
+                            () =>
+                                new Error(
+                                    'Refresh token failed: ' + error.message
+                                )
+                        )
+                    }),
+                    finalize(() => {
+                        // The BehaviorSubject is not reset here on purpose
+                    })
                 )
-            }),
-            finalize(() => {
-                // Don't reset the subject here - it contains the new token
-                // Just let it be reset on the next refresh attempt
-            }),
-            shareReplay(1)
+            })
         )
     }
 }

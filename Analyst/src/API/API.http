@@ -59,6 +59,15 @@ Accept: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhY2Q4YmMxNS1lOWZmLTRiZjgtYjBhYS1iZmZiOWM5MzI5ODQiLCJuYW1lIjoiTU9oIiwiZW1haWwiOiJ0ZXN0MTlAdGVzdC5jb20iLCJleHAiOjE3NDcwNTYxODAsImlzcyI6IlNvY2lhbE1lZGlhIiwiYXVkIjoiU29jaWFsTWVkaWEifQ.6LG8dU6cJCkOwXq5F8DYPP-dmCyJSjPUegUXF1cFahI
 
 ###
+POST {{API_HostAddress}}/api/User/device
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhY2Q4YmMxNS1lOWZmLTRiZjgtYjBhYS1iZmZiOWM5MzI5ODQiLCJuYW1lIjoiTU9oIiwiZW1haWwiOiJ0ZXN0MTlAdGVzdC5jb20iLCJleHAiOjE3NDc3MzI3MjksImlzcyI6IlNvY2lhbE1lZGlhIiwiYXVkIjoiU29jaWFsTWVkaWEifQ.iAFEnvMA0o8wyE9vx6W4Eu9ITV2gIuLr1jwRM2VUt_k
+
+{
+ "deviceToken": "ExponentPushToken[0tFRNbLC1bSTJoq1b_Umdt]"
+}
+
+###
 # curl http://localhost:5031/health
 GET {{API_HostAddress}}/health
 
