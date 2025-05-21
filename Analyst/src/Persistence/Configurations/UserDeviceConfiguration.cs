@@ -17,6 +17,10 @@ public class UserDeviceConfiguration : IEntityTypeConfiguration<UserDevice>
             .IsRequired()
             .HasMaxLength(512); 
 
+        builder.Property(d => d.DeviceId)
+            .IsRequired()
+            .HasMaxLength(512);
+
         builder.Property(d => d.CreatedOnUtc)
             .IsRequired();
 
@@ -29,5 +33,8 @@ public class UserDeviceConfiguration : IEntityTypeConfiguration<UserDevice>
 
         builder.HasIndex(d => d.DeviceToken)
             .IsUnique(false); 
+
+        builder.HasIndex(d => d.DeviceId)
+            .IsUnique(); 
     }
 }
