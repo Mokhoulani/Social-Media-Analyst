@@ -53,10 +53,12 @@ export class RefreshTokenRequest {
                     )
                 ).pipe(
                     map((response) => response.data),
-                    switchMap((response) =>
-                        storeToken$(
+                    switchMap((response) => {
+                        const expiration = Date.now() + 30 * 60 * 1000
+                        return storeToken$(
                             response.accessToken,
-                            response.refreshToken
+                            response.refreshToken,
+                            expiration
                         ).pipe(
                             tap(() =>
                                 RefreshTokenRequest.refreshInProgress$.next(
@@ -65,7 +67,7 @@ export class RefreshTokenRequest {
                             ),
                             map(() => response.accessToken)
                         )
-                    ),
+                    }),
                     catchError((error) => {
                         clearTokens()
                         RefreshTokenRequest.refreshInProgress$.next(null)

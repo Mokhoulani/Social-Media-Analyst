@@ -1,8 +1,9 @@
 import { NavigationContainer } from '@react-navigation/native'
 import { StatusBar } from 'expo-status-bar'
 import React from 'react'
-import { StyleSheet, useColorScheme, View } from 'react-native'
+import { StyleSheet, useColorScheme } from 'react-native'
 import { PaperProvider } from 'react-native-paper'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { useSplashScreen } from '../hooks/useSplashScreen'
 import RootNavigator from '../navigators/RootStackNavigator'
 import SplashScreen from '../screens/SplashScreen'
@@ -28,7 +29,13 @@ export default function Main() {
         return <SplashScreen />
     }
     return (
-        <View style={styles.container} onLayout={onLayoutRootView}>
+        <SafeAreaView
+            style={[
+                styles.container,
+                { backgroundColor: theme.colors.background },
+            ]}
+            onLayout={onLayoutRootView}
+        >
             <StatusBar
                 style={
                     colorMode === 'light'
@@ -43,7 +50,7 @@ export default function Main() {
                     <RootNavigator />
                 </NavigationContainer>
             </PaperProvider>
-        </View>
+        </SafeAreaView>
     )
 }
 

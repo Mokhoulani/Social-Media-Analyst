@@ -1,8 +1,6 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import React from 'react'
-import { useAuthCheck } from '../hooks/useAuthCheck'
-import { useDeviceId } from '../hooks/useDeviceId'
-import { useRegisterPushToken } from '../hooks/useRegisterPushToken'
+import { AuthFacade } from '../store/auth/facade'
 import AuthTabs from './AuthTabsNavigator'
 import BottomTabsNavigator from './BottomTabsNavigator'
 
@@ -14,9 +12,7 @@ export type RootStackParamList = {
 const RootStack = createNativeStackNavigator<RootStackParamList>()
 
 export default function RootNavigator() {
-    const isAuthenticated = useAuthCheck()
-    useDeviceId()
-    useRegisterPushToken(isAuthenticated)
+    const isAuthenticated = AuthFacade.isAuthenticated()
 
     return (
         <RootStack.Navigator screenOptions={{ headerShown: false }}>

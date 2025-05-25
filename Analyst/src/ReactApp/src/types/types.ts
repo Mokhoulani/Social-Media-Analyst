@@ -98,6 +98,6 @@ export interface TokenResponse {
     refreshToken: string
 }
 
-export interface AuthError {
+export interface Error {
     message: string
 }

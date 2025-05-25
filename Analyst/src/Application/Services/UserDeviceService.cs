@@ -1,5 +1,6 @@
 using Application.Common.Interfaces;
 using Domain.Entities;
+using Domain.Errors;
 using Domain.Interfaces;
 using Domain.Shared;
 using Domain.Specification.Devices;
@@ -49,6 +50,16 @@ public class UserDeviceService(IUnitOfWork unitOfWork) : IUserDeviceService
         }
 
         return await UpdateDeviceAsync(userDevice, cancellationToken);
+    }
+    
+    public async Task<Result<UserDevice>> GetDeviceTokenByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var spec = new LatestDeviceTokenByUserIdSpecification(userId);
+        var user = await unitOfWork.Repository<UserDevice,Guid>()
+            .FindOneAsync(spec, cancellationToken);
+        
+        return user.IsFailure ? Result.Failure<UserDevice>(DomainErrors.NotFound<UserDevice>()) 
+            : Result.Success(user.Value);
     }
 }
 

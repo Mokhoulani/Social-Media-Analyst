@@ -4,4 +4,4 @@ using Domain.Shared;
 
 namespace Application.CQRS.User.Commands;
 
-public record GetUserCommand(string Token) : ICommand<Result<AppUserViewModel>>;
+public record GetUserCommand : ICommand<Result<AppUserViewModel>>;

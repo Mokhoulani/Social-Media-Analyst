@@ -65,14 +65,7 @@ public class UserController(ISender sender) : ApiController(sender)
     [HttpGet("get-user")]
     public async Task<IActionResult> GetUser(CancellationToken cancellationToken)
     {
-        var token = Request.Headers.Authorization.FirstOrDefault();
-
-        if (string.IsNullOrEmpty(token))
-        {
-            return HandleFailure(Result.Failure<AppUserViewModel>(AuthenticationErrors.Unauthenticated));
-        }
-
-        var command = new GetUserCommand(token);
+        var command = new GetUserCommand();
 
         var userResult = await Sender.Send(command, cancellationToken);
 
@@ -80,7 +73,7 @@ public class UserController(ISender sender) : ApiController(sender)
     }
 
     [HttpPost("device")]
-    public async Task<IActionResult> SaveDeviceToken([FromBody] DeviceTokenRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateOrUpdateUserDevice([FromBody] DeviceTokenRequest request, CancellationToken cancellationToken)
     {
         var command = new DeviceTokenCommand(request.DeviceToken, request.DeviceId);
 

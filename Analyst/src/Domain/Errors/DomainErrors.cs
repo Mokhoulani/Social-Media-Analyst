@@ -7,18 +7,18 @@ public static class DomainErrors
     public static class User
     {
         public static readonly Error EmailAlreadyExists = new Error(
-            "User.EmailAlreadyExists", 
+            "User.EmailAlreadyExists",
             "The email address is already in use.");
-        
-        public static readonly Error NotFound =  new Error(
+
+        public static readonly Error NotFound = new Error(
             "User.NotFound",
             $"User not found.");
-        
-        public static readonly Error InvalidCredentials  = new(
+
+        public static readonly Error InvalidCredentials = new(
             "User.InvalidCredentials",
             "Invalid credentials.");
     }
-    
+
     public static class Email
     {
         public static readonly Error Empty = new(
@@ -32,7 +32,7 @@ public static class DomainErrors
         public static readonly Error InvalidFormat = new(
             "Email.InvalidFormat",
             "The email format is invalid.");
-        
+
         public static readonly Error Invalid = new(
             "Email.Invalid",
             "The email is invalid.");
@@ -45,7 +45,7 @@ public static class DomainErrors
             "First name cannot be empty.");
 
         public static readonly Error TooLong = new(
-            "FirstName.TooLong", 
+            "FirstName.TooLong",
             "First name is too long.");
         public static readonly Error Invalid = new(
             "FirstName.Invalid",
@@ -100,8 +100,15 @@ public static class DomainErrors
             "Password.NotValid",
             "Password is invalid.");
     }
-    
+
     public static Error NotFound<T>() => new(
-        $"{typeof(T).Name}.NotFound", 
+        $"{typeof(T).Name}.NotFound",
         $"{typeof(T).Name} not found.");
+
+    public static class UserUsageGoal
+    {
+        public static readonly Error NotFound = new(
+            "UserUsageGoal.NotFound",
+            "The usage goal for the user was not found.");
+    }
 }

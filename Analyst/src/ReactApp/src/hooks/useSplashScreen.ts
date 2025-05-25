@@ -1,5 +1,6 @@
 import * as SplashScreen from 'expo-splash-screen'
 import { useCallback, useEffect, useState } from 'react'
+import { initializeAppAsync } from '../helpers/initializeAppAsync'
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync()
@@ -8,15 +9,8 @@ export function useSplashScreen() {
     const [appIsReady, setAppIsReady] = useState(false)
 
     useEffect(() => {
-        async function prepare() {
-            try {
-                // Initialize authentication
-            } catch (e) {
-                console.warn(e)
-            } finally {
-                // Tell the application to render
-                setAppIsReady(true)
-            }
+        const prepare = async () => {
+            await initializeAppAsync(setAppIsReady)
         }
 
         prepare()

@@ -22,35 +22,37 @@ public static class DependencyInjection
         IWebHostEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(services);
-        
+
         services.AddMediatR(typeof(AssemblyReference).Assembly);
 
         ConfigureValidation(services);
         ConfigureCacheBehavior(services);
-        
+
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthenticationBehavior<,>));
         services.AddProblemDetailsConfiguration(environment);
-        
+
         services.AddSingleton(GetConfiguredMappingConfig());
-        
+
         services.AddScoped<IMapper, ServiceMapper>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IPasswordResetService, PasswordResetService>();
         services.AddScoped<IUserDeviceService, UserDeviceService>();
+        services.AddScoped<IUserUsageGoalService, UserUsageGoalService>();
+        services.AddScoped<ISocialMediaPlatFormService, SocialMediaPlatFormService>();
 
         services.AddTransient<EmailService>();
         return services;
     }
-    
+
     private static TypeAdapterConfig GetConfiguredMappingConfig()
     {
         var config = TypeAdapterConfig.GlobalSettings;
-    
+
         var registers = config.Scan(Assembly.GetExecutingAssembly());
-    
+
         config.Apply(registers);
-    
+
         return config;
     }
 
