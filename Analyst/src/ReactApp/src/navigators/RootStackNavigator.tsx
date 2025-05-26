@@ -1,18 +1,19 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import React from 'react'
-import { AuthFacade } from '../store/auth/facade'
+import { authSelectors } from '../store/auth/selectors'
+import { useAppSelector } from '../store/hook'
 import AuthTabs from './AuthTabsNavigator'
 import BottomTabsNavigator from './BottomTabsNavigator'
 
 export type RootStackParamList = {
     HomeScreen: undefined
-    SettingScreen: undefined
+    NavigatorAuth: undefined
 }
 
 const RootStack = createNativeStackNavigator<RootStackParamList>()
 
 export default function RootNavigator() {
-    const isAuthenticated = AuthFacade.isAuthenticated()
+    const isAuthenticated = useAppSelector(authSelectors.selectIsAuthenticated)
 
     return (
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
@@ -22,7 +23,7 @@ export default function RootNavigator() {
                     component={BottomTabsNavigator}
                 />
             ) : (
-                <RootStack.Screen name="HomeScreen" component={AuthTabs} />
+                <RootStack.Screen name="NavigatorAuth" component={AuthTabs} />
             )}
         </RootStack.Navigator>
     )

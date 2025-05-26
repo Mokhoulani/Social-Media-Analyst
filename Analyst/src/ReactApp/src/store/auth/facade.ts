@@ -8,10 +8,34 @@ import {
     timeout,
     TimeoutError,
 } from 'rxjs'
+import z from 'zod'
 import { getStoredRefreshToken$ } from '../../utils/jwt-utils'
 import { store } from '../store'
 import { AuthActions } from './actions'
 import { authSelectors } from './selectors'
+
+export const signUpSchema = z.object({
+    firstName: z.string().min(1, { message: 'First name is required' }),
+    lastName: z.string().min(1, { message: 'Last name is required' }),
+    email: z.string().email({ message: 'Invalid email address' }),
+    password: z
+        .string()
+        .min(6, { message: 'Password must be at least 6 characters' })
+        .refine((val) => /[A-Z]/.test(val), {
+            message: 'Password must contain at least one uppercase letter',
+        })
+        .refine((val) => /[a-z]/.test(val), {
+            message: 'Password must contain at least one lowercase letter',
+        })
+        .refine((val) => /[0-9]/.test(val), {
+            message: 'Password must contain at least one digit',
+        })
+        .refine((val) => /[!@#$%^&*(),.?":{}|<>_\-\\/[\]=+~`]/.test(val), {
+            message: 'Password must contain at least one special character',
+        }),
+})
+
+export type SignUpForm = z.infer<typeof signUpSchema>
 
 let sharedRefresh$: Observable<void> | null = null
 /**
@@ -29,14 +53,14 @@ export const AuthFacade = {
     /**
      * Sign up a new user
      */
-    signUp: (
-        firstName: string,
-        lastName: string,
-        email: string,
-        password: string
-    ) => {
+    signUp: (form: SignUpForm) => {
         store.dispatch(
-            AuthActions.signUpRequest({ firstName, lastName, email, password })
+            AuthActions.signUpRequest({
+                firstName: form.firstName,
+                lastName: form.lastName,
+                email: form.email,
+                password: form.password,
+            })
         )
     },
 

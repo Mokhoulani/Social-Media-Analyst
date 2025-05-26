@@ -21,6 +21,7 @@ public class SignUpHandlerTests
     private readonly Mock<IMapper> _mapperMock = new();
     private readonly Mock<ILogger<SignUpHandler>> _loggerMock = new();
     private readonly Mock<IPermissionService> _permissionServiceMock = new();
+    private readonly Mock<IAuthService> _authServiceMock = new();
 
     [Fact]
     public async Task Handle_ShouldReturnViewModel_WhenSignUpIsSuccessful()
@@ -53,29 +54,29 @@ public class SignUpHandlerTests
         if (roleResult.IsSuccess)
             domainUser.Roles.Add(roleResult.Value);
 
-        _userServiceMock.Setup(s => s.AddUserAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success(domainUser));
+        _userServiceMock
+           .Setup(s => s.AddUserAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+           .ReturnsAsync(Result.Success(domainUser));
 
-        var viewModel = new AppUserViewModel
-        {
-            Id = domainUser.Id.ToString(),
-            Email = domainUser.Email.Value,
-            FirstName = domainUser.FirstName.Value,
-            LastName = domainUser.LastName.Value,
-        };
+        var expectedTokenResponse = new TokenResponseViewModel("access-token", "refresh-token");
 
-        _mapperMock
-            .Setup(x => x.Map<AppUserViewModel>(It.IsAny<User>()))
-            .Returns(viewModel);
+        _authServiceMock
+           .Setup(a => a.GenerateTokenResponse(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+           .ReturnsAsync(Result.Success(expectedTokenResponse));
 
-        var handler = new SignUpHandler(_userServiceMock.Object, _permissionServiceMock.Object, _mapperMock.Object, _loggerMock.Object);
+        var handler = new SignUpHandler(
+            _userServiceMock.Object,
+            _permissionServiceMock.Object,
+            _mapperMock.Object,
+            _loggerMock.Object,
+            _authServiceMock.Object);
 
         // Act
         var resultVm = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         resultVm.IsSuccess.Should().BeTrue();
-        resultVm.Value.Should().BeEquivalentTo(viewModel);
+        resultVm.Value.Should().BeEquivalentTo(expectedTokenResponse);
     }
 
     [Fact]
@@ -83,7 +84,13 @@ public class SignUpHandlerTests
     {
         // Arrange
         var command = new SignUpCommand("John", "invalid-email", "Doe", "StrongPassword1!");
-        var handler = new SignUpHandler(_userServiceMock.Object, _permissionServiceMock.Object, _mapperMock.Object, _loggerMock.Object);
+
+        var handler = new SignUpHandler(
+             _userServiceMock.Object,
+             _permissionServiceMock.Object,
+             _mapperMock.Object,
+             _loggerMock.Object,
+             _authServiceMock.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);

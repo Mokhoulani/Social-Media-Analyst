@@ -1,3 +1,4 @@
+import * as SecureStore from 'expo-secure-store'
 import { BehaviorSubject, from, Observable, of, throwError } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
 
@@ -17,15 +18,16 @@ export const refreshToken$ = refreshTokenSubject.asObservable()
 export const isAuthenticated$ = token$.pipe(map((token) => !!token))
 export const expiration$ = expirationSubject.asObservable()
 
-// Helpers
-const safeParseInt = (value: string | null): number | null =>
-    value ? parseInt(value, 10) : null
-
-// Token Getters
+/**
+ * Retrieves the stored authentication token
+ * @returns Promise resolving to the authentication token or null
+ */
 export const getStoredToken = async (): Promise<string | null> => {
     try {
-        const token = localStorage.getItem(TOKEN_KEY)
-        if (token) tokenSubject.next(token)
+        const token = await SecureStore.getItemAsync(TOKEN_KEY)
+        if (token) {
+            tokenSubject.next(token)
+        }
         return token
     } catch (error) {
         console.error('Error retrieving token:', error)
@@ -33,6 +35,10 @@ export const getStoredToken = async (): Promise<string | null> => {
     }
 }
 
+/**
+ * Retrieves the stored token as an Observable
+ * @returns Observable of the authentication token
+ */
 export const getStoredToken$ = (): Observable<string | null> => {
     return from(getStoredToken()).pipe(
         catchError((err) => {
@@ -44,9 +50,11 @@ export const getStoredToken$ = (): Observable<string | null> => {
 
 export const getStoredExpiration = async (): Promise<number | null> => {
     try {
-        const expiration = safeParseInt(localStorage.getItem(EXPIRATION_KEY))
-        if (expiration) expirationSubject.next(expiration)
-        return expiration
+        const expiration = await SecureStore.getItemAsync(EXPIRATION_KEY)
+        if (expiration) {
+            expirationSubject.next(parseInt(expiration, 10))
+        }
+        return expiration ? parseInt(expiration, 10) : null
     } catch (error) {
         console.error('Error retrieving expiration:', error)
         return null
@@ -62,10 +70,16 @@ export const getStoredExpiration$ = (): Observable<number | null> => {
     )
 }
 
+/**
+ * Retrieves the stored refresh token
+ * @returns Promise resolving to the refresh token or null
+ */
 export const getStoredRefreshToken = async (): Promise<string | null> => {
     try {
-        const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
-        if (refreshToken) refreshTokenSubject.next(refreshToken)
+        const refreshToken = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY)
+        if (refreshToken) {
+            refreshTokenSubject.next(refreshToken)
+        }
         return refreshToken
     } catch (error) {
         console.error('Error retrieving refresh token:', error)
@@ -73,6 +87,10 @@ export const getStoredRefreshToken = async (): Promise<string | null> => {
     }
 }
 
+/**
+ * Retrieves the stored refresh token as an Observable
+ * @returns Observable of the refresh token
+ */
 export const getStoredRefreshToken$ = (): Observable<string | null> => {
     return from(getStoredRefreshToken()).pipe(
         catchError((err) => {
@@ -84,17 +102,23 @@ export const getStoredRefreshToken$ = (): Observable<string | null> => {
     )
 }
 
-// Store
+/**
+ * Stores authentication and refresh tokens securely
+ * @param token The authentication token to store
+ * @param refreshToken The refresh token to store
+ * @returns Promise that resolves when tokens are stored
+ */
 export const storeToken = async (
     token: string,
     refreshToken: string,
     expiration: number
 ): Promise<void> => {
     try {
-        localStorage.setItem(TOKEN_KEY, token)
-        localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
-        localStorage.setItem(EXPIRATION_KEY, expiration.toString())
+        await SecureStore.setItemAsync(TOKEN_KEY, token)
+        await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken)
+        await SecureStore.setItemAsync(EXPIRATION_KEY, expiration.toString())
 
+        // Update subjects with new values
         tokenSubject.next(token)
         refreshTokenSubject.next(refreshToken)
         expirationSubject.next(expiration)
@@ -104,6 +128,12 @@ export const storeToken = async (
     }
 }
 
+/**
+ * Stores tokens as an Observable operation
+ * @param token The authentication token to store
+ * @param refreshToken The refresh token to store
+ * @returns Observable that completes when tokens are stored
+ */
 export const storeToken$ = (
     token: string,
     refreshToken: string,
@@ -117,13 +147,17 @@ export const storeToken$ = (
     )
 }
 
-// Clear
+/**
+ * Clears all stored tokens
+ * @returns Promise that resolves when tokens are cleared
+ */
 export const clearTokens = async (): Promise<void> => {
     try {
-        localStorage.removeItem(TOKEN_KEY)
-        localStorage.removeItem(REFRESH_TOKEN_KEY)
-        localStorage.removeItem(EXPIRATION_KEY)
+        await SecureStore.deleteItemAsync(TOKEN_KEY)
+        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY)
+        await SecureStore.deleteItemAsync(EXPIRATION_KEY)
 
+        // Update subjects to reflect cleared state
         tokenSubject.next(null)
         refreshTokenSubject.next(null)
         expirationSubject.next(null)
@@ -133,6 +167,10 @@ export const clearTokens = async (): Promise<void> => {
     }
 }
 
+/**
+ * Clears tokens as an Observable operation
+ * @returns Observable that completes when tokens are cleared
+ */
 export const clearTokens$ = (): Observable<void> => {
     return from(clearTokens()).pipe(
         catchError((err) => {
@@ -142,26 +180,30 @@ export const clearTokens$ = (): Observable<void> => {
     )
 }
 
-// Expiration helpers
 export const isTokenExpired = async (): Promise<boolean> => {
-    const exp = safeParseInt(localStorage.getItem(EXPIRATION_KEY))
+    const exp = await SecureStore.getItemAsync(EXPIRATION_KEY)
     if (!exp) return true
-    return Date.now() >= exp
+
+    const expiration = parseInt(exp, 10)
+    return Date.now() >= expiration
 }
 
 export const isTokenExpired$ = (): Observable<boolean> => {
     return from(isTokenExpired()).pipe(
         catchError((err) => {
             console.error('Error in isTokenExpired$:', err)
-            return of(true)
+            return of(true) // Assume expired if we can't determine
         })
     )
 }
 
 export const getTokenTimeLeft = async (): Promise<number> => {
-    const exp = safeParseInt(localStorage.getItem(EXPIRATION_KEY))
+    const exp = await SecureStore.getItemAsync(EXPIRATION_KEY)
     if (!exp) return 0
-    return Math.max(exp - Date.now(), 0)
+
+    const expiration = parseInt(exp, 10)
+    const timeLeft = expiration - Date.now()
+    return Math.max(timeLeft, 0) // never return negative
 }
 
 export const getTokenTimeLeft$ = (): Observable<number> => {

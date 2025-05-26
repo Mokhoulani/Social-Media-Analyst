@@ -1,8 +1,6 @@
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
 import { useWindowDimensions } from 'react-native'
 import { useTheme } from 'react-native-paper'
-import { HomeScreen } from '../screens/HomeScreen'
-import { LoginScreen } from '../screens/LoginScreen'
 import SetGoalScreen from '../screens/SetGoalScreen'
 
 export type TabAuthParamsList = {
@@ -39,8 +37,6 @@ export default function MeterialTopTabsNavigator() {
                 lazyPlaceholder: () => null,
             }}
         >
-            <Tab.Screen name="signUp" component={HomeScreen} />
-            <Tab.Screen name="signIn" component={LoginScreen} />
             <Tab.Screen name="Goal" component={SetGoalScreen} />
         </Tab.Navigator>
     )

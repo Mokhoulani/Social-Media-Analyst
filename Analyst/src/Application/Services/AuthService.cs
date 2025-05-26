@@ -55,7 +55,7 @@ public class AuthService(
 
         if (user.IsFailure) return Result.Failure<TokenResponseViewModel>(DomainErrors.User.NotFound);
 
-        var newAccessToken =  jwtProvider.Generate(user.Value);
+        var newAccessToken = jwtProvider.Generate(user.Value);
         var newRefreshToken = tokenService.GenerateRefreshToken();
 
         var expiryDate = tokenService.GetRefreshTokenExpiryDate();
@@ -71,4 +71,23 @@ public class AuthService(
 
         return Result.Success(new TokenResponseViewModel(newAccessToken, newRefreshToken));
     }
+    
+    public async Task<Result<TokenResponseViewModel>> GenerateTokenResponse(
+        User user,
+        CancellationToken cancellationToken)
+    {
+        var accessToken = jwtProvider.Generate(user);
+        var refreshToken = tokenService.GenerateRefreshToken();
+        var expiryDate = tokenService.GetRefreshTokenExpiryDate();
+
+        var refreshTokenEntity = RefreshToken.Create(user.Id, refreshToken, expiryDate);
+
+        await unitOfWork.Repository<RefreshToken, Guid>()
+            .AddAsync(refreshTokenEntity, cancellationToken);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return Result.Success(new TokenResponseViewModel(accessToken, refreshToken));
+    }
 }
+

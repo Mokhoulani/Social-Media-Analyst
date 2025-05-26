@@ -18,7 +18,7 @@ import {
 
 export class RefreshTokenRequest {
     private static refreshAxios = axios.create({
-        baseURL: 'http://192.168.8.165:5031/api/auth',
+        baseURL: 'http://localhost:5031/api/auth',
         headers: { 'Content-Type': 'application/json' },
     })
 

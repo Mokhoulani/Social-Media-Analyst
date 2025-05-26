@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace Application.CQRS.User.Commands;
 
 [AllowAnonymous]
-public sealed class SignUpCommand : ICommand<Result<AppUserViewModel>>
+public sealed class SignUpCommand : ICommand<Result<TokenResponseViewModel>>
 {
     /// <summary>
     ///     Initiates a new instance of the <see cref="SignUpCommand" /> class.
