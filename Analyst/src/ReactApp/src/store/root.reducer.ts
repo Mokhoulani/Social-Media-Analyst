@@ -4,6 +4,7 @@ import { deviceReducer } from './device/reducer'
 import { goalReducer } from './goal/reducer'
 import { platformReducer } from './platform/reducer'
 import { themeReducer } from './theme/reducer'
+import { usageReducer } from './usage/reducer'
 import { userReducer } from './user/reducer'
 
 // Combine all your reducers into one rootReducer
@@ -14,6 +15,7 @@ export const rootReducer = combineReducers({
     device: deviceReducer,
     platforms: platformReducer,
     goal: goalReducer,
+    usage: usageReducer,
 })
 
 export type RootState = {
@@ -23,4 +25,5 @@ export type RootState = {
     device: ReturnType<typeof deviceReducer>
     platforms: ReturnType<typeof platformReducer>
     goal: ReturnType<typeof goalReducer>
+    usage: ReturnType<typeof usageReducer>
 }

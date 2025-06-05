@@ -3,9 +3,9 @@ using Domain.Entities;
 
 namespace Domain.Specification.Goals;
 
-public class UserUsageGoalsWithPlatformByUserIdSpecification : Specification<UserUsageGoal, int>
+public class GoalsWithPlatformByUserIdSpecification : Specification<UserUsageGoal, int>
 {
-    public UserUsageGoalsWithPlatformByUserIdSpecification(Guid userId)
+    public GoalsWithPlatformByUserIdSpecification(Guid userId)
         : base(goal => goal.UserId == userId)
     {
         AddInclude(goal => goal.Platform);

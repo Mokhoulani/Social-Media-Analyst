@@ -4,7 +4,6 @@ import { Controller, useForm } from 'react-hook-form'
 import {
     ActivityIndicator,
     Alert,
-    Modal,
     SafeAreaView,
     Text,
     TextInput,
@@ -12,6 +11,7 @@ import {
     View,
 } from 'react-native'
 import { Dropdown } from 'react-native-element-dropdown'
+import Modal from 'react-native-modal'
 import { useSelector } from 'react-redux'
 import { SocialMediaPlatform } from '../entities/SocialMediaPlatform'
 import { UserUsageGoal, UserUsageGoalSchema } from '../entities/UserUsageGoal'
@@ -63,7 +63,7 @@ export const UpdateGoalDialog: React.FC<Props> = ({
         (data: UserUsageGoal) => {
             try {
                 if (goal?.id) {
-                    onSubmit({ ...data, id: goal.id }) // preserve ID on update
+                    onSubmit({ ...data, id: goal.id })
                 } else {
                     onSubmit(data)
                 }
@@ -90,10 +90,11 @@ export const UpdateGoalDialog: React.FC<Props> = ({
 
     return (
         <Modal
-            visible={visible}
-            animationType="slide"
-            transparent={false}
-            onRequestClose={handleModalClose}
+            isVisible={visible}
+            onBackdropPress={handleModalClose}
+            onBackButtonPress={handleModalClose}
+            useNativeDriver
+            style={styles.modal}
         >
             <SafeAreaView style={styles.modalContainer}>
                 <View style={styles.container}>
@@ -119,10 +120,8 @@ export const UpdateGoalDialog: React.FC<Props> = ({
                                 field: { onChange, onBlur, value },
                             }) => (
                                 <TextInput
-                                    keyboardType="numbers-and-punctuation" // Allows colon input
-                                    onChangeText={(val) => {
-                                        onChange(val) // Directly store the hh:mm:ss string
-                                    }}
+                                    keyboardType="numbers-and-punctuation"
+                                    onChangeText={(val) => onChange(val)}
                                     onBlur={onBlur}
                                     value={value ?? ''}
                                     style={styles.input}
@@ -158,9 +157,9 @@ export const UpdateGoalDialog: React.FC<Props> = ({
                                         valueField="value"
                                         placeholder="Select a platform"
                                         value={value === 0 ? null : value}
-                                        onChange={(item) => {
+                                        onChange={(item) =>
                                             onChange(item.value)
-                                        }}
+                                        }
                                         disable={isSubmitting}
                                     />
                                 )}

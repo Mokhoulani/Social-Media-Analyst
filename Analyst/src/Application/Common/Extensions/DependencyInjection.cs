@@ -28,7 +28,8 @@ public static class DependencyInjection
         ConfigureValidation(services);
         ConfigureCacheBehavior(services);
 
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthenticationBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>),
+            typeof(AuthenticationBehavior<,>));
         services.AddProblemDetailsConfiguration(environment);
 
         services.AddSingleton(GetConfiguredMappingConfig());
@@ -40,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<IUserDeviceService, UserDeviceService>();
         services.AddScoped<IUserUsageGoalService, UserUsageGoalService>();
         services.AddScoped<ISocialMediaPlatFormService, SocialMediaPlatFormService>();
+        services.AddScoped<IUserSocialMediaUsageService, UserSocialMediaUsageService>();
 
         services.AddTransient<EmailService>();
         return services;
@@ -59,12 +61,15 @@ public static class DependencyInjection
     private static void ConfigureValidation(IServiceCollection services)
     {
         services.AddValidatorsFromAssembly(typeof(SignUpValidator).Assembly);
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>),
+            typeof(ValidationBehavior<,>));
     }
 
     private static void ConfigureCacheBehavior(IServiceCollection services)
     {
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CacheBehavior<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>),
+            typeof(CacheBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>),
+            typeof(RequestPreProcessorBehavior<,>));
     }
 }

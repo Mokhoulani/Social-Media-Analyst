@@ -7,25 +7,34 @@ using Domain.Specification.Goals;
 
 namespace Application.Services;
 
-public class UserUsageGoalService(IUnitOfWork unitOfWork) : IUserUsageGoalService
+public class UserUsageGoalService(
+    IUnitOfWork unitOfWork) : IUserUsageGoalService
 {
     public async Task<Result<UserUsageGoal>> AddUserUsageGoalAsync(UserUsageGoal userUsageGoal,
         CancellationToken cancellationToken)
     {
-        var newUserDevice =
-            await unitOfWork.Repository<UserUsageGoal, int>().AddAsync(userUsageGoal, cancellationToken);
+        var newUserUsageGoal =
+            await unitOfWork.Repository<UserUsageGoal, int>()
+                .AddAsync(userUsageGoal,
+                    cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return newUserDevice.IsFailure ? newUserDevice.Error : newUserDevice.Value;
+        return newUserUsageGoal.IsFailure
+            ? newUserUsageGoal.Error
+            : newUserUsageGoal.Value;
     }
 
 
-    public async Task<Result<UserUsageGoal>> UpdateUserUsageGoalAsync(UserUsageGoal userUsageGoal,
+    public async Task<Result<UserUsageGoal>> UpdateUserUsageGoalAsync(
+        UserUsageGoal userUsageGoal,
         CancellationToken cancellationToken)
     {
-        var newUserDevice = await unitOfWork.Repository<UserUsageGoal, int>()
-            .SoftUpdateAsync(userUsageGoal, cancellationToken);
+        var newUserUsageGoal = await unitOfWork.Repository<UserUsageGoal, int>()
+            .SoftUpdateAsync(userUsageGoal,
+                cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-        return newUserDevice.IsFailure ? newUserDevice.Error : newUserDevice.Value;
+        return newUserUsageGoal.IsFailure
+            ? newUserUsageGoal.Error
+            : newUserUsageGoal.Value;
     }
 
 
@@ -33,13 +42,15 @@ public class UserUsageGoalService(IUnitOfWork unitOfWork) : IUserUsageGoalServic
         UserUsageGoal userUsageGoal,
         CancellationToken cancellationToken)
     {
-        var updateResult = await UpdateUserUsageGoalAsync(userUsageGoal, cancellationToken);
+        var updateResult = await UpdateUserUsageGoalAsync(userUsageGoal,
+            cancellationToken);
 
         if (updateResult.IsSuccess)
             return updateResult;
 
         if (updateResult.Error == DomainErrors.NotFound<UserUsageGoal>())
-            return await AddUserUsageGoalAsync(userUsageGoal, cancellationToken);
+            return await AddUserUsageGoalAsync(userUsageGoal,
+                cancellationToken);
 
         return updateResult;
     }
@@ -48,10 +59,11 @@ public class UserUsageGoalService(IUnitOfWork unitOfWork) : IUserUsageGoalServic
         Guid userId,
         CancellationToken cancellationToken)
     {
-        var spec = new UserUsageGoalsWithPlatformByUserIdSpecification(userId);
+        var spec = new GoalsWithPlatformByUserIdSpecification(userId);
 
         var result = await unitOfWork.Repository<UserUsageGoal, int>()
-        .FindManyAsync(spec, cancellationToken);
+            .FindManyAsync(spec,
+                cancellationToken);
 
         if (result.IsSuccess)
             return result.Value;

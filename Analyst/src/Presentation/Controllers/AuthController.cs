@@ -3,6 +3,7 @@ using Application.CQRS.Authentication.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using presentation.Contracts.Auth;
+using Microsoft.AspNetCore.Http;
 
 namespace Presentation.Controllers;
 
@@ -10,6 +11,12 @@ namespace Presentation.Controllers;
 public class AuthController(ISender sender) : ApiController(sender)
 {
     [HttpPost("refresh-token")]
+    [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+    [Produces("application/json")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request, CancellationToken token)
     {
         var command = new RefreshTokenCommand(request.RefreshToken);
@@ -37,4 +44,8 @@ public class AuthController(ISender sender) : ApiController(sender)
 
         return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
     }
+}
+
+internal class TokenResponse
+{
 }

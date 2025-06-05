@@ -5,3 +5,4 @@ public record CreateOrUpdateUserUsageGoalRequest(
     string UserId,
     int PlatformId,
     string DailyLimit);
+    

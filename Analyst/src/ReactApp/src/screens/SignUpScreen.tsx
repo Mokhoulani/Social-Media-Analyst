@@ -1,15 +1,9 @@
 import React, { useState } from 'react'
-import {
-    ActivityIndicator,
-    Button,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
-} from 'react-native'
+import { ActivityIndicator, Button, Text, TextInput, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { AuthFacade, SignUpForm, signUpSchema } from '../store/auth/facade'
 import { authSelectors } from '../store/auth/selectors'
+import { useStyles } from '../themes/useStyles'
 
 export function SignUpScreen() {
     const [form, setForm] = useState<SignUpForm>({
@@ -25,6 +19,7 @@ export function SignUpScreen() {
     const isLoading = useSelector(authSelectors.selectLoading)
     const error = useSelector(authSelectors.selectError)
     const isAuthenticated = useSelector(authSelectors.selectIsAuthenticated)
+    const styles = useStyles()
 
     const handleChange = (field: keyof SignUpForm, value: string) => {
         setForm({ ...form, [field]: value })
@@ -101,37 +96,3 @@ export function SignUpScreen() {
         </View>
     )
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-        backgroundColor: '#fff',
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        marginBottom: 24,
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 8,
-    },
-    success: {
-        marginTop: 12,
-        color: 'green',
-        textAlign: 'center',
-    },
-    error: {
-        marginTop: 4,
-        marginBottom: 8,
-        color: 'red',
-        textAlign: 'left',
-        marginLeft: 4,
-    },
-})

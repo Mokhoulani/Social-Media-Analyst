@@ -88,6 +88,16 @@ Content-Type: application/json
 }
 
 ###
+POST {{API_HostAddress}}/api/UserSocialMediaUsage/get-usages
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhY2Q4YmMxNS1lOWZmLTRiZjgtYjBhYS1iZmZiOWM5MzI5ODQiLCJuYW1lIjoiTU9oIiwiZW1haWwiOiJ0ZXN0MTlAdGVzdC5jb20iLCJleHAiOjE3NDkwMzU5OTEsImlzcyI6IlNvY2lhbE1lZGlhIiwiYXVkIjoiU29jaWFsTWVkaWEifQ.LIVT5zUQACzv9QyJj10K7nsIolDSYKd6yHtmSi9qNyI
+
+{
+  "userId": "acd8bc15-e9ff-4bf8-b0aa-bffb9c932984"
+}
+
+###
+
 GET {{API_HostAddress}}/api/SocialMediaPlatform/get-all
 Content-Type: application/json
 

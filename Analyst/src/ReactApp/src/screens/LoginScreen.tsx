@@ -1,16 +1,10 @@
 ﻿import React, { useState } from 'react'
-import {
-    ActivityIndicator,
-    Button,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
-} from 'react-native'
+import { ActivityIndicator, Button, Text, TextInput, View } from 'react-native'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
 import { AuthFacade } from '../store/auth/facade'
 import { authSelectors } from '../store/auth/selectors'
+import { useStyles } from '../themes/useStyles'
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -24,6 +18,7 @@ export function LoginScreen() {
         email: '',
         password: '',
     })
+    const styles = useStyles()
 
     const [errors, setErrors] = useState<Partial<LoginInput>>({})
 
@@ -84,33 +79,3 @@ export function LoginScreen() {
         </View>
     )
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 26,
-        marginBottom: 20,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    input: {
-        borderColor: '#ccc',
-        borderWidth: 1,
-        borderRadius: 8,
-        padding: 12,
-        marginBottom: 10,
-    },
-    error: {
-        color: 'red',
-        marginBottom: 10,
-    },
-    success: {
-        color: 'green',
-        marginTop: 10,
-        fontWeight: 'bold',
-    },
-})

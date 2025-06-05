@@ -19,20 +19,26 @@ namespace Domain.Entities
         {
         }
 
-        private UserSocialMediaUsage(Guid userId,
+        private UserSocialMediaUsage(
+            int id,
+            Guid userId,
             int platformId,
-            DateTime startTime)
+            DateTime startTime) : base(id)
         {
             UserId = userId;
             PlatformId = platformId;
             StartTime = startTime;
         }
 
-        public static UserSocialMediaUsage Create(Guid userId,
+        public static UserSocialMediaUsage Create(
+            int id,
+            Guid userId,
             int platformId,
             DateTime startTime)
         {
-            return new UserSocialMediaUsage(userId,
+            return new UserSocialMediaUsage(
+                id,
+                userId,
                 platformId,
                 startTime);
         }
@@ -52,5 +58,6 @@ namespace Domain.Entities
                 UserId,
                 PlatformId));
         }
+
     }
 }
