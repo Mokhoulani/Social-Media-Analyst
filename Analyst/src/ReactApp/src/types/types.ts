@@ -35,3 +35,69 @@ export type ApiResponse<T> =
     | UnauthorizedError
     | ForbiddenError
     | ErrorResponse
+export interface LoginPayload {
+    email: string
+    password: string
+}
+
+export interface SignUpPayload {
+    email: string
+    password: string
+}
+
+export interface AuthResponse {
+    accessToken: string
+    refreshToken: string
+}
+
+export interface RefrreshTokenPayload {
+    refreshToken: string
+}
+export interface RefreshTokenResponse {
+    accessToken: string
+    refreshToken: string
+}
+
+export interface LoginPayload {
+    email: string
+    password: string
+}
+
+export interface TokenResponse {
+    accessToken: string
+    refreshToken: string
+}
+
+export interface AuthState {
+    accessToken: string | null
+    refreshToken: string | null
+    isAuthenticated: boolean
+    loading: boolean
+    error: string | null
+}
+export interface SignUpPayload {
+    firstName: string
+    lastName: string
+    email: string
+    password: string
+}
+export interface LoginPayload {
+    email: string
+    password: string
+}
+
+export interface SignUpPayload {
+    firstName: string
+    lastName: string
+    email: string
+    password: string
+}
+
+export interface TokenResponse {
+    accessToken: string
+    refreshToken: string
+}
+
+export interface Error {
+    message: string
+}

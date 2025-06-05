@@ -93,145 +93,6 @@ namespace API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Permission", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "ReadUser"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "UpdateUser"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "DeleteUser"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "CreateUser"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "ReadRole"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "UpdateRole"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "DeleteRole"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Name = "CreateRole"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Name = "ReadPermission"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Name = "UpdatePermission"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Name = "DeletePermission"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Name = "CreatePermission"
-                        });
-                });
-
-            modelBuilder.Entity("Domain.Entities.Permission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Permission", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "ReadUser"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "UpdateUser"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "DeleteUser"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "CreateUser"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "ReadRole"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "UpdateRole"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "DeleteRole"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Name = "CreateRole"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Name = "ReadPermission"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Name = "UpdatePermission"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Name = "DeletePermission"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Name = "CreatePermission"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
@@ -274,13 +135,6 @@ namespace API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Role", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Registered"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
@@ -296,28 +150,6 @@ namespace API.Migrations
                     b.HasIndex("PermissionId");
 
                     b.ToTable("RolePermission");
-
-                    b.HasData(
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 1
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 2
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 3
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 4
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.SocialMediaPlatform", b =>
@@ -415,6 +247,43 @@ namespace API.Migrations
                         .IsUnique();
 
                     b.ToTable("User", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.UserDevice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedOnUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeviceId")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeviceToken")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ModifiedOnUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId")
+                        .IsUnique();
+
+                    b.HasIndex("DeviceToken");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserDevice", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.UserSocialMediaUsage", b =>
@@ -536,7 +405,7 @@ namespace API.Migrations
             modelBuilder.Entity("Domain.Entities.Notification", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -628,6 +497,17 @@ namespace API.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Entities.UserDevice", b =>
+                {
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany("Devices")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Domain.Entities.UserSocialMediaUsage", b =>
                 {
                     b.HasOne("Domain.Entities.SocialMediaPlatform", "Platform")
@@ -696,6 +576,10 @@ namespace API.Migrations
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
+                    b.Navigation("Devices");
+
+                    b.Navigation("Notifications");
+
                     b.Navigation("PasswordResetTokens");
 
                     b.Navigation("RefreshTokens");

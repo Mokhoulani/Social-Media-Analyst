@@ -8,67 +8,90 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.Persistence.Repositories;
 
-public class Repository<T, TKey>(ApplicationDbContext applicationDbContext) : IRepository<T, TKey>
-    where T : Entity<TKey>, IAggregateRoot where TKey : notnull
+public class Repository<T, TKey>(
+    ApplicationDbContext applicationDbContext) : IRepository<T, TKey>
+    where T : Entity<TKey>, IAggregateRoot
+    where TKey : notnull
 {
     private readonly DbSet<T> _dbSet = applicationDbContext.Set<T>();
 
-    public async Task<Result<T>> AddAsync(T entity, CancellationToken cancellationToken = default)
+    public async Task<Result<T>> AddAsync(T entity,
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            await _dbSet.AddAsync(entity, cancellationToken);
+            await _dbSet.AddAsync(entity,
+                cancellationToken);
             return entity;
         }
         catch (Exception ex)
         {
-            return Result.Failure<T>(new Error("Database.AddError", $"Failed to add entity: {ex.Message}"));
+            return Result.Failure<T>(new Error("Database.AddError",
+                $"Failed to add entity: {ex.Message}"));
         }
     }
 
-    public async Task<Result<T>> GetByIdAsync(TKey id, CancellationToken cancellationToken = default)
+    public async Task<Result<T>> GetByIdAsync(TKey id,
+        CancellationToken cancellationToken = default)
     {
-        var entity = await _dbSet.FindAsync([id], cancellationToken);
+        var entity = await _dbSet.FindAsync([id],
+            cancellationToken);
 
-        return entity is null ? DomainErrors.NotFound<T>() : entity;
+        return entity is null
+            ? DomainErrors.NotFound<T>()
+            : entity;
     }
 
     public async Task<Result<T>> GetAsync(Expression<Func<T, bool>> predicate,
         CancellationToken cancellationToken = default)
     {
-        var entity = await _dbSet.FirstOrDefaultAsync(predicate, cancellationToken);
+        var entity = await _dbSet.FirstOrDefaultAsync(predicate,
+            cancellationToken);
 
-        return entity is null ? DomainErrors.NotFound<T>() : entity;
+        return entity is null
+            ? DomainErrors.NotFound<T>()
+            : entity;
     }
 
     public async Task<Result<List<T>>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         var entities = await _dbSet.ToListAsync(cancellationToken);
 
-        return entities.Count == 0 ? DomainErrors.NotFound<T>() : entities;
+        return entities.Count == 0
+            ? DomainErrors.NotFound<T>()
+            : entities;
     }
 
-    public async Task<Result<T>> SoftUpdateAsync(T entity, CancellationToken cancellationToken = default)
+    public async Task<Result<T>> SoftUpdateAsync(T entity,
+        CancellationToken cancellationToken = default)
     {
-        var existingEntity = await _dbSet.FindAsync([entity.Id], cancellationToken);
+        var existingEntity = await _dbSet.FindAsync([entity.Id],
+            cancellationToken);
 
-        if (existingEntity is null) return DomainErrors.NotFound<T>();
+        if (existingEntity is null)
+            return DomainErrors.NotFound<T>();
 
-        _dbSet.Entry(existingEntity).CurrentValues.SetValues(entity);
+        _dbSet.Entry(existingEntity)
+            .CurrentValues.SetValues(entity);
         return existingEntity;
     }
 
-    public async Task<Result<T>> FullUpdateAsync(T entity, CancellationToken cancellationToken = default)
+    public async Task<Result<T>> FullUpdateAsync(T entity,
+        CancellationToken cancellationToken = default)
     {
-        _dbSet.Entry(entity).State = EntityState.Modified;
+        _dbSet.Entry(entity)
+            .State = EntityState.Modified;
         await Task.CompletedTask;
         return entity;
     }
 
-    public async Task<Result<T>> DeleteAsync(TKey id, CancellationToken cancellationToken)
+    public async Task<Result<T>> DeleteAsync(TKey id,
+        CancellationToken cancellationToken)
     {
-        var entity = await _dbSet.FindAsync([id], cancellationToken);
-        if (entity is null) return DomainErrors.NotFound<T>();
+        var entity = await _dbSet.FindAsync([id],
+            cancellationToken);
+        if (entity is null)
+            return DomainErrors.NotFound<T>();
 
         _dbSet.Remove(entity);
         return entity;
@@ -77,27 +100,32 @@ public class Repository<T, TKey>(ApplicationDbContext applicationDbContext) : IR
     public async Task<Result<T>> FindOneAsync(Specification<T, TKey> specification,
         CancellationToken cancellationToken = default)
     {
-        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet, specification);
+        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet,
+            specification);
 
         var entity = await queryWithSpec.FirstOrDefaultAsync(cancellationToken);
 
-        return entity is null ? DomainErrors.NotFound<T>() : entity;
+        return entity is null
+            ? DomainErrors.NotFound<T>()
+            : entity;
     }
 
     public async Task<Result<List<T>>> FindManyAsync(Specification<T, TKey> specification,
         CancellationToken cancellationToken = default)
     {
-        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet, specification);
+        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet,
+            specification);
 
         var list = await queryWithSpec.ToListAsync(cancellationToken);
 
-        return list.Count == 0 ? DomainErrors.NotFound<T>() : list;
+        return list;
     }
 
     public async Task<Result<bool>> ExistsAsync(Specification<T, TKey> specification,
         CancellationToken cancellationToken = default)
     {
-        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet, specification);
+        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet,
+            specification);
 
         return await queryWithSpec.AnyAsync(cancellationToken);
     }
@@ -105,13 +133,16 @@ public class Repository<T, TKey>(ApplicationDbContext applicationDbContext) : IR
     public async Task<Result<int>> CountAsync(Specification<T, TKey> specification,
         CancellationToken cancellationToken = default)
     {
-        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet, specification);
+        var queryWithSpec = SpecificationEvaluator.GetQuery(_dbSet,
+            specification);
 
         return await queryWithSpec.CountAsync(cancellationToken);
     }
-    
+
     public IQueryable<T> AsQueryable(bool trackChanges = false)
     {
-        return trackChanges ? _dbSet.AsQueryable() : _dbSet.AsNoTracking();
+        return trackChanges
+            ? _dbSet.AsQueryable()
+            : _dbSet.AsNoTracking();
     }
 }

@@ -35,10 +35,11 @@ namespace Domain.Entities
         {
         }
 
-        private UserUsageGoal(Guid userId,
+        private UserUsageGoal(int id,
+            Guid userId,
             int platformId,
             TimeSpan dailyLimit,
-            double? warningThresholdPercentage = null)
+            double? warningThresholdPercentage = null) : base(id)
         {
             UserId = userId;
             PlatformId = platformId;
@@ -46,12 +47,14 @@ namespace Domain.Entities
             WarningThresholdPercentage = warningThresholdPercentage;
         }
 
-        public static UserUsageGoal Create(Guid userId,
+        public static UserUsageGoal Create(int id,
+            Guid userId,
             int platformId,
             TimeSpan dailyLimit,
             double? warningThresholdPercentage = null)
         {
-            return new UserUsageGoal(userId,
+            return new UserUsageGoal(id,
+                userId,
                 platformId,
                 dailyLimit,
                 warningThresholdPercentage);

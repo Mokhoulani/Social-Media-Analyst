@@ -1,20 +1,25 @@
-using Application.CQRS.User.Commands;
-using MapsterMapper;
-using Microsoft.Extensions.Logging;
-using Domain.ValueObjects;
 using Application.Abstractions.Messaging;
 using Application.Common.Interfaces;
 using Application.Common.Mod.ViewModels;
+using Application.CQRS.User.Commands;
+using Domain.Interfaces;
 using Domain.Shared;
 using Domain.Shared.Extensions;
-using Domain.Interfaces;
+using Domain.ValueObjects;
+using Microsoft.Extensions.Logging;
 
 namespace Application.CQRS.User.Handlers;
 
-public class SignUpHandler(IUserService userService, IPermissionService permissionService, IMapper mapper, ILogger<SignUpHandler> logger)
-    : ICommandHandler<SignUpCommand, AppUserViewModel>
+public class SignUpHandler(
+    IUserService userService,
+    IPermissionService permissionService,
+    ILogger<SignUpHandler> logger,
+    IAuthService authService)
+    : ICommandHandler<SignUpCommand, TokenResponseViewModel>
 {
-    public async Task<Result<AppUserViewModel>> Handle(SignUpCommand request, CancellationToken cancellationToken)
+    public async Task<Result<TokenResponseViewModel>> Handle(
+        SignUpCommand request,
+        CancellationToken cancellationToken)
     {
         var result = Email.Create(request.Email)
             .Bind(email => Password.Create(request.Password)
@@ -27,7 +32,7 @@ public class SignUpHandler(IUserService userService, IPermissionService permissi
                             FirstName = firstName,
                             LastName = lastName
                         }))));
-     
+
         if (result.IsFailure) return result.Error;
 
         var role = await permissionService.GetRoleByNameAsync("registered", cancellationToken);
@@ -42,8 +47,18 @@ public class SignUpHandler(IUserService userService, IPermissionService permissi
 
         if (userResult.IsFailure) return userResult.Error;
 
+        var tokenResponse = await authService.GenerateTokenResponse(user, cancellationToken);
+
+        if (tokenResponse.IsFailure)
+        {
+            logger.LogError("Failed to generate token response for user with ID: {UserId}", user.Id);
+            return tokenResponse.Error;
+        }
+
         logger.LogInformation("User with ID: {UserId} has been signed up successfully", user.Id);
 
-        return mapper.Map<AppUserViewModel>(user);
+        return Result.Success(new TokenResponseViewModel(
+            tokenResponse.Value.AccessToken,
+            tokenResponse.Value.RefreshToken));
     }
 }

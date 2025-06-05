@@ -1,6 +1,5 @@
 using Application.CQRS.User.Commands;
 using Domain.Entities;
-using Domain.Errors;
 using Domain.Shared;
 using Domain.ValueObjects;
 

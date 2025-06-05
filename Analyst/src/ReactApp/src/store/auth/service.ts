@@ -1,6 +1,6 @@
+import { AxiosHeaders } from 'axios'
 import { Observable } from 'rxjs'
-import { BaseApi } from '../../service/api/base-api'
-import { ApiResponse } from '../../types/types'
+import { APIClient } from '../../api/apiClient'
 
 export interface LoginPayload {
     email: string
@@ -69,20 +69,26 @@ export interface AuthError {
     message: string
 }
 
-export const AuthSevice = {
-    login: (payload: LoginPayload): Observable<ApiResponse<AuthResponse>> =>
-        BaseApi.post<AuthResponse, LoginPayload>('/User/login', payload),
+type RefreshTokenPayload = string
 
-    signUp: (payload: SignUpPayload): Observable<ApiResponse<AuthResponse>> =>
-        BaseApi.post<AuthResponse, SignUpPayload>('/User/signup', payload),
+export const AuthService = {
+    login: (payload: LoginPayload): Observable<AuthResponse> =>
+        APIClient.post<AuthResponse>('/User/login', payload),
+
+    signUp: (payload: SignUpPayload): Observable<AuthResponse> =>
+        APIClient.post<AuthResponse>('/User/signup', payload),
 
     refreshToken: (
-        payload: RefrreshTokenPayload
-    ): Observable<ApiResponse<RefreshTokenResponse>> =>
-        BaseApi.post<RefreshTokenResponse, RefrreshTokenPayload>(
-            '/User/refresh-token',
-            payload
-        ),
-    logout: (token: string): Observable<ApiResponse<void>> =>
-        BaseApi.post<void, void>('/User/logout', null, token),
+        refreshToken: RefreshTokenPayload
+    ): Observable<RefreshTokenResponse> =>
+        APIClient.post<RefreshTokenResponse>('/auth/refresh-token', {
+            refreshToken,
+        }),
+
+    logout: (token: string): Observable<void> =>
+        APIClient.post<void>('/User/logout', undefined, {
+            headers: new AxiosHeaders({
+                Authorization: `Bearer ${token}`,
+            }),
+        }),
 }

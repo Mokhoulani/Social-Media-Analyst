@@ -2,6 +2,8 @@ using Application.Common.Interfaces;
 using Domain.Interfaces;
 using HealthChecks.Redis;
 using Infrastructure.Authentication;
+using Infrastructure.Notifications;
+using Infrastructure.OptionsSetup;
 using Infrastructure.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -31,6 +33,8 @@ public static class DependencyInjection
         services.ConfigureOptions<JwtOptionsSetup>();
         services.ConfigureOptions<RefreshTokenOptionsSetup>();
         services.ConfigureOptions<JwtBearerOptionsSetup>();
+        services.ConfigureOptions<FirebaseOptionsSetup>();
+
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer();
@@ -40,6 +44,8 @@ public static class DependencyInjection
         services.AddSingleton<ITokenService, TokenService>();
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
+
+        services.AddSingleton<IFirebaseNotificationService, FirebaseNotificationService>();
         return services;
     }
 }

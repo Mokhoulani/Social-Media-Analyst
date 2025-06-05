@@ -15,8 +15,6 @@ internal sealed class PermissionConfiguration : IEntityTypeConfiguration<Permiss
 
         IEnumerable<Permission> permissions = Enum
             .GetValues<Domain.Enums.Permission>()
-            .Select(p => new Permission((int)p, p.ToString()));
-
-        builder.HasData(permissions);
+            .Select(p => new Permission((int)p, p.ToString()));  
     }
 }

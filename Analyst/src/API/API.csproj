@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <SpaRoot>..\ReactApp</SpaRoot>
     <SpaProxyLaunchCommand>npm run web</SpaProxyLaunchCommand>
-    <SpaProxyServerUrl>https://localhost:51703</SpaProxyServerUrl>
+    <SpaProxyServerUrl>http://localhost:8081</SpaProxyServerUrl>
   </PropertyGroup>
 
   <ItemGroup>

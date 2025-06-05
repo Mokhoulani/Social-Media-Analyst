@@ -33,6 +33,8 @@ public sealed class User : AggregateRoot<Guid>, IAggregateRoot , IAuditableEntit
     public ICollection<PasswordResetToken>? PasswordResetTokens { get; private set; } = [];
     public ICollection<Role> Roles { get; private set; } = [];
     public ICollection<UserSocialMediaUsage>? SocialMediaUsages { get; private set; } = [];
+    public ICollection<UserDevice>? Devices { get; private set; } = [];
+    public ICollection<Notification>? Notifications { get; private set; } = [];
     
     public static User Create(Guid id, Email email, FirstName firstName, LastName lastName, Password password)
     {

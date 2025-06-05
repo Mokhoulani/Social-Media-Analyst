@@ -22,46 +22,54 @@ public static class DependencyInjection
         IWebHostEnvironment environment)
     {
         ArgumentNullException.ThrowIfNull(services);
-        
+
         services.AddMediatR(typeof(AssemblyReference).Assembly);
 
         ConfigureValidation(services);
         ConfigureCacheBehavior(services);
-        
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(AuthenticationBehavior<,>));
+
+        services.AddTransient(typeof(IPipelineBehavior<,>),
+            typeof(AuthenticationBehavior<,>));
         services.AddProblemDetailsConfiguration(environment);
-        
+
         services.AddSingleton(GetConfiguredMappingConfig());
-        
+
         services.AddScoped<IMapper, ServiceMapper>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IPasswordResetService, PasswordResetService>();
+        services.AddScoped<IUserDeviceService, UserDeviceService>();
+        services.AddScoped<IUserUsageGoalService, UserUsageGoalService>();
+        services.AddScoped<ISocialMediaPlatFormService, SocialMediaPlatFormService>();
+        services.AddScoped<IUserSocialMediaUsageService, UserSocialMediaUsageService>();
 
         services.AddTransient<EmailService>();
         return services;
     }
-    
+
     private static TypeAdapterConfig GetConfiguredMappingConfig()
     {
         var config = TypeAdapterConfig.GlobalSettings;
-    
+
         var registers = config.Scan(Assembly.GetExecutingAssembly());
-    
+
         config.Apply(registers);
-    
+
         return config;
     }
 
     private static void ConfigureValidation(IServiceCollection services)
     {
         services.AddValidatorsFromAssembly(typeof(SignUpValidator).Assembly);
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>),
+            typeof(ValidationBehavior<,>));
     }
 
     private static void ConfigureCacheBehavior(IServiceCollection services)
     {
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(CacheBehavior<,>));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>),
+            typeof(CacheBehavior<,>));
+        services.AddTransient(typeof(IPipelineBehavior<,>),
+            typeof(RequestPreProcessorBehavior<,>));
     }
 }

@@ -12,20 +12,6 @@ internal sealed class RolePermissionConfiguration
     {
         builder.HasKey(x => new { x.RoleId, x.PermissionId });
 
-        builder.HasData(
-            Create(Role.Registered, Permission.ReadUser),
-            Create(Role.Registered, Permission.UpdateUser),
-            Create(Role.Registered, Permission.DeleteUser),
-            Create(Role.Registered, Permission.CreateUser));
     }
 
-    private static RolePermission Create(
-        Role role, Permission permission)
-    {
-        return new RolePermission
-        {
-            RoleId = role.Id,
-            PermissionId = (int)permission
-        };
-    }
 }

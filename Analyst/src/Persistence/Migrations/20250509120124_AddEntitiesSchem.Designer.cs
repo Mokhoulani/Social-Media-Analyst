@@ -95,69 +95,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permission", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "ReadUser"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "UpdateUser"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "DeleteUser"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "CreateUser"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "ReadRole"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "UpdateRole"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Name = "DeleteRole"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Name = "CreateRole"
-                        },
-                        new
-                        {
-                            Id = 9,
-                            Name = "ReadPermission"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            Name = "UpdatePermission"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Name = "DeletePermission"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Name = "CreatePermission"
-                        });
+                    b.ToTable("Permission", (string)null);           
                 });
 
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
@@ -199,14 +137,7 @@ namespace API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Role", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Registered"
-                        });
+                    b.ToTable("Role", (string)null);       
                 });
 
             modelBuilder.Entity("Domain.Entities.RolePermission", b =>
@@ -222,28 +153,6 @@ namespace API.Migrations
                     b.HasIndex("PermissionId");
 
                     b.ToTable("RolePermission");
-
-                    b.HasData(
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 1
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 2
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 3
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 4
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.SocialMediaPlatform", b =>

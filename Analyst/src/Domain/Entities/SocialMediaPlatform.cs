@@ -8,7 +8,7 @@ namespace Domain.Entities
         IAuditableEntity
     {
         public string Name { get; private set; } = string.Empty;
-        public string IconUrl { get; private set; } = string.Empty;
+        public string? IconUrl { get; private set; } = string.Empty;
 
         public DateTime CreatedOnUtc { get; set; }
         public DateTime? ModifiedOnUtc { get; set; }

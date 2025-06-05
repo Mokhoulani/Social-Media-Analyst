@@ -2,10 +2,13 @@ using Presentation.Abstractions;
 using Application.Common.Mod.ViewModels;
 using Application.CQRS.User.Commands;
 using Application.CQRS.User.Queries;
+using Domain.Errors;
+using Domain.Shared;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using presentation.Contracts.User;
+using Presentation.Contracts.User;
 
 namespace Presentation.Controllers;
 
@@ -53,6 +56,26 @@ public class UserController(ISender sender) : ApiController(sender)
     public async Task<IActionResult> LoginUser([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         var command = new LoginCommand(request.Email, request.Password);
+
+        var tokenResult = await Sender.Send(command, cancellationToken);
+
+        return tokenResult.IsSuccess ? Ok(tokenResult.Value) : HandleFailure(tokenResult);
+    }
+
+    [HttpGet("get-user")]
+    public async Task<IActionResult> GetUser(CancellationToken cancellationToken)
+    {
+        var command = new GetUserCommand();
+
+        var userResult = await Sender.Send(command, cancellationToken);
+
+        return userResult.IsSuccess ? Ok(userResult.Value) : HandleFailure(userResult);
+    }
+
+    [HttpPost("device")]
+    public async Task<IActionResult> CreateOrUpdateUserDevice([FromBody] DeviceTokenRequest request, CancellationToken cancellationToken)
+    {
+        var command = new DeviceTokenCommand(request.DeviceToken, request.DeviceId);
 
         var tokenResult = await Sender.Send(command, cancellationToken);
 
