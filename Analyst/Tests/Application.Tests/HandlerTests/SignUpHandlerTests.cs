@@ -9,7 +9,6 @@ using Domain.Shared;
 using Domain.Shared.Extensions;
 using Domain.ValueObjects;
 using FluentAssertions;
-using MapsterMapper;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -18,7 +17,6 @@ namespace Application.Tests.HandlerTests;
 public class SignUpHandlerTests
 {
     private readonly Mock<IUserService> _userServiceMock = new();
-    private readonly Mock<IMapper> _mapperMock = new();
     private readonly Mock<ILogger<SignUpHandler>> _loggerMock = new();
     private readonly Mock<IPermissionService> _permissionServiceMock = new();
     private readonly Mock<IAuthService> _authServiceMock = new();
@@ -55,19 +53,18 @@ public class SignUpHandlerTests
             domainUser.Roles.Add(roleResult.Value);
 
         _userServiceMock
-           .Setup(s => s.AddUserAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
-           .ReturnsAsync(Result.Success(domainUser));
+            .Setup(s => s.AddUserAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success(domainUser));
 
         var expectedTokenResponse = new TokenResponseViewModel("access-token", "refresh-token");
 
         _authServiceMock
-           .Setup(a => a.GenerateTokenResponse(It.IsAny<User>(), It.IsAny<CancellationToken>()))
-           .ReturnsAsync(Result.Success(expectedTokenResponse));
+            .Setup(a => a.GenerateTokenResponse(It.IsAny<User>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success(expectedTokenResponse));
 
         var handler = new SignUpHandler(
             _userServiceMock.Object,
             _permissionServiceMock.Object,
-            _mapperMock.Object,
             _loggerMock.Object,
             _authServiceMock.Object);
 
@@ -86,11 +83,10 @@ public class SignUpHandlerTests
         var command = new SignUpCommand("John", "invalid-email", "Doe", "StrongPassword1!");
 
         var handler = new SignUpHandler(
-             _userServiceMock.Object,
-             _permissionServiceMock.Object,
-             _mapperMock.Object,
-             _loggerMock.Object,
-             _authServiceMock.Object);
+            _userServiceMock.Object,
+            _permissionServiceMock.Object,
+            _loggerMock.Object,
+            _authServiceMock.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -100,5 +96,4 @@ public class SignUpHandlerTests
         result.Error.Should().NotBeNull();
         result.Error.Code.Should().Be(DomainErrors.Email.InvalidFormat.Code);
     }
-
 }

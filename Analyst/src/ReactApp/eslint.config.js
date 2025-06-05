@@ -1,10 +1,10 @@
 import js from '@eslint/js'
-import globals from 'globals'
+import jestPlugin from 'eslint-plugin-jest'
+import eslintPluginPrettier from 'eslint-plugin-prettier/recommended'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
+import globals from 'globals'
 import tseslint from 'typescript-eslint'
-import eslintPluginPrettier from 'eslint-plugin-prettier/recommended'
-import jestPlugin from 'eslint-plugin-jest'
 
 export default [
     // Ignore folders globally
@@ -59,4 +59,13 @@ export default [
 
     // Prettier integration
     eslintPluginPrettier,
+    {
+        'prettier/prettier': [
+            'error',
+            {
+                singleQuote: true,
+                parser: 'flow',
+            },
+        ],
+    },
 ]
