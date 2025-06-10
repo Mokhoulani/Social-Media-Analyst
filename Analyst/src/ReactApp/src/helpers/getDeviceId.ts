@@ -1,6 +1,6 @@
 import * as Device from 'expo-device'
 import * as SecureStore from 'expo-secure-store'
-import { v4 as uuidv4 } from 'uuid'
+import uuid from 'react-native-uuid'
 
 const DEVICE_ID_KEY = 'unique_device_id'
 
@@ -11,15 +11,16 @@ const DEVICE_ID_KEY = 'unique_device_id'
 export async function getDeviceId(): Promise<string> {
     try {
         const storedId = await SecureStore.getItemAsync(DEVICE_ID_KEY)
-        if (storedId) {
-            return storedId
-        }
+        if (storedId) return storedId
 
-        const generatedId = Device.osInternalBuildId ?? uuidv4()
+        const generatedId = Device.osInternalBuildId ?? (uuid.v4() as string)
         await SecureStore.setItemAsync(DEVICE_ID_KEY, generatedId)
         return generatedId
     } catch (error) {
-        console.warn('Failed to retrieve or generate device ID:', error)
+        console.warn(
+            '[DeviceManager] Failed to retrieve or generate device ID:',
+            error
+        )
         throw error
     }
 }

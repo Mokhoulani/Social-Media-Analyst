@@ -39,7 +39,7 @@ export async function initializeAppAsync(
         await firstValueFrom(UserFacade.getUser())
 
         const deviceId = await getDeviceId()
-        await registerPushToken(true, deviceId)
+        await registerPushToken(deviceId)
     } catch (e) {
         console.warn('Error during app initialization:', e)
     } finally {

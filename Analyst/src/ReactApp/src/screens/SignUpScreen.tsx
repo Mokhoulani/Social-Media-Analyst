@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import { ActivityIndicator, Button, Text, TextInput, View } from 'react-native'
 import { useSelector } from 'react-redux'
+import { firstValueFrom } from 'rxjs'
 import { AuthFacade, SignUpForm, signUpSchema } from '../store/auth/facade'
 import { authSelectors } from '../store/auth/selectors'
+import { UserFacade } from '../store/user/facade'
 import { useStyles } from '../themes/useStyles'
 
 export function SignUpScreen() {
@@ -25,7 +27,7 @@ export function SignUpScreen() {
         setForm({ ...form, [field]: value })
     }
 
-    const handleSignUp = () => {
+    const handleSignUp = async () => {
         const result = signUpSchema.safeParse(form)
         if (!result.success) {
             const zodErrors = result.error.flatten().fieldErrors
@@ -39,7 +41,8 @@ export function SignUpScreen() {
         }
 
         setErrors({})
-        AuthFacade.signUp(form)
+        await firstValueFrom(AuthFacade.signUp(form))
+        await firstValueFrom(UserFacade.getUser())
     }
 
     return (

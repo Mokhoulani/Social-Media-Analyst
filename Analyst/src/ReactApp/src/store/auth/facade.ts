@@ -2,6 +2,7 @@ import {
     catchError,
     Observable,
     shareReplay,
+    Subject,
     switchMap,
     take,
     throwError,
@@ -46,14 +47,36 @@ export const AuthFacade = {
     /**
      * Login with email and password
      */
-    login: (email: string, password: string) => {
-        store.dispatch(AuthActions.loginRequest({ email, password }))
-    },
+    login(email: string, password: string) {
+        const result$ = new Subject<boolean>()
 
+        // Dispatch the login request
+        store.dispatch(AuthActions.loginRequest({ email, password }))
+
+        // Listen for success or failure using store.subscribe
+        const unsubscribe = store.subscribe(() => {
+            const state = store.getState()
+            const error = authSelectors.selectError(state)
+            const isAuthenticated = authSelectors.selectIsAuthenticated(state)
+            if (isAuthenticated) {
+                result$.next(true)
+                result$.complete()
+                unsubscribe()
+            } else if (error) {
+                result$.error('Login failed')
+                result$.complete()
+                unsubscribe()
+            }
+        })
+
+        return result$.asObservable()
+    },
     /**
      * Sign up a new user
      */
-    signUp: (form: SignUpForm) => {
+    signUp(form: SignUpForm) {
+        const result$ = new Subject<boolean>()
+
         store.dispatch(
             AuthActions.signUpRequest({
                 firstName: form.firstName,
@@ -62,6 +85,24 @@ export const AuthFacade = {
                 password: form.password,
             })
         )
+
+        const unsubscribe = store.subscribe(() => {
+            const state = store.getState()
+            const error = authSelectors.selectError(state)
+            const isAuthenticated = authSelectors.selectIsAuthenticated(state)
+
+            if (isAuthenticated) {
+                result$.next(true)
+                result$.complete()
+                unsubscribe()
+            } else if (error) {
+                result$.error('Signup failed')
+                result$.complete()
+                unsubscribe()
+            }
+        })
+
+        return result$.asObservable()
     },
 
     /**

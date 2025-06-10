@@ -22,7 +22,7 @@ type ResponseInterceptor = (response: unknown) => unknown
 
 export class APIClient {
     private static axiosInstance = axios.create({
-        baseURL: process.env.API_URL || 'http://localhost:5031/api',
+        baseURL: process.env.API_URL || 'http://192.168.8.165:5031/api',
     })
 
     private static requestInterceptors: RequestInterceptor[] = []

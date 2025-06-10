@@ -1,9 +1,11 @@
 ﻿import React, { useState } from 'react'
 import { ActivityIndicator, Button, Text, TextInput, View } from 'react-native'
 import { useSelector } from 'react-redux'
+import { firstValueFrom } from 'rxjs'
 import { z } from 'zod'
 import { AuthFacade } from '../store/auth/facade'
 import { authSelectors } from '../store/auth/selectors'
+import { UserFacade } from '../store/user/facade'
 import { useStyles } from '../themes/useStyles'
 
 const loginSchema = z.object({
@@ -31,7 +33,7 @@ export function LoginScreen() {
         setErrors((prev) => ({ ...prev, [key]: undefined })) // clear error on input
     }
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         const result = loginSchema.safeParse(form)
         if (!result.success) {
             const zodErrors = result.error.flatten().fieldErrors
@@ -42,7 +44,8 @@ export function LoginScreen() {
             return
         }
 
-        AuthFacade.login(form.email, form.password)
+        await firstValueFrom(AuthFacade.login(form.email, form.password))
+        await firstValueFrom(UserFacade.getUser())
     }
 
     return (

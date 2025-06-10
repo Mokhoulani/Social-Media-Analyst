@@ -2,11 +2,13 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { useWindowDimensions } from 'react-native'
 import { useTheme } from 'react-native-paper'
 import DailyUsageScreen from '../screens/DailyUsageScreen'
+import ServiceControlScreen from '../screens/ServiceControlScreen'
 import SetGoalScreen from '../screens/SetGoalScreen'
 
 export type TabAuthParamsList = {
     Daily: undefined
     Goal: undefined
+    service: undefined
 }
 
 const Tab = createMaterialTopTabNavigator<TabAuthParamsList>()
@@ -39,6 +41,7 @@ export default function MeterialTopTabsNavigator() {
         >
             <Tab.Screen name="Goal" component={SetGoalScreen} />
             <Tab.Screen name="Daily" component={DailyUsageScreen} />
+            <Tab.Screen name="service" component={ServiceControlScreen} />
         </Tab.Navigator>
     )
 }

@@ -7,22 +7,23 @@ const DEVICE_TOKEN_KEY = 'device_token'
 
 /**
  * Registers the device's push notification token if needed.
- * @param isAuthenticated Whether the user is authenticated
  * @param deviceId The unique device ID
  */
-export async function registerPushToken(
-    isAuthenticated: boolean,
-    deviceId: string
-): Promise<void> {
-    if (!isAuthenticated) return
 
+export async function registerPushToken(deviceId: string): Promise<void> {
     try {
         const newToken = await registerForPushNotificationsAsync()
         if (!newToken) return
 
         const storedToken = await SecureStore.getItemAsync(DEVICE_TOKEN_KEY)
 
+        if (__DEV__) {
+            console.log('[DeviceManager] Stored token:', storedToken)
+            console.log('[DeviceManager] New token:', newToken)
+        }
+
         if (storedToken !== newToken) {
+            // Token has changed or doesn't exist – sync with backend
             store.dispatch(
                 DeviceActions.setDeviceRequest({
                     deviceToken: newToken,
@@ -30,9 +31,16 @@ export async function registerPushToken(
                 })
             )
 
-            await SecureStore.setItemAsync(DEVICE_TOKEN_KEY, newToken)
+            await SecureStore.setItemAsync(DEVICE_TOKEN_KEY, newToken, {
+                keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+            })
+
+            if (__DEV__)
+                console.log(
+                    '[DeviceManager] Updated push token in secure store'
+                )
         }
     } catch (error) {
-        console.error('Error registering device token:', error)
+        console.error('[DeviceManager] Error registering device token:', error)
     }
 }

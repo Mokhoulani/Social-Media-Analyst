@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <SpaRoot>..\ReactApp</SpaRoot>
-    <SpaProxyLaunchCommand>npm run web</SpaProxyLaunchCommand>
+    <SpaProxyLaunchCommand>npm run andriod</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>http://localhost:8081</SpaProxyServerUrl>
   </PropertyGroup>
 
